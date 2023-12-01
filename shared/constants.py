@@ -1,6 +1,9 @@
 # Import packages
 import os
 
+###################################################################################################
+# General paths
+###################################################################################################
 # Set path for logging
 path_logs = '/media/m2_front/research/logs/node-data/'
 
@@ -20,6 +23,8 @@ path_uniswap_v2_pair_abi = os.path.join(BASE_DIR, '../abis/uniswap_v2/IUniswapV2
 # Unsiwp v2 events
 uniswap_v2_swap_event = '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822'
 uniswap_v2_sync_event = '0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1'
+uniswap_v2_mint_event = '0x4c209b5fc8ad50758f13e2e1088ba56a560dff690a1c6fef26394f4c03821c4f'
+uniswap_v2_burn_event = '0xdccd412f0b1252819cb1fd330b93224ca42612892bb3f4f789976e6d81936496'
 
 ###################################################################################################
 # Uniswap v3

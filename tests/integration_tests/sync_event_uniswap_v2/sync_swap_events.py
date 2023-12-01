@@ -19,7 +19,7 @@ from shared import constants
 
 # Set up logger
 path_logs = constants.path_logs
-log_name = 'sync_swap_events.log'
+log_name = 'tests/sync_swap_events.log'
 logging.basicConfig(filename=path_logs + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)

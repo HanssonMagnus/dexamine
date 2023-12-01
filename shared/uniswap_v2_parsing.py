@@ -5,7 +5,7 @@ from web3 import Web3
 from . import constants
 
 ###################################################################################################
-# Uniswap v2 ABI call functions
+# Uniswap v2 ABI call node functions
 ###################################################################################################
 def get_v2_pair(v2_pair_address, uniswap_v2_pair_abi):
     '''Get meta data for an v2 pair from node.'''
@@ -47,17 +47,25 @@ def get_erc20_symbol(token_address, uniswap_v2_erc20_abi):
 # Uniswp v2 check functions
 ###################################################################################################
 def has_uniswap_v2_swap_event(topics_0):
-    '''Check if the tx has any Uniswp v2 swap events.'''
+    '''Check if the tx has a Uniswp v2 swap event.'''
     uniswap_v2_swap_event = constants.uniswap_v2_swap_event
     if uniswap_v2_swap_event in topics_0:
         return True
     else:
         return False
 
-def has_uniswap_v3_swap_event(topics_0):
-    '''Check if the tx has any Uniswp v3 swap events.'''
-    swap_v3 = '0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67'
-    if swap_v3 in topics_0:
+def has_uniswap_v2_burn_event(topics_0):
+    '''Check if the tx has a Uniswap v2 burn event for removing liquidity.'''
+    uniswap_v2_burn_event = constants.uniswap_v2_burn_event
+    if uniswap_v2_burn_event in topics_0:
+        return True
+    else:
+        return False
+
+def has_uniswap_v2_mint_event(topics_0):
+    '''Check if the tx has a Uniswap v2 mint event for liquidity provision.'''
+    uniswap_v2_mint_event = constants.uniswap_v2_mint_event
+    if uniswap_v2_mint_event in topics_0:
         return True
     else:
         return False

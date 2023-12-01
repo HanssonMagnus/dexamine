@@ -1,4 +1,4 @@
-# Scripts Documentation - `node-data` Project
+# Parsers Documentation - `node-data` Project
 
 ## Uniswap v2
 
