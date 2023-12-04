@@ -11,7 +11,7 @@ parsers to process this data into structured datasets.
 - `docs/`: Comprehensive documentation for each component.
 - `lists/`: Contains text files that are useful for the parsers.
 - `parsers/`: Python scripts for parsing blockchain data.
-- `scripts/`: Bash scripts for querying blockchain data.
+- `scripts/`: Bash scripts for querying blockchain data and Python scripts for creating data sets.
 - `shared/`: Shared utilities and common code.
 - `test_data/`: Contains test data files and samples.
 - `tests/`: Test cases for ensuring code reliability.

@@ -8,6 +8,15 @@ import csv
 ###################################################################################################
 # RPC call functions
 ###################################################################################################
+def get_tx_receipt_block_by_index(block_hex, index_hex):
+    '''Get tx, receipt, and block response from node.'''
+    tx_data = get_tx_data_by_block_and_index(block_hex, index_hex)
+    hash = tx_data['hash']
+    receipt_data = get_receipt_data_by_hash(hash)
+    block_data = get_block_data_by_block_number(block_hex)
+    return tx_data, receipt_data, block_data
+
+
 def get_tx_data_by_hash(hash):
     '''Get tx response from node.'''
     url = 'http://localhost:8545'
@@ -57,7 +66,7 @@ def get_block_data_by_block_number(block_hex):
     return block_data
 
 ###################################################################################################
-# Parsing logs
+# Parsing transaction logs
 ###################################################################################################
 def get_topics_0(logs):
     '''Return list of all "topic 0"s in logs.'''

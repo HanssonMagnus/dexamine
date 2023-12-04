@@ -2,7 +2,6 @@
 import sys
 import os
 import logging
-from web3 import Web3
 
 # Set the path to the root of the project
 sys.path.append(os.path.abspath('../../'))
@@ -14,83 +13,6 @@ from shared import constants
 
 # Get a logger
 logger = logging.getLogger(__name__)
-
-###################################################################################################
-# Parse all Uniswap v2 swaps, mints, and burns from a transaction
-###################################################################################################
-def parse_all_v2_events(logs, exchange_pair_address=''):
-    '''Parse all swaps, mints, and burns from a tx.
-    Inputs:
-        logs: Logs from transaction receipt.
-        exchange_pair_address: string of the exchange pair smart contract address.
-    '''
-    events = []
-
-    # Get the first topic for all events in the logs
-    topics_0 = general_helpers.get_topics_0(logs)
-
-    # Get event hashes
-    swap_indexes = general_helpers.get_event_index(topics_0, constants.uniswap_v2_swap_event)
-    mint_indexes = general_helpers.get_event_index(topics_0, constants.uniswap_v2_mint_event)
-    burn_indexes = general_helpers.get_event_index(topics_0, constants.uniswap_v2_burn_event)
-
-    # Load ABIs
-    uniswap_v2_erc20_abi = general_helpers.load_abi(constants.path_uniswap_v2_erc20_abi)
-    uniswap_v2_pair_abi = general_helpers.load_abi(constants.path_uniswap_v2_pair_abi)
-
-    # Convert exchange_pair_address to checksum
-    if exchange_pair_address:
-        try:
-            exchange_pair_address = Web3.to_checksum_address(exchange_pair_address)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-
-    # Parse swaps
-    if swap_indexes: # If the list is not empty
-        if exchange_pair_address == '':
-            swaps = parse_v2_trades(logs, swap_indexes, uniswap_v2_erc20_abi, uniswap_v2_pair_abi)
-            for swap in swaps:
-                if swap is not None: # Since the error handling in parse_trade(s) can return None
-                    events.append(swap)
-        else:
-            for swap_index in swap_indexes:
-                smart_contract = Web3.to_checksum_address(logs[swap_index]['address'])
-                if smart_contract == exchange_pair_address:
-                    swap = parse_v2_trade(logs, swap_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi)
-                    if swap is not None:
-                        events.append(swap)
-
-    # Parse mints
-    if mint_indexes:
-        if exchange_pair_address == '':
-            mints = parse_v2_mints(logs, mint_indexes, uniswap_v2_erc20_abi, uniswap_v2_pair_abi)
-            for mint in mints:
-                if mint is not None:
-                    events.append(mint)
-        else:
-            for mint_index in mint_indexes:
-                smart_contract = Web3.to_checksum_address(logs[mint_index]['address'])
-                if smart_contract == exchange_pair_address:
-                    mint = parse_v2_mint(logs, mint_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi)
-                    if mint is not None:
-                        events.append(mint)
-
-    # Parse burns
-    if burn_indexes:
-        if exchange_pair_address == '':
-            burns = parse_v2_burns(logs, burn_indexes, uniswap_v2_erc20_abi, uniswap_v2_pair_abi)
-            for burn in burns:
-                if burn is not None:
-                    events.append(burn)
-        else:
-            for burn_index in burn_indexes:
-                smart_contract = Web3.to_checksum_address(logs[burn_index]['address'])
-                if smart_contract == exchange_pair_address:
-                    burn = parse_v2_burn(logs, burn_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi)
-                    if burn is not None:
-                        events.append(burn)
-
-    return events
 
 ###################################################################################################
 # Trade parse functions
@@ -154,18 +76,13 @@ def parse_v2_trade(logs, swap_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi):
     # "Sync: Emitted each time reserves are updated via mint, burn, swap, or sync.
     sync_data = sync_log['data'][2:] # remove initial 0x
     xt1 = int(sync_data[0:64], 16)
+    #xt1 = xt1*10**-decimals_0
     yt1 = int(sync_data[64:128], 16)
-
-    # Transform to base values
-    xt1 = xt1*10**-decimals_0
-    yt1 = yt1*10**-decimals_1
-    dxt = dxt*10**-decimals_0
-    dyt = dyt*10**-decimals_1
-
+    #yt1 = yt1*10**-decimals_1
     pt1 = xt1 / yt1
     kt1 = xt1 * yt1
 
-    trade = ['swap', dex_symbol, symbol_0, symbol_1, decimals_0, decimals_1, dxt, dyt, xt1, yt1, pt1, kt1]
+    trade = [dex_symbol, symbol_0, symbol_1, decimals_0, decimals_1, dxt, dyt, xt1, yt1, pt1, kt1]
 
     return trade
 
@@ -224,17 +141,10 @@ def parse_v2_mint(logs, mint_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi):
     sync_data = sync_log['data'][2:] # remove initial 0x
     xt1 = int(sync_data[0:64], 16)
     yt1 = int(sync_data[64:128], 16)
-
-    # Transform to base values
-    xt1 = xt1*10**-decimals_0
-    yt1 = yt1*10**-decimals_1
-    dxt = dxt*10**-decimals_0
-    dyt = dyt*10**-decimals_1
-
     pt1 = xt1 / yt1
     kt1 = xt1 * yt1
 
-    mint = ['mint', dex_symbol, symbol_0, symbol_1, decimals_0, decimals_1, dxt, dyt, xt1, yt1, pt1, kt1]
+    mint = [dex_symbol, symbol_0, symbol_1, decimals_0, decimals_1, dxt, dyt, xt1, yt1, pt1, kt1]
 
     return mint
 
@@ -290,17 +200,10 @@ def parse_v2_burn(logs, burn_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi):
     sync_data = sync_log['data'][2:] # remove initial 0x
     xt1 = int(sync_data[0:64], 16)
     yt1 = int(sync_data[64:128], 16)
-
-    # Transform to base values
-    xt1 = xt1*10**-decimals_0
-    yt1 = yt1*10**-decimals_1
-    dxt = dxt*10**-decimals_0
-    dyt = dyt*10**-decimals_1
-
     pt1 = xt1 / yt1
     kt1 = xt1 * yt1
 
-    burn = ['burn', dex_symbol, symbol_0, symbol_1, decimals_0, decimals_1, dxt, dyt, xt1, yt1, pt1, kt1]
+    burn = [dex_symbol, symbol_0, symbol_1, decimals_0, decimals_1, dxt, dyt, xt1, yt1, pt1, kt1]
 
     return burn
 
