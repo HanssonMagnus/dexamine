@@ -4,6 +4,10 @@
 import requests
 import json
 import csv
+from web3 import Web3
+
+# Import scirpts
+from . import constants
 
 ###################################################################################################
 # RPC call functions
@@ -66,6 +70,26 @@ def get_block_data_by_block_number(block_hex):
     return block_data
 
 ###################################################################################################
+# ABI call functions
+###################################################################################################
+def get_erc20_symbol(token_address, erc20_abi):
+    '''Match an ERC20 token smart contract address to its symbol.'''
+    # Transform address to checksum address
+    token_address = Web3.to_checksum_address(token_address)
+    try:
+        url = 'http://localhost:8545'
+        w3 = Web3(Web3.HTTPProvider(url))
+        token_address = Web3.to_checksum_address(token_address)
+        token_contract = w3.eth.contract(address=token_address, abi=erc20_abi)
+        symbol = token_contract.functions.symbol().call()
+        decimals = token_contract.functions.decimals().call()
+    except Exception as e: # some tokens return symbol as bytes32
+        logger.error(e, exc_info=True)
+        symbol = "unknown"
+
+    return symbol, decimals #string
+
+###################################################################################################
 # Parsing transaction logs
 ###################################################################################################
 def get_topics_0(logs):
@@ -82,6 +106,60 @@ def get_event_index(topics_0, event):
         if topics_0[i] == event:
             event_index.append(i)
     return event_index
+
+###################################################################################################
+# Hexadecimal parsing
+###################################################################################################
+def parse_signed_int(hex_str):
+    """
+    Parses a hexadecimal string representing a signed integer in two's complement format.
+
+    In Ethereum logs, integers are represented in two's complement format. This function
+    converts a hexadecimal string to a signed integer. If the number is negative, it adjusts
+    the value based on two's complement representation.
+
+    Parameters:
+    hex_str (str): A hexadecimal string representing a signed integer. The string should not
+                   have '0x' at the beginning and should be 64 characters long (32 bytes).
+
+    Returns:
+    int: The signed integer value represented by the input hexadecimal string.
+
+    Example:
+    >>> parse_signed_int('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE')
+    -2
+    >>> parse_signed_int('0000000000000000000000000000000000000000000000000000000000000001')
+    1
+    """
+    value = int(hex_str, 16)
+    if value >= 2**255:  # Check if the value is negative
+        value -= 2**256
+    return value
+
+###################################################################################################
+# Parse transaction type from to address
+###################################################################################################
+def parse_to_type(to_address, mev_contracts_list):
+    # Transform address to checksum address
+    to_address = Web3.to_checksum_address(to_address)
+
+    # Assign which route the transaction took to execution.
+    if to_address in mev_contracts_list:
+        to_type = 'mev'
+    elif to_address == constants.uniswap_v3_router_address:
+        to_type = 'uni'
+    elif to_address == constants.uniswap_v3_positions_nft_address:
+        to_type = 'uni'
+    elif to_address == constants.uniswap_universal_router_address:
+        to_type = 'uni'
+    elif to_address == constants.uniswap_v3_migrator_address:
+        to_type = 'uni'
+    elif to_address == constants.uniswap_v2_router_address:
+        to_type = 'uni'
+    else:
+        to_type = 'defi'
+
+    return to_type
 
 ###################################################################################################
 # Loading files
@@ -129,3 +207,29 @@ def chifra_csv_to_json(csv_path):
             tx_dict[blockNumber].append(txIndex)
     csv_file.close()
     return tx_dict
+
+def filter_blocks(input_file, output_file, start_block, end_block):
+    """
+    This function reads a JSON file containing Ethereum blocks and their transactions,
+    filters the blocks based on a specified range, and writes the filtered data to a new JSON file.
+
+    Parameters:
+    input_file (str): The path to the input JSON file containing Ethereum blocks and transactions.
+    output_file (str): The path where the filtered data will be written in JSON format.
+    start_block (int): The starting block number (inclusive) of the range to filter.
+    end_block (int): The ending block number (inclusive) of the range to filter.
+
+    The function does not return any value. Instead, it writes the filtered data to the specified
+    output file. It assumes that block numbers are represented as integers and are unique keys in
+    the JSON structure.
+
+    Example:
+        filter_blocks('path_to_input.json', 'path_to_output.json', 12377035, 12377530)
+    """
+    with open(input_file, 'r') as file:
+        data = json.load(file)
+
+    filtered_data = {block: txs for block, txs in data.items() if start_block <= int(block) <= end_block}
+
+    with open(output_file, 'w+') as file:
+        json.dump(filtered_data, file, indent=4)

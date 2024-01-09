@@ -147,8 +147,6 @@ def parse_v2_trade(logs, swap_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi):
     # Calculate the "net traded amounts"
     dxt = amount0In - amount0Out # change in xt (USDC liquidity pool at t)
     dyt = amount1In - amount1Out # change in yt (wETH liquidity pool at t)
-    #dxt = dxt*10**-decimals_0 # transform to "dollars"
-    #dyt = dyt*10**-decimals_1 # transform to "dollars"
 
     # Collect NEW exchange rate from the sync event.
     # "Sync: Emitted each time reserves are updated via mint, burn, swap, or sync.
@@ -156,7 +154,7 @@ def parse_v2_trade(logs, swap_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi):
     xt1 = int(sync_data[0:64], 16)
     yt1 = int(sync_data[64:128], 16)
 
-    # Transform to base values
+    # Transform to base values, e.g., USDC to whole dollars and wETH to whole ether
     xt1 = xt1*10**-decimals_0
     yt1 = yt1*10**-decimals_1
     dxt = dxt*10**-decimals_0

@@ -11,8 +11,20 @@ path_logs = '/media/m2_front/research/logs/node-data/'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ###################################################################################################
+# General Paths (ABIs, lists)
+###################################################################################################
+# Path to MEV contract list
+path_mev_contracts = os.path.join(BASE_DIR, '../lists/mev_contracts.txt')
+
+# Path to general ABIs
+path_erc20_abi = os.path.join(BASE_DIR, '../abis/erc20/ERC20_abi.json')
+
+###################################################################################################
 # Uniswap v2
 ###################################################################################################
+# Uniswap v2 smart contract addresses
+uniswap_v2_router_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+
 # Path to Uniswap v2 ABIs
 path_uniswap_v2_erc20_abi = os.path.join(BASE_DIR, '../abis/uniswap_v2/IUniswapV2ERC20.json')
 path_uniswap_v2_pair_abi = os.path.join(BASE_DIR, '../abis/uniswap_v2/IUniswapV2Pair.json')
@@ -33,5 +45,29 @@ uniswap_v2_usdc_eth = '0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc'
 ###################################################################################################
 # Uniswap v3
 ###################################################################################################
+# Uniswap v3 smart contract addresses
+uniswap_v3_factory_address = '0x1F98431c8aD98523631AE4a59f267346ea31F984'
+uniswap_v3_router_address = '0xE592427A0AEce92De3Edee1F18E0157C05861564'
+uniswap_v3_positions_nft_address = '0xC36442b4a4522E871399CD717aBDD847Ab11FE88'
+uniswap_v3_migrator_address = '0xA5644E29708357803b5A882D272c41cC0dF92B34'
+
+# Universal router (also routes to v2)
+uniswap_universal_router_address = '0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD'
+
+# Path to Uniswap v3 ABIs
+path_uniswap_v3_pair_abi = os.path.join(BASE_DIR, '../abis/uniswap_v3/UniswapV3PoolABI.json')
+
 # Path to Uniswap v3 test data
+path_uni_v3_test_data_dir = os.path.join(BASE_DIR, '../test_data/uniswap_v3/')
 path_uni_v3_by_positions = os.path.join(BASE_DIR, '../test_data/uniswap_v3/uni_v3_by_positions.json')
+
+# Uniswap v3 events
+uniswap_v3_swap_event = '0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67'
+uniswap_v3_mint_event = '0x7a53080ba414158be7ec69b987b5fb7d07dee101fe85488f0853ae16239d0bde'
+uniswap_v3_burn_event = '0x0c396cd989a39f4459b5fa1aed6a9a8dcdbc45908acfd67e028cd568da98982c'
+
+uniswap_v3_increase_liquidity_event = '0x3067048beee31b25b2f1681f88dac838c8bba36af25bfb2b7cf7473a5847e35f'
+uniswap_v3_decrease_liquidity_event = '0x26f6a048ee9138f2c0ce266f322cb99228e8d619ae2bff30c67f8dcf9d2377b4'
+
+# Unsiwap v3 pools
+uniswap_v3_usdc_eth_5bps = '0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640'

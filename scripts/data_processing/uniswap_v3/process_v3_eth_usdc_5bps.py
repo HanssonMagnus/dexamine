@@ -1,7 +1,4 @@
-# Output run 2023-12-11:
-# [4156247 rows x 23 columns]
-# 'Elapsed time: 04:35:18.37'
-# This is wrong for some reason.
+# Output run 2024-01-09:
 #
 # Import packages
 import time
@@ -19,11 +16,11 @@ sys.path.append(os.path.abspath('../../../'))
 # Import scripts
 from shared import general_helpers
 from shared import constants
-from parsers.uniswap_v2 import parse_uni_v2_events
+from parsers.uniswap_v3 import parse_uni_v3_events
 
 # Set up logger
 path_logs = constants.path_logs
-log_name = 'scripts/data_processing/uniswap_v2/eth_usdc.log'
+log_name = 'scripts/data_processing/uniswap_v3/eth_usdc.log'
 logging.basicConfig(filename=path_logs + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)
@@ -34,23 +31,39 @@ logger.error("Logging setup complete.")
 # Changeable variables: Blocks and output file.
 ###################################################################################################
 # Import test data
-#path_uni_v2_by_positions = constants.path_uni_v2_by_positions
-#file_out = os.path.join(constants.path_uni_v2_test_data_dir, 'parsed_events_usdc_weth.csv')
+path_uni_v3_by_positions = constants.path_uni_v3_by_positions
 
 # Full data set
-path_uni_v2_by_positions = '/media/m2_front/research/data/projects/dex_price_discovery/0_raw/txes_eth_usdc.json'
-file_out = '/media/m2_front/research/data/projects/dex_price_discovery/6_new_parser/events_usdc_weth.csv'
+#path_uni_v3_by_positions = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions_october.json'
+file_out = '/media/m2_front/research/data/projects/quantum_defi/0_raw/usdc_eth_5bps_october_2023.csv'
 
 ###################################################################################################
 # Load tx data as a json dict.
 ###################################################################################################
-data = general_helpers.load_json(path_uni_v2_by_positions)
+data = general_helpers.load_json(path_uni_v3_by_positions)
 
 # Flatten the dict into a list of tuples
 block_index_pairs = [(block, index) for block, indexes in data.items() for index in indexes]
 
 # Smart contract address of USDC-WETH pool
-uniswap_v2_usdc_eth = constants.uniswap_v2_usdc_eth
+uniswap_v3_usdc_eth = constants.uniswap_v3_usdc_eth_5bps
+
+###################################################################################################
+# Load ABIs
+###################################################################################################
+erc20_abi = general_helpers.load_abi(constants.path_erc20_abi)
+uniswap_v3_pair_abi = general_helpers.load_abi(constants.path_uniswap_v3_pair_abi)
+
+###################################################################################################
+# Load MEV contracts
+###################################################################################################
+mev_contracts = general_helpers.load_txt(constants.path_mev_contracts) # Generator object
+mev_contracts_list = list(mev_contracts)
+
+###################################################################################################
+# Prepare arguments for multiprocessing
+###################################################################################################
+args_for_multiprocessing = [(block, index, erc20_abi, uniswap_v3_pair_abi, mev_contracts_list) for block, index in block_index_pairs]
 
 ###################################################################################################
 # Def multiprocess function
@@ -60,12 +73,26 @@ uniswap_v2_usdc_eth = constants.uniswap_v2_usdc_eth
 # 'maxFeePerGas', 'hash', 'input', 'nonce', 'to', 'transactionIndex', 'value', 'type',
 # 'accessList', 'chainId', 'v', 'r', 's'])
 ###################################################################################################
-def parse_transaction(block_number, index):
+def parse_transaction(block_number, index, erc20_abi, uniswap_v3_pair_abi, mev_contracts_list):
     try:
         tx_data, receipt_data, block_data = general_helpers.get_tx_receipt_block_by_index(hex(int(block_number)),
                                                                                 hex(int(index)))
     except Exception as e:
         logger.error(e, exc_info=True)
+
+    # Collect events
+    try:
+        logs = receipt_data['logs']
+        events = parse_uni_v3_events.parse_all_v3_events(logs,
+                                                         exchange_pair_address=uniswap_v3_usdc_eth,
+                                                         erc20_abi=erc20_abi,
+                                                         uniswap_v3_pair_abi=uniswap_v3_pair_abi)
+    except Exception as e:
+        logger.error(e, exc_info=True)
+
+    # Return function if there are no events
+    if events is None:
+        return
 
     # Collect meta data
     try:
@@ -91,10 +118,9 @@ def parse_transaction(block_number, index):
     except Exception as e:
         logger.error(e, exc_info=True)
 
-    # Collect events
+    # Identify type of transaction (MEV, DeFi, UNI)
     try:
-        logs = receipt_data['logs']
-        events = parse_uni_v2_events.parse_all_v2_events(logs, exchange_pair_address=uniswap_v2_usdc_eth)
+        to_type = general_helpers.parse_to_type(to_address, mev_contracts_list)
     except Exception as e:
         logger.error(e, exc_info=True)
 
@@ -107,15 +133,18 @@ def parse_transaction(block_number, index):
             symbol_1 = event[3]
             decimals_0 = event[4]
             decimals_1 = event[5]
-            dxt = event[6]
-            dyt = event[7]
-            xt1 = event[8]
-            yt1 = event[9]
-            pt1 = event[10]
-            kt1 = event[11]
-            data = [timestamp, block_number, index, hash, from_address, to_address, value, gas, gasPrice,
-                         maxPriorityFeePerGas, maxFeePerGas, type_of_event, dex_symbol, symbol_0,
-                        symbol_1, decimals_0, decimals_1, dxt, dyt, xt1, yt1, pt1, kt1]
+            amount_0 = event[6]
+            amount_1 = event[7]
+            liquidity = event[8]
+            tick = event[9]
+            sqrtPriceX96 = event[10]
+            price = event[11]
+            tick_lower = event[12]
+            tick_upper = event[13]
+            data = [timestamp, block_number, index, hash, from_address, to_address, value, gas,
+                    gasPrice, maxPriorityFeePerGas, maxFeePerGas, type_of_event, dex_symbol,
+                    symbol_0, symbol_1, decimals_0, decimals_1, amount_0, amount_1, liquidity,
+                    tick, sqrtPriceX96, price, tick_lower, tick_upper, to_type]
             L.append(data)
     except Exception as e:
         logger.error(e, exc_info=True)
@@ -135,7 +164,7 @@ with multiprocessing.Manager() as manager:
 
     # Map get_tx to a range of blocks
     #pool.imap_unordered(parse_transaction, hashes_list)
-    pool.starmap(parse_transaction, block_index_pairs)
+    pool.starmap(parse_transaction, args_for_multiprocessing)
 
     pool.close()
     pool.join() # Synchronization point needed for this to work
@@ -151,14 +180,18 @@ with multiprocessing.Manager() as manager:
 #             'gas_fee_cap']
 col_names= ['timestamp', 'block_number', 'index', 'hash', 'from_address', 'to_address', 'value',
             'gas', 'gasPrice', 'maxPriorityFeePerGas', 'maxFeePerGas', 'type_of_event', 'dex_symbol',
-            'symbol_0', 'symbol_1', 'decimals_0', 'decimals_1', 'dxt', 'dyt', 'xt1', 'yt1', 'pt1',
-            'kt1']
+            'symbol_0', 'symbol_1', 'decimals_0', 'decimals_1', 'amount_0', 'amount_1', 'liquidity',
+            'tick', 'sqrtPriceX96', 'price', 'tick_lower', 'tick_upper', 'to_type']
 
 df = pd.DataFrame(data=transaction_data, columns=col_names)
 
 # Sort dataframe by blockNumber
 df = df.sort_values(by=['block_number', 'index'])
 pprint(df)
+
+# Set the display option to show the full content of the column
+pd.set_option('display.max_colwidth', None)
+pprint(df[df['to_type']=='defi']['hash'])
 
 # Save dataframe as csv
 df.to_csv(file_out, sep=',', index=False)

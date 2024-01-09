@@ -31,5 +31,3 @@ receives `696961612401492081` since there is some other latent cost to the speci
 To mitigate any potential issues here, I would recommend that you understand the ERC20 protocol
 that you are analyzing. You can also run `./tests/integration_tests/sync_swap_events.py` and
 investigate if there are any edge cases.
-
-## Uniswap v3

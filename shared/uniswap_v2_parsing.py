@@ -26,6 +26,12 @@ def get_v2_dex(v2_pair_address, uniswap_v2_erc20_abi):
     dex_symbol = dex_contract.functions.symbol().call()
     return dex_symbol
 
+'''
+This function below (get_erc20_symbol) should only be in "general_helpers.py" since it is used for
+both v2 and v3 swaps as well as other things. But, if I remove it here I need to also change all
+places in the v2 parser where this is called, so I leave it for now, and change it when I have more
+time in the future... (hopefully some day)
+'''
 def get_erc20_symbol(token_address, uniswap_v2_erc20_abi):
     '''Match an ERC20 token smart contract address to its symbol.'''
     # Transform address to checksum address
