@@ -1,7 +1,7 @@
 # Stats
 
 ## Stats from run 2023-12-04
-- Elapsed time:
+- Elapsed time: 'Elapsed time: 0 days, 04:40:35'
 - TEMP: 78°C
 - CPU: ~ 94% with pool = multiprocessing.Pool(n_cpu, maxtasksperchild=100)
 - First time running parsing script on the full dex_price_discovery data. Will be a good exercise

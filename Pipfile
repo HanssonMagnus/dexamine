@@ -7,6 +7,8 @@ name = "pypi"
 web3 = "*"
 ipython = "*"
 pandas = "*"
+py-evm = "*"
+eth-abi = "*"
 
 [dev-packages]
 

@@ -1,4 +1,6 @@
 # Output run 2024-01-09:
+# [5694177 rows x 26 columns]
+# 'Elapsed time: 0 days, 06:14:56'
 #
 # Import packages
 import time
@@ -31,11 +33,16 @@ logger.error("Logging setup complete.")
 # Changeable variables: Blocks and output file.
 ###################################################################################################
 # Import test data
-path_uni_v3_by_positions = constants.path_uni_v3_by_positions
+#path_uni_v3_by_positions = constants.path_uni_v3_by_positions
+#file_out = '/media/m2_front/research/data/projects/quantum_defi/0_raw/usdc_eth_5bps_october_2023_test.csv'
+
+# October 2023 data set
+#path_uni_v3_by_positions = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions_october.json'
+#file_out = '/media/m2_front/research/data/projects/quantum_defi/0_raw/usdc_eth_5bps_october_2023.csv'
 
 # Full data set
-#path_uni_v3_by_positions = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions_october.json'
-file_out = '/media/m2_front/research/data/projects/quantum_defi/0_raw/usdc_eth_5bps_october_2023.csv'
+path_uni_v3_by_positions = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions.json'
+file_out = '/media/m2_front/research/data/projects/defi_price_impact/0_raw/usdc_eth_5bps_2023-11-23.csv'
 
 ###################################################################################################
 # Load tx data as a json dict.
@@ -74,6 +81,8 @@ args_for_multiprocessing = [(block, index, erc20_abi, uniswap_v3_pair_abi, mev_c
 # 'accessList', 'chainId', 'v', 'r', 's'])
 ###################################################################################################
 def parse_transaction(block_number, index, erc20_abi, uniswap_v3_pair_abi, mev_contracts_list):
+    events = None # Initialize events to None
+
     try:
         tx_data, receipt_data, block_data = general_helpers.get_tx_receipt_block_by_index(hex(int(block_number)),
                                                                                 hex(int(index)))
@@ -84,24 +93,29 @@ def parse_transaction(block_number, index, erc20_abi, uniswap_v3_pair_abi, mev_c
     try:
         logs = receipt_data['logs']
         events = parse_uni_v3_events.parse_all_v3_events(logs,
-                                                         exchange_pair_address=uniswap_v3_usdc_eth,
                                                          erc20_abi=erc20_abi,
-                                                         uniswap_v3_pair_abi=uniswap_v3_pair_abi)
+                                                         uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+                                                         exchange_pair_address=uniswap_v3_usdc_eth)
     except Exception as e:
         logger.error(e, exc_info=True)
 
-    # Return function if there are no events
+    # Return function if there are no Uniswap v3 events
     if events is None:
         return
 
     # Collect meta data
     try:
+        hash = tx_data['hash']
+        to_address = tx_data['to']
+
+        # to_address is None if it's a contract creating transactions
+        if to_address is None:
+            to_address = 'contract_creation'
+
         timestamp = block_data['timestamp']
         timestamp = int(timestamp, 0) # from hex to int
 
-        hash = tx_data['hash']
         from_address = tx_data['from']
-        to_address = tx_data['to']
         tx_type = int(tx_data['type'], 16)
 
         value = int(tx_data['value'], 16)
@@ -190,8 +204,8 @@ df = df.sort_values(by=['block_number', 'index'])
 pprint(df)
 
 # Set the display option to show the full content of the column
-pd.set_option('display.max_colwidth', None)
-pprint(df[df['to_type']=='defi']['hash'])
+#pd.set_option('display.max_colwidth', None)
+#pprint(df[df['to_type']=='defi']['hash'])
 
 # Save dataframe as csv
 df.to_csv(file_out, sep=',', index=False)

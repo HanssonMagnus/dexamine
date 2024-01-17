@@ -1,13 +1,21 @@
 # This file contains general helper function.
 
 # Import packages
+import logging
 import requests
 import json
 import csv
 from web3 import Web3
 
+# Import packages for mempool decoding
+from eth.vm.forks.arrow_glacier.transactions import ArrowGlacierTransactionBuilder as TransactionBuilder
+from eth_utils import encode_hex, to_bytes
+
 # Import scirpts
 from . import constants
+
+# Get a logger
+logger = logging.getLogger(__name__)
 
 ###################################################################################################
 # RPC call functions
@@ -96,7 +104,11 @@ def get_topics_0(logs):
     '''Return list of all "topic 0"s in logs.'''
     topics_0 = []
     for log in logs:
-        topics_0.append(log['topics'][0])
+        # Check if 'topics' key exists and it has at least one element
+        if 'topics' in log and len(log['topics']) > 0:
+            topics_0.append(log['topics'][0])
+        else:
+            continue # continue loop to next log
     return topics_0
 
 def get_event_index(topics_0, event):
@@ -140,8 +152,16 @@ def parse_signed_int(hex_str):
 # Parse transaction type from to address
 ###################################################################################################
 def parse_to_type(to_address, mev_contracts_list):
-    # Transform address to checksum address
-    to_address = Web3.to_checksum_address(to_address)
+    # If to_address is None I set it to 'contract_creation' in the multiprocessing parse script.
+    # Ensure that 'contract_creation' strings will not raise ValueError as it is not a HEX string.
+    if to_address == 'contract_creation':
+        return 'contract_creation'
+
+    # Transform HEX address to checksum address
+    try:
+        to_address = Web3.to_checksum_address(to_address)
+    except Exception as e:
+        logger.error(e, exc_info=True)
 
     # Assign which route the transaction took to execution.
     if to_address in mev_contracts_list:
@@ -156,10 +176,59 @@ def parse_to_type(to_address, mev_contracts_list):
         to_type = 'uni'
     elif to_address == constants.uniswap_v2_router_address:
         to_type = 'uni'
+    elif to_address == constants.uniswap_v3_router_2_address:
+        to_type = 'uni'
+    elif to_address == constants.uniswap_v2_router_2_address:
+        to_type = 'uni'
     else:
         to_type = 'defi'
 
     return to_type
+
+###################################################################################################
+# Decode raw transaction from mempool
+###################################################################################################
+def decode_mempool_tx(raw_tx):
+    '''
+    Decodes both EIP-1559 and Legacy Ethereum transactions.
+    - 1559 tx: dict_keys(['type_id', '_inner'])
+    - Legacy tx: dict_keys(['_nonce', '_gas_price', '_gas', '_to', '_value', '_data', '_v', '_r',
+    '_s', '_cached_rlp'])
+
+    Parameters:
+    raw_tx (str): A hexadecimal string representing a signed transaction.
+
+    Returns:
+    dict: Decoded transaction.
+
+    Mock example of raw_tx: '0xf86901844190ab00825208943 ... 9a0a414587d4b1bbf713e42614d36a3f5b27'
+    '''
+    # Convert the hex string to bytes
+    signed_tx_as_bytes = to_bytes(hexstr=raw_tx)
+
+    # Deserialize the transaction using the latest transaction builder:
+    decoded_tx = TransactionBuilder().decode(signed_tx_as_bytes)
+
+    # Transform to dict
+    decoded_tx_dict = decoded_tx.__dict__
+
+    # Check for transaction type and process accordingly
+    if 'type_id' in decoded_tx_dict:
+        # EIP-1559 transaction
+        decoded_tx_dict = decoded_tx_dict.get('_inner', {}).__dict__
+    else:
+        # Legacy transaction
+        pass  # No special handling needed for legacy transactions
+
+    # Common processing for both types
+    if '_data' in decoded_tx_dict:
+        decoded_tx_dict['_data'] = encode_hex(decoded_tx_dict['_data'])
+    if '_cached_rlp' in decoded_tx_dict:
+        decoded_tx_dict['_cached_rlp'] = encode_hex(decoded_tx_dict['_cached_rlp'])
+    if '_to' in decoded_tx_dict:
+        decoded_tx_dict['_to'] = encode_hex(decoded_tx_dict['_to'])
+
+    return decoded_tx_dict
 
 ###################################################################################################
 # Loading files

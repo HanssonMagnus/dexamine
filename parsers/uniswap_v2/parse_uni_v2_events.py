@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 ###################################################################################################
 # Parse all Uniswap v2 swaps, mints, and burns from a transaction
 ###################################################################################################
-def parse_all_v2_events(logs, exchange_pair_address=''):
+def parse_all_v2_events(logs, uniswap_v2_erc20_abi, uniswap_v2_pair_abi, exchange_pair_address=''):
     '''Parse all swaps, mints, and burns from a tx.
     Inputs:
         logs: Logs from transaction receipt.
@@ -33,10 +33,6 @@ def parse_all_v2_events(logs, exchange_pair_address=''):
     swap_indexes = general_helpers.get_event_index(topics_0, constants.uniswap_v2_swap_event)
     mint_indexes = general_helpers.get_event_index(topics_0, constants.uniswap_v2_mint_event)
     burn_indexes = general_helpers.get_event_index(topics_0, constants.uniswap_v2_burn_event)
-
-    # Load ABIs
-    uniswap_v2_erc20_abi = general_helpers.load_abi(constants.path_uniswap_v2_erc20_abi)
-    uniswap_v2_pair_abi = general_helpers.load_abi(constants.path_uniswap_v2_pair_abi)
 
     # Convert exchange_pair_address to checksum
     if exchange_pair_address:
@@ -125,11 +121,13 @@ def parse_v2_trade(logs, swap_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi):
 
     # Check that the event prior to the swap event is a sync event and that the events have the
     # same address in the logs.
-    sync_log = logs[swap_index - 1] # sync event is just before swap event
-    if not ((logs[swap_index]['address'] == sync_log['address']) &
-        (sync_log['topics'][0] == uniswap_v2_sync_event)):
-        logger.error("Sync event not before swap event.", exc_info=True)
+    if swap_index == 0 or not (logs[swap_index]['address'] == logs[swap_index - 1]['address'] and
+                           logs[swap_index - 1]['topics'][0] == uniswap_v2_sync_event):
+        transactionHash = logs[swap_index]['transactionHash']
+        logger.error(f"Sync event with same address not before swap event in tx: {transactionHash}", exc_info=True)
         return
+    else:
+        sync_log = logs[swap_index - 1] # sync event is just before swap event
 
     swap_contract = logs[swap_index]['address']
     token_0, token_1 = uniswap_v2_parsing.get_v2_pair(swap_contract, uniswap_v2_pair_abi)

@@ -16,7 +16,7 @@ from shared import constants
 logger = logging.getLogger(__name__)
 
 ###################################################################################################
-# Parse all Uniswap v3 swaps, mints, and burns from a transaction
+# Parse all Uniswap v3 swap, mint, and burn events from a transaction
 ###################################################################################################
 def parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_address=''):
     '''Parse all Unsiwap v3 swaps, mints, and burns from a tx.
@@ -103,7 +103,7 @@ def parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_addr
     return events
 
 ###################################################################################################
-# Trade parse functions
+# Trade (swap events) parse functions
 ###################################################################################################
 def parse_v3_trades(logs, swap_indexes, erc20_abi, uniswap_v3_pair_abi):
     '''Parse all v3 trades of the tx by identifying all swap events and parse them.
@@ -160,7 +160,7 @@ def parse_v3_trade(logs, swap_index, erc20_abi, uniswap_v3_pair_abi):
     return trade
 
 ###################################################################################################
-# Liquidity provision parse functions
+# Liquidity provision (mint and burn events) parse functions
 ###################################################################################################
 def parse_v3_mints(logs, mint_indexes, erc20_abi, uniswap_v3_pair_abi):
     '''Parse all v3 mints of the tx by identifying all mint events and parse them.

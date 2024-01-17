@@ -11,19 +11,30 @@ path_logs = '/media/m2_front/research/logs/node-data/'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ###################################################################################################
-# General Paths (ABIs, lists)
+# General Paths (ABIs, lists, data)
 ###################################################################################################
 # Path to MEV contract list
-path_mev_contracts = os.path.join(BASE_DIR, '../lists/mev_contracts.txt')
+path_mev_contracts = os.path.join(BASE_DIR, '../lists/mev_contracts_2024-01-09.txt')
 
 # Path to general ABIs
 path_erc20_abi = os.path.join(BASE_DIR, '../abis/erc20/ERC20_abi.json')
+
+# Path to Uniswap v2 test data
+path_mempool_test_data_dir = os.path.join(BASE_DIR, '../test_data/mempool/')
+path_mempool_test_data = os.path.join(BASE_DIR, '../test_data/mempool/2023-10-01_test.parquet')
+
+###################################################################################################
+# General Addresses
+###################################################################################################
+usdc_token = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+weth_token = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
 ###################################################################################################
 # Uniswap v2
 ###################################################################################################
 # Uniswap v2 smart contract addresses
-uniswap_v2_router_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+uniswap_v2_router_address = '0xf164fC0Ec4E93095b804a4795bBe1e041497b92a'
+uniswap_v2_router_2_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 
 # Path to Uniswap v2 ABIs
 path_uniswap_v2_erc20_abi = os.path.join(BASE_DIR, '../abis/uniswap_v2/IUniswapV2ERC20.json')
@@ -46,8 +57,10 @@ uniswap_v2_usdc_eth = '0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc'
 # Uniswap v3
 ###################################################################################################
 # Uniswap v3 smart contract addresses
+# https://docs.uniswap.org/contracts/v3/reference/deployments
 uniswap_v3_factory_address = '0x1F98431c8aD98523631AE4a59f267346ea31F984'
 uniswap_v3_router_address = '0xE592427A0AEce92De3Edee1F18E0157C05861564'
+uniswap_v3_router_2_address = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 uniswap_v3_positions_nft_address = '0xC36442b4a4522E871399CD717aBDD847Ab11FE88'
 uniswap_v3_migrator_address = '0xA5644E29708357803b5A882D272c41cC0dF92B34'
 

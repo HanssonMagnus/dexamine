@@ -28,7 +28,7 @@ blocks = list(data.keys())
 
 # Parse transations
 #blocks = blocks[83:84] # test with only 1 tx (2 swaps)
-#blocks = blocks[0:1] # test with only 1 tx (2 swaps)
+blocks = blocks[0:1] # test with only 1 tx (2 swaps)
 for block in blocks:
     tx_indexes = data[block]
     for index in tx_indexes:
@@ -39,6 +39,7 @@ for block in blocks:
         except Exception as e:
             logger.error(e, exc_info=True)
 
-        pprint(tx)
-        pprint(receipt)
-        pprint(block_data)
+        #pprint(tx)
+        for j in range(len(receipt['logs'])):
+            pprint(receipt['logs'][j]['transactionHash'])
+        #pprint(block_data)
