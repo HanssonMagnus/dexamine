@@ -9,6 +9,7 @@ ipython = "*"
 pandas = "*"
 py-evm = "*"
 eth-abi = "*"
+matplotlib = "*"
 
 [dev-packages]
 

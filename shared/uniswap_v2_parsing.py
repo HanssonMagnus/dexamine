@@ -31,23 +31,26 @@ This function below (get_erc20_symbol) should only be in "general_helpers.py" si
 both v2 and v3 swaps as well as other things. But, if I remove it here I need to also change all
 places in the v2 parser where this is called, so I leave it for now, and change it when I have more
 time in the future... (hopefully some day)
-'''
-def get_erc20_symbol(token_address, uniswap_v2_erc20_abi):
-    '''Match an ERC20 token smart contract address to its symbol.'''
-    # Transform address to checksum address
-    token_address = Web3.to_checksum_address(token_address)
-    try:
-        url = 'http://localhost:8545'
-        w3 = Web3(Web3.HTTPProvider(url))
-        token_address = Web3.to_checksum_address(token_address)
-        token_contract = w3.eth.contract(address=token_address, abi=uniswap_v2_erc20_abi)
-        symbol = token_contract.functions.symbol().call()
-        decimals = token_contract.functions.decimals().call()
-    except Exception as e: # some tokens return symbol as bytes32
-        logger.error(e, exc_info=True)
-        symbol = "unknown"
 
-    return symbol, decimals #string
+Now this should be fixed, but I'll keep it here until I have tested it fully.
+'''
+
+#def get_erc20_symbol(token_address, uniswap_v2_erc20_abi):
+#    '''Match an ERC20 token smart contract address to its symbol.'''
+#    # Transform address to checksum address
+#    token_address = Web3.to_checksum_address(token_address)
+#    try:
+#        url = 'http://localhost:8545'
+#        w3 = Web3(Web3.HTTPProvider(url))
+#        token_address = Web3.to_checksum_address(token_address)
+#        token_contract = w3.eth.contract(address=token_address, abi=uniswap_v2_erc20_abi)
+#        symbol = token_contract.functions.symbol().call()
+#        decimals = token_contract.functions.decimals().call()
+#    except Exception as e: # some tokens return symbol as bytes32
+#        logger.error(e, exc_info=True)
+#        symbol = "unknown"
+#
+#    return symbol, decimals #string
 
 ###################################################################################################
 # Uniswp v2 check functions

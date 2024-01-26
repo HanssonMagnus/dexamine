@@ -38,7 +38,7 @@ logger.error("Logging setup complete.")
 
 # Full data set
 path_uni_v2_by_positions = '/media/m2_front/research/data/projects/dex_price_discovery/0_raw/txes_eth_usdc.json'
-file_out = '/media/m2_front/research/data/projects/dex_price_discovery/6_new_parser/events_usdc_weth.csv'
+file_out = '/media/m2_front/research/data/projects/dex_price_discovery/1_parsed/events_usdc_weth.csv'
 
 ###################################################################################################
 # Load tx data as a json dict.

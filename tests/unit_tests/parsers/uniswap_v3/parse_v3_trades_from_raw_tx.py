@@ -32,6 +32,7 @@ erc20_abi = general_helpers.load_abi(constants.path_erc20_abi)
 # Select sub-sample
 #df = df[0:1]
 pprint(df.columns)
+pprint(df)
 
 
 sig_1 = '0x414bf389'
@@ -57,6 +58,7 @@ for rawTx in df['rawTx']:
     except Exception as e:
         print(e)
 
+    #pprint(swaps)
     if swaps:
         counter +=1
         pprint(swaps)

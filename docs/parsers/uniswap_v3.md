@@ -175,6 +175,7 @@ create in your own smart contract, that calls the functions in the `ISwapRouter`
   - `deadline`: Time after which the transaction will revert.
   - `amountOut`: Exact amount of `tokenOut` to receive.
   - `amountInMaximum`: Maximum amount of `tokenIn` to spend.
+  - `sqrtPriceLimitX96`: Limit on the pool's price movement.
 
 #### exactInput(...)
 - Parameters:

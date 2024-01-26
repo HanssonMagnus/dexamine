@@ -132,8 +132,8 @@ def parse_v2_trade(logs, swap_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi):
     swap_contract = logs[swap_index]['address']
     token_0, token_1 = uniswap_v2_parsing.get_v2_pair(swap_contract, uniswap_v2_pair_abi)
     dex_symbol = uniswap_v2_parsing.get_v2_dex(swap_contract, uniswap_v2_erc20_abi)
-    symbol_0, decimals_0 = uniswap_v2_parsing.get_erc20_symbol(token_0, uniswap_v2_erc20_abi)
-    symbol_1, decimals_1 = uniswap_v2_parsing.get_erc20_symbol(token_1, uniswap_v2_erc20_abi)
+    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(token_0, uniswap_v2_erc20_abi)
+    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(token_1, uniswap_v2_erc20_abi)
 
     # Collect the swap amounts delta x_t and delta y_t
     swap_data = logs[swap_index]['data'][2:] # 256 characters after removing 0x
@@ -207,8 +207,8 @@ def parse_v2_mint(logs, mint_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi):
     mint_contract = logs[mint_index]['address']
     token_0, token_1 = uniswap_v2_parsing.get_v2_pair(mint_contract, uniswap_v2_pair_abi)
     dex_symbol = uniswap_v2_parsing.get_v2_dex(mint_contract, uniswap_v2_erc20_abi)
-    symbol_0, decimals_0 = uniswap_v2_parsing.get_erc20_symbol(token_0, uniswap_v2_erc20_abi)
-    symbol_1, decimals_1 = uniswap_v2_parsing.get_erc20_symbol(token_1, uniswap_v2_erc20_abi)
+    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(token_0, uniswap_v2_erc20_abi)
+    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(token_1, uniswap_v2_erc20_abi)
 
     # Collect how much was deposited
     mint_data = logs[mint_index]['data'][2:] # len 128
@@ -273,8 +273,8 @@ def parse_v2_burn(logs, burn_index, uniswap_v2_erc20_abi, uniswap_v2_pair_abi):
     burn_contract = logs[burn_index]['address']
     token_0, token_1 = uniswap_v2_parsing.get_v2_pair(burn_contract, uniswap_v2_pair_abi)
     dex_symbol = uniswap_v2_parsing.get_v2_dex(burn_contract, uniswap_v2_erc20_abi)
-    symbol_0, decimals_0 = uniswap_v2_parsing.get_erc20_symbol(token_0, uniswap_v2_erc20_abi)
-    symbol_1, decimals_1 = uniswap_v2_parsing.get_erc20_symbol(token_1, uniswap_v2_erc20_abi)
+    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(token_0, uniswap_v2_erc20_abi)
+    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(token_1, uniswap_v2_erc20_abi)
 
     # Collect how much was burnt
     burn_data = logs[burn_index]['data'][2:] # len 128
