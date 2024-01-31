@@ -1,11 +1,49 @@
-# Node-Data Project
+# ethereum-defi-parser
+This project focuses on extracting and analyzing blockchain data from Ethereum archive nodes, with
+a specific emphasis on DeFi protocols. It utilizes scripts to query contract data from the Ethereum
+blockchain and parsers to process this data into structured datasets for research and data science.
 
-## Overview
-This project focuses on extracting and analyzing blockchain data from Ethereum nodes, with a
-specific emphasis on DeFi protocols. It utilizes scripts to query data from Ethereum contracts and
-parsers to process this data into structured datasets.
+## Release Notes
 
-## Structure
+### v0.1.1
+- Add support for Sushiswap.
+
+### v0.0.1
+- Initial version with support for Uniswap v2 and v3.
+
+## Pipeline
+
+### Decentralized Exchanges
+| Protocol | Status |
+|------------|--------|
+| Uniswap v2 | ✅ |
+| Uniswap v3 | ✅ |
+| Sushiswap | 🕒 |
+| Curve | ❌ |
+
+### Liquidity Aggregators
+| Protocol | Status |
+|------------|--------|
+| 1Inch | ❌ |
+| CoW Swap | ❌ |
+
+### Protocols for Loanable Funds
+| Protocol | Status |
+|------------|--------|
+| Aave | ❌ |
+
+### Yield Aggregators
+| Protocol | Status |
+|------------|--------|
+| Year | ❌ |
+
+
+✅: Included.
+🕒: Under development.
+❌: Not prioritized at the moment.
+
+
+## Repository Structure
 - `abis/`: ABIs for the smart contracts used in the project.
 - `config/`: Configuration files for scripts.
 - `docs/`: Comprehensive documentation for each component.
