@@ -12,8 +12,10 @@ blockchain and parsers to process this data into structured datasets for researc
 - Initial version with support for Uniswap v2 and v3.
 
 ## Pipeline
+<table>
+<tr><th>Decentralized Exchanges</th><th>Liquidity Aggregators</th></tr>
+<tr><td>
 
-### Decentralized Exchanges
 | Protocol | Status |
 |------------|--------|
 | Uniswap v2 | ✅ |
@@ -21,26 +23,33 @@ blockchain and parsers to process this data into structured datasets for researc
 | Sushiswap | 🕒 |
 | Curve | ❌ |
 
-### Liquidity Aggregators
+</td><td>
+
 | Protocol | Status |
 |------------|--------|
 | 1Inch | ❌ |
 | CoW Swap | ❌ |
 
-### Protocols for Loanable Funds
+</td></tr> </table>
+
+<table>
+<tr><th>Protocols for Loanable Funds</th><th>Yield Aggregators</th></tr>
+<tr><td>
+
 | Protocol | Status |
 |------------|--------|
 | Aave | ❌ |
 
-### Yield Aggregators
+</td><td>
+
 | Protocol | Status |
 |------------|--------|
-| Year | ❌ |
+| Yearn | ❌ |
+
+</td></tr> </table>
 
 
-✅: Included.
-🕒: Under development.
-❌: Not prioritized at the moment.
+✅: Included. 🕒: Under development. ❌: Not prioritized at the moment.
 
 
 ## Repository Structure
@@ -63,6 +72,10 @@ blockchain and parsers to process this data into structured datasets for researc
 
 ## Usage
 Refer to individual READMEs in `docs/` for detailed usage instructions for each script and parser.
+
+## Citation
+If you use this package in any research papers or data science reports please cite it. The citation
+details can be found in [CITATION.cff](./CITATION.cff) in this repository.
 
 ## Contributing
 Contributions to the project are welcome. Please refer to `CONTRIBUTING.md` for guidelines.
