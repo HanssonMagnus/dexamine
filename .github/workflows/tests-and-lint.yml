@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  lint:
+  tests-and-lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -43,10 +43,10 @@ jobs:
       run: |
         poetry install --no-interaction --no-root
 
-    - name: Analysing the code with pylint
-      run: |
-        poetry run pylint ethereum_defi_parser/
-
     - name: Run pytest
       run: |
         poetry run pytest ethereum_defi_parser/
+
+    - name: Analysing the code with pylint
+      run: |
+        poetry run pylint ethereum_defi_parser/

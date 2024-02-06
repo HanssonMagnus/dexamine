@@ -11,10 +11,10 @@ import logging
 import csv
 from io import StringIO
 import json
-import requests
-from web3 import Web3
 from importlib import resources
 import importlib.resources as pkg_resources
+import requests
+from web3 import Web3
 
 # Import packages for mempool decoding
 from eth.vm.forks.arrow_glacier.transactions import (
