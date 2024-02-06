@@ -12,7 +12,6 @@ import csv
 from io import StringIO
 import json
 from importlib import resources
-import importlib.resources as pkg_resources
 import requests
 from web3 import Web3
 
@@ -440,8 +439,8 @@ def get_csv_test_data_as_string(test_data_file):
     resource_path = '.'.join([package_path] + path_components[:-1])
     file_name = path_components[-1]
 
-    # Use pkg_resources.open_text to access the file
-    with pkg_resources.open_text(resource_path, file_name) as file:
+    # Use resources.open_text to access the file
+    with resources.open_text(resource_path, file_name) as file:
         return file.read()
 
 ########################################################################################

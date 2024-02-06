@@ -7,10 +7,14 @@ This file contains helper functions for parsers.uniswap_v2.
 """
 
 # Import packages
+import logging
 from web3 import Web3
 
 # Import modules
 from ethereum_defi_parser.shared import constants
+
+# Get a logger
+logger = logging.getLogger(__name__)
 
 ########################################################################################
 # Uniswap v2 ABI call node functions
@@ -96,12 +100,13 @@ def sync_event_is_before_event(logs, event_index):
         logs[event_index]["address"] == logs[event_index - 1]["address"]
         and logs[event_index - 1]["topics"][0] == constants.UNISWAP_V2_SYNC_EVENT
     ):
-        transaction_hash = logs[swap_index]["transactionHash"]
+        transaction_hash = logs[event_index]["transactionHash"]
+
         logger.error(
-            f"Sync event with same address not before swap event in tx: {transaction_hash}",
+            "Sync event with same address not before swap event in tx: %s",
+            transaction_hash,
             exc_info=True,
         )
         return False
 
-    else:
-        return True
+    return True

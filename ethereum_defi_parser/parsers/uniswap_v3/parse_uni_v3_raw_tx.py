@@ -37,7 +37,7 @@ def parse_v3_exact_input_single(data, erc20_abi, token_in="", token_out=""):
         - `sqrt_price_limit_x96`: Limit on the pool's price movement.
     """
     if data == "0x":  # If there is no data in the tx
-        return  # Returns None
+        return None
 
     # Function signature for exactInputSingle
     sig_exact_input_single = "414bf389"
@@ -66,6 +66,8 @@ def parse_v3_exact_input_single(data, erc20_abi, token_in="", token_out=""):
 
         # Extract and decode the arguments
         encoded_args = data[start:end]
+
+        # pylint: disable=unsubscriptable-object
         decoded_args = eth_abi.decode(abi_types, bytes.fromhex(encoded_args))
 
         # Collect arguments
@@ -73,7 +75,7 @@ def parse_v3_exact_input_single(data, erc20_abi, token_in="", token_out=""):
         token_out_address = decoded_args[1]
 
         # Check if token_in and token_out addresses are used in the function argument
-        # and if they are match them.
+        # and if they are, match them.
         if not (token_in == "" and token_out == ""):
             token_in_address = Web3.to_checksum_address(token_in_address)
             token_out_address = Web3.to_checksum_address(token_out_address)
@@ -149,7 +151,7 @@ def parse_v3_exact_output_single(data, erc20_abi):
         - `sqrt_price_limit_x96`: Limit on the pool's price movement.
     """
     if data == "0x":  # If there is no data in the tx
-        return  # Returns None
+        return None # Returns None
 
     # Function signature for exactOutputSingle
     sig_exact_output_single = "db3e2198"
@@ -178,6 +180,8 @@ def parse_v3_exact_output_single(data, erc20_abi):
 
         # Extract and decode the arguments
         encoded_args = data[start:end]
+
+        # pylint: disable=unsubscriptable-object
         decoded_args = eth_abi.decode(abi_types, bytes.fromhex(encoded_args))
 
         # Collect arguments
