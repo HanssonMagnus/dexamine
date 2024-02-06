@@ -7,13 +7,7 @@ datasets for research and data science.
 ### Project Information
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Made with Python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://python.org)
-[![Build Status](https://github.com/HanssonMagnus/ethereum-defi-parser/workflows/CI/badge.svg)](https://github.com/HanssonMagnus/ethereum-defi-parser/actions)
-[![GitHub issues](https://img.shields.io/github/issues/HanssonMagnus/ethereum-defi-parser.svg)](https://github.com/HanssonMagnus/ethereum-defi-parser/issues)
-[![GitHub forks](https://img.shields.io/github/forks/HanssonMagnus/ethereum-defi-parser.svg?style=social&label=Fork)](https://github.com/HanssonMagnus/ethereum-defi-parser)
-[![GitHub stars](https://img.shields.io/github/stars/HanssonMagnus/ethereum-defi-parser.svg?style=social&label=Stars)](https://github.com/HanssonMagnus/ethereum-defi-parser)
-
-### Code Quality
-[![Pytest and Pylint](https://github.com/HanssonMagnus/ethereum-defi-parser/actions/workflows/tests-and-lint.yml/badge.svg)](https://github.com/HanssonMagnus/ethereum-defi-parser/actions/workflows/tests-and-lint.yml)
+[![pytest and pylint](https://github.com/HanssonMagnus/ethereum-defi-parser/actions/workflows/pytest-and-pylint.yml/badge.svg)](https://github.com/HanssonMagnus/ethereum-defi-parser/actions/workflows/pytest-and-pylint.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 At this moment in time only Ethereum Mainnet is supported.
