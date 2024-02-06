@@ -39,9 +39,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-py-
 
-    - name: Install dependencies
+    - name: Install dependencies for caching
       run: |
         poetry install --no-interaction --no-root
+
+    - name: Install my package
+      run: |
+        poetry install --no-interaction
 
     - name: Run pytest
       run: |
