@@ -14,6 +14,7 @@ datasets for research and data science.
 
 ### Code Quality
 [![pylint](https://img.shields.io/badge/just%20the%20message-8A2BE2)](https://github.com/HanssonMagnus/ethereum-defi-parser)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 At this moment in time only Ethereum Mainnet is supported.
 
