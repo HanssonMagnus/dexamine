@@ -13,7 +13,7 @@ datasets for research and data science.
 [![GitHub stars](https://img.shields.io/github/stars/HanssonMagnus/ethereum-defi-parser.svg?style=social&label=Stars)](https://github.com/HanssonMagnus/ethereum-defi-parser)
 
 ### Code Quality
-[![pylint](https://img.shields.io/badge/just%20the%20message-8A2BE2)](https://github.com/HanssonMagnus/ethereum-defi-parser)
+[![Pytest and Pylint](https://github.com/HanssonMagnus/ethereum-defi-parser/actions/workflows/tests-and-lint.yml/badge.svg)](https://github.com/HanssonMagnus/ethereum-defi-parser/actions/workflows/tests-and-lint.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 At this moment in time only Ethereum Mainnet is supported.

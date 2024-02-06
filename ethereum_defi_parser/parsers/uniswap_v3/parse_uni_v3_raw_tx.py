@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 ########################################################################################
 # Raw data from signed transation (mempool) parse functions
 ########################################################################################
-def parse_v3_exact_input_single(data, erc20_abi, token_in="", token_out=""):
+def parse_v3_exact_input_single(data, erc20_abi, erc20_bytes32_abi, token_in="", token_out=""):
     """
     Parse direct Uniswap v3 swap calls from exactInputSingle.
 
@@ -93,10 +93,10 @@ def parse_v3_exact_input_single(data, erc20_abi, token_in="", token_out=""):
         # Get symbols from tokens and transform values to base units
         try:
             symbol_in, decimals_in = general_helpers.get_erc20_symbol(
-                token_in_address, erc20_abi
+                token_in_address, erc20_abi, erc20_bytes32_abi
             )
             symbol_out, decimals_out = general_helpers.get_erc20_symbol(
-                token_out_address, erc20_abi
+                token_out_address, erc20_abi, erc20_bytes32_abi
             )
 
             amount_in = amount_in * 10**-decimals_in
@@ -135,7 +135,7 @@ def parse_v3_exact_input_single(data, erc20_abi, token_in="", token_out=""):
     return swaps
 
 
-def parse_v3_exact_output_single(data, erc20_abi):
+def parse_v3_exact_output_single(data, erc20_abi, erc20_bytes32_abi):
     """
     Parse direct Uniswap v3 swap calls from exactOutputSingle.
 
@@ -197,10 +197,10 @@ def parse_v3_exact_output_single(data, erc20_abi):
         # Get symbols from tokens and transform values to base units
         try:
             symbol_in, decimals_in = general_helpers.get_erc20_symbol(
-                token_in_address, erc20_abi
+                token_in_address, erc20_abi, erc20_bytes32_abi
             )
             symbol_out, decimals_out = general_helpers.get_erc20_symbol(
-                token_out_address, erc20_abi
+                token_out_address, erc20_abi, erc20_bytes32_abi
             )
 
             amount_in_minimum = amount_in_minimum * 10**-decimals_in

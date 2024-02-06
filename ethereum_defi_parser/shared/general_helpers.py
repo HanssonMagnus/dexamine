@@ -130,16 +130,19 @@ def get_block_data_by_block_number(block_hex):
 ########################################################################################
 # ABI call functions
 ########################################################################################
-def get_erc20_symbol(token_address, erc20_abi):
+def get_erc20_symbol(token_address, erc20_abi, erc20_bytes32_abi):
     """
-    Match an ERC20 token smart contract address to its symbol.
+    Match an ERC-20 token smart contract address to its symbol and get the number of
+    decimals for that ERC-20 token.
 
     Args:
-        token_address (str): Smart contract address of ERC-20 token
-        erc20_abi (dict): ERC-20 ABI
+        token_address (str): Smart contract address of ERC-20 token.
+        erc20_abi (dict): ERC-20 ABI.
+        erc20_bytes32_abi (dict): ERC-20 ABI with Bytes32 type for symbol (some
+                                  contracts have this to save gas).
 
     Returns:
-        tuple (str, int): Symbol and number of decimals of ERC-20 token.
+        tuple (str, int): Symbol and number of decimals of the ERC-20 token.
     """
     # Transform address to checksum address
     token_address = Web3.to_checksum_address(token_address)
@@ -150,11 +153,14 @@ def get_erc20_symbol(token_address, erc20_abi):
         token_contract = w3.eth.contract(address=token_address, abi=erc20_abi)
         symbol = token_contract.functions.symbol().call()
         decimals = token_contract.functions.decimals().call()
-    except Exception as e:  # some tokens return symbol as bytes32
+    except (OverflowError) as e:  # some tokens return symbol as bytes32
         logger.error(e, exc_info=True)
-        symbol = "unknown"
+        token_contract = w3.eth.contract(address=token_address, abi=erc20_bytes32_abi)
+        symbol = token_contract.functions.symbol().call()
+        symbol = bytes32_to_string(symbol)
+        decimals = token_contract.functions.decimals().call()
 
-    return symbol, decimals  # string
+    return symbol, decimals
 
 
 ########################################################################################
@@ -180,6 +186,13 @@ def get_event_index(topics_0, event):
             event_index.append(i)
     return event_index
 
+
+########################################################################################
+# Bytes32 parsing
+########################################################################################
+def bytes32_to_string(bytes32):
+    """Decode using utf-8 and then strip the null characters."""
+    return bytes32.decode('utf-8').rstrip('\x00')
 
 ########################################################################################
 # Hexadecimal parsing
@@ -238,7 +251,7 @@ def parse_to_type(to_address, mev_contracts_list):
     # Transform HEX address to checksum address
     try:
         to_address = Web3.to_checksum_address(to_address)
-    except Exception as e:
+    except ValueError as e:
         logger.error(e, exc_info=True)
 
     # Assign which route the transaction took to execution.
@@ -374,6 +387,8 @@ def get_json_abi(abi_file):
     The `abi_file` argument should include the subdirectory and filename. For example,
     "uniswap_v2/IUniswapV2Pair.json".
 
+    The ABIs are structured such that we return abi['abi'].
+
     Args:
         abi_file (str): Relative path of ABI file within the abis directory.
     """
@@ -389,7 +404,7 @@ def get_json_abi(abi_file):
 
     # Use resources.open_text to access the file
     with resources.open_text(resource_path, file_name) as file:
-        return json.load(file)
+        return json.load(file)['abi']
 
 
 def get_txt_as_list(txt_file):

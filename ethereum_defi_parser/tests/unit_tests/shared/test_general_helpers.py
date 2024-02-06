@@ -242,6 +242,53 @@ def test_get_event_index_normal_case():
 
 
 ########################################################################################
+# Bytes32 parsing
+########################################################################################
+def test_bytes32_to_string():
+    """
+    Test the bytes32_to_string function to ensure it correctly decodes bytes32 data to a
+    string.
+
+    This test covers four scenarios:
+    1. A normal string with trailing null bytes: Verifies that the function correctly
+       decodes a bytes32 string and strips trailing null bytes.
+    2. A string composed entirely of null bytes: Checks that the function returns an
+       empty string when given a bytes32 value of all null bytes.
+    3. A string with no null bytes: Ensures that the function correctly decodes a
+       bytes32 string with no trailing null bytes and does not alter the original
+       string.
+    4. A string with non-UTF-8 bytes: Confirms that the function raises a
+       UnicodeDecodeError when decoding bytes that cannot be interpreted as a UTF-8
+       string.
+    """
+    # Test case with a normal string
+    bytes32_data = b'Test String\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    expected_result = 'Test String'
+    # Should decode and strip null bytes correctly
+    assert general_helpers.bytes32_to_string(bytes32_data) == expected_result
+
+    # Test case with all null bytes
+    bytes32_data_all_nulls = b'\x00' * 32
+    expected_result_all_nulls = ''
+    # Should return an empty string for all null bytes
+    assert general_helpers.bytes32_to_string(bytes32_data_all_nulls) == expected_result_all_nulls
+
+    # Test case with no null bytes
+    bytes32_data_no_nulls = b'NoNullBytesInThisStringTesting!'
+    expected_result_no_nulls = 'NoNullBytesInThisStringTesting!'
+    # Should return the original string if there are no null bytes
+    assert general_helpers.bytes32_to_string(bytes32_data_no_nulls) == expected_result_no_nulls
+
+    # Test case with non-UTF-8 bytes (This should raise an exception)
+    bytes32_data_non_utf8 = b'\xff' * 32
+    try:
+        result = general_helpers.bytes32_to_string(bytes32_data_non_utf8)
+        assert False, "Expected a UnicodeDecodeError"
+    except UnicodeDecodeError:
+        pass  # Test passes as the exception is expected
+
+
+########################################################################################
 # Hexadecimal parsing
 ########################################################################################
 def test_parse_signed_int_positive():
@@ -375,8 +422,8 @@ def test_get_json_test_data_file_not_found():
 
 def test_get_json_abi_success():
     """Test for when a correct data file has been specified."""
-    sample_json_data = {"key": "value"}
-    sample_json_content = '{"key": "value"}'
+    sample_json_data = {"abi": {"key": "value"}}
+    sample_json_content = '{"abi": {"key": "value"}}'
     m = mock_open(read_data=sample_json_content)
     with patch("importlib.resources.open_text", m) as mocked_open:
         with patch("json.load", return_value=sample_json_data):
@@ -387,7 +434,7 @@ def test_get_json_abi_success():
             mocked_open.assert_called_once()
 
             # Assert that the result matches the expected JSON data
-            assert result == sample_json_data
+            assert result == {"key": "value"}
 
 
 def test_get_json_test_abi_not_found():

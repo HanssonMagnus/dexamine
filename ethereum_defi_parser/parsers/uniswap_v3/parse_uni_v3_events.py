@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 ########################################################################################
 # Parse all Uniswap v3 swap, mint, and burn events from a transaction
 ########################################################################################
-def parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_address=""):
+def parse_all_v3_events(
+    logs, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi, exchange_pair_address=""
+):
     """Parse all Unsiwap v3 swaps, mints, and burns from a tx.
     Inputs:
         logs: Logs from transaction receipt.
@@ -44,7 +46,7 @@ def parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_addr
 
     # Return the function is no swap, mint, or burn events are found
     if not swap_indexes and not mint_indexes and not burn_indexes:
-        return
+        return None
 
     # Load ABIs
     # erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
@@ -54,7 +56,7 @@ def parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_addr
     if exchange_pair_address:
         try:
             exchange_pair_address = Web3.to_checksum_address(exchange_pair_address)
-        except Exception as e:
+        except ValueError as e:
             logger.error(e, exc_info=True)
 
     # Parse swaps
@@ -64,14 +66,20 @@ def parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_addr
                 smart_contract = Web3.to_checksum_address(logs[swap_index]["address"])
                 if smart_contract == exchange_pair_address:
                     swap = parse_v3_trade(
-                        logs, swap_index, erc20_abi, uniswap_v3_pair_abi
+                        logs,
+                        swap_index,
+                        erc20_abi,
+                        erc20_bytes32_abi,
+                        uniswap_v3_pair_abi,
                     )
                     if swap is not None:  # Since parse_trade(s) can return None
                         events.append(swap)
 
         elif not exchange_pair_address:  # if string is empty, i.e., == ''
             # Parse all swaps regardless of exchange pair
-            swaps = parse_v3_trades(logs, swap_indexes, erc20_abi, uniswap_v3_pair_abi)
+            swaps = parse_v3_trades(
+                logs, swap_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+            )
             for swap in swaps:
                 if swap is not None:  # Since parse_trade(s) can return None
                     events.append(swap)
@@ -83,14 +91,20 @@ def parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_addr
                 smart_contract = Web3.to_checksum_address(logs[mint_index]["address"])
                 if smart_contract == exchange_pair_address:
                     mint = parse_v3_mint(
-                        logs, mint_index, erc20_abi, uniswap_v3_pair_abi
+                        logs,
+                        mint_index,
+                        erc20_abi,
+                        erc20_bytes32_abi,
+                        uniswap_v3_pair_abi,
                     )
                     if mint is not None:
                         events.append(mint)
 
         elif not exchange_pair_address:
             # Parse all mints regardless of exchange pair
-            mints = parse_v3_mints(logs, mint_indexes, erc20_abi, uniswap_v3_pair_abi)
+            mints = parse_v3_mints(
+                logs, mint_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+            )
             for mint in mints:
                 if mint is not None:
                     events.append(mint)
@@ -102,14 +116,20 @@ def parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_addr
                 smart_contract = Web3.to_checksum_address(logs[burn_index]["address"])
                 if smart_contract == exchange_pair_address:
                     burn = parse_v3_burn(
-                        logs, burn_index, erc20_abi, uniswap_v3_pair_abi
+                        logs,
+                        burn_index,
+                        erc20_abi,
+                        erc20_bytes32_abi,
+                        uniswap_v3_pair_abi,
                     )
                     if burn is not None:
                         events.append(burn)
 
         elif not exchange_pair_address:
             # Parse all burns regardless of exchange pair
-            burns = parse_v3_burns(logs, burn_indexes, erc20_abi, uniswap_v3_pair_abi)
+            burns = parse_v3_burns(
+                logs, burn_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+            )
             for burn in burns:
                 if burn is not None:
                     events.append(burn)
@@ -120,7 +140,9 @@ def parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_addr
 ########################################################################################
 # Trade (swap events) parse functions
 ########################################################################################
-def parse_v3_trades(logs, swap_indexes, erc20_abi, uniswap_v3_pair_abi):
+def parse_v3_trades(
+    logs, swap_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+):
     """Parse all v3 trades of the tx by identifying all swap events and parse them.
     Inpur arguments:
         swap_indexes: Index of where the swap event occur in the logs, e.g., [4, 7]
@@ -128,7 +150,9 @@ def parse_v3_trades(logs, swap_indexes, erc20_abi, uniswap_v3_pair_abi):
     trades = []
     for swap_index in swap_indexes:
         try:
-            trade = parse_v3_trade(logs, swap_index, erc20_abi, uniswap_v3_pair_abi)
+            trade = parse_v3_trade(
+                logs, swap_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+            )
         except Exception as e:
             logger.error(e, exc_info=True)
 
@@ -138,7 +162,7 @@ def parse_v3_trades(logs, swap_indexes, erc20_abi, uniswap_v3_pair_abi):
     return trades
 
 
-def parse_v3_trade(logs, swap_index, erc20_abi, uniswap_v3_pair_abi):
+def parse_v3_trade(logs, swap_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi):
     """
     Parse a Uniswap v3 swap event.
     Input arguments:
@@ -153,8 +177,12 @@ def parse_v3_trade(logs, swap_index, erc20_abi, uniswap_v3_pair_abi):
         swap_contract, uniswap_v3_pair_abi
     )
     dex_symbol = uniswap_v3_parsing.get_v3_dex(swap_contract, uniswap_v3_pair_abi)
-    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(token_0, erc20_abi)
-    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(token_1, erc20_abi)
+    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
+        token_0, erc20_abi, erc20_bytes32_abi
+    )
+    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
+        token_1, erc20_abi, erc20_bytes32_abi
+    )
 
     # Collect the swap amounts delta x_t and delta y_t
     swap_data = logs[swap_index]["data"][2:]
@@ -211,7 +239,9 @@ def parse_v3_mints(logs, mint_indexes, erc20_abi, uniswap_v3_pair_abi):
     mints = []
     for mint_index in mint_indexes:
         try:
-            mint = parse_v3_mint(logs, mint_index, erc20_abi, uniswap_v3_pair_abi)
+            mint = parse_v3_mint(
+                logs, mint_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+            )
         except Exception as e:
             logger.error(e, exc_info=True)
 
@@ -221,7 +251,7 @@ def parse_v3_mints(logs, mint_indexes, erc20_abi, uniswap_v3_pair_abi):
     return mints
 
 
-def parse_v3_mint(logs, mint_index, erc20_abi, uniswap_v3_pair_abi):
+def parse_v3_mint(logs, mint_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi):
     """
     Parse a Uniswap v3 mint event (deposit liquidity).
     Input arguments:
@@ -236,8 +266,12 @@ def parse_v3_mint(logs, mint_index, erc20_abi, uniswap_v3_pair_abi):
         mint_contract, uniswap_v3_pair_abi
     )
     dex_symbol = uniswap_v3_parsing.get_v3_dex(mint_contract, uniswap_v3_pair_abi)
-    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(token_0, erc20_abi)
-    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(token_1, erc20_abi)
+    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
+        token_0, erc20_abi, erc20_bytes32_abi
+    )
+    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
+        token_1, erc20_abi, erc20_bytes32_abi
+    )
 
     # Collect tick_lower and tick_upper
     tick_lower = general_helpers.parse_signed_int(logs[mint_index]["topics"][2])
@@ -245,7 +279,7 @@ def parse_v3_mint(logs, mint_index, erc20_abi, uniswap_v3_pair_abi):
 
     # Collect how much was deposited
     mint_data = logs[mint_index]["data"][2:]  # len 128
-    #sender = mint_data[24:64]  # Sender's address
+    # sender = mint_data[24:64]  # Sender's address
     liquidity = int(mint_data[64:128], 16)  # Liquidity amount
     amount0 = int(mint_data[128:192], 16)  # Amount of token0
     amount1 = int(mint_data[192:256], 16)  # Amount of token1
@@ -255,7 +289,7 @@ def parse_v3_mint(logs, mint_index, erc20_abi, uniswap_v3_pair_abi):
     amount1 = amount1 * 10**-decimals_1
 
     # Convert sender to Ethereum address format
-    #sender_address = f"0x{sender}"
+    # sender_address = f"0x{sender}"
 
     mint = [
         "mint",
@@ -277,7 +311,9 @@ def parse_v3_mint(logs, mint_index, erc20_abi, uniswap_v3_pair_abi):
     return mint
 
 
-def parse_v3_burns(logs, burn_indexes, erc20_abi, uniswap_v3_pair_abi):
+def parse_v3_burns(
+    logs, burn_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+):
     """Parse all v3 burns of the tx by identifying all burn events and parse them.
     Inpur arguments:
         burn_indexes: Index of where the burn event occur in the logs, e.g., [4, 7]
@@ -285,7 +321,9 @@ def parse_v3_burns(logs, burn_indexes, erc20_abi, uniswap_v3_pair_abi):
     burns = []
     for burn_index in burn_indexes:
         try:
-            burn = parse_v3_burn(logs, burn_index, erc20_abi, uniswap_v3_pair_abi)
+            burn = parse_v3_burn(
+                logs, burn_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+            )
         except Exception as e:
             logger.error(e, exc_info=True)
 
@@ -295,7 +333,7 @@ def parse_v3_burns(logs, burn_indexes, erc20_abi, uniswap_v3_pair_abi):
     return burns
 
 
-def parse_v3_burn(logs, burn_index, erc20_abi, uniswap_v3_pair_abi):
+def parse_v3_burn(logs, burn_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi):
     """
     Parse a Uniswap v2 burn event (deposit liquidity).
     Input arguments:
@@ -310,8 +348,12 @@ def parse_v3_burn(logs, burn_index, erc20_abi, uniswap_v3_pair_abi):
         burn_contract, uniswap_v3_pair_abi
     )
     dex_symbol = uniswap_v3_parsing.get_v3_dex(burn_contract, uniswap_v3_pair_abi)
-    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(token_0, erc20_abi)
-    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(token_1, erc20_abi)
+    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
+        token_0, erc20_abi, erc20_bytes32_abi
+    )
+    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
+        token_1, erc20_abi, erc20_bytes32_abi
+    )
 
     # Collect tick_lower and tick_upper
     tick_lower = general_helpers.parse_signed_int(logs[burn_index]["topics"][2])
