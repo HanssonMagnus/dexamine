@@ -145,12 +145,9 @@ def parse_v2_trades(
     """
     trades = []
     for swap_index in swap_indexes:
-        try:
-            trade = parse_v2_trade(
-                logs, swap_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
-            )
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        trade = parse_v2_trade(
+            logs, swap_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
+        )
         trades.append(trade)
 
     return trades
@@ -251,12 +248,9 @@ def parse_v2_mints(
     """
     mints = []
     for mint_index in mint_indexes:
-        try:
-            mint = parse_v2_mint(
-                logs, mint_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
-            )
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        mint = parse_v2_mint(
+             logs, mint_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
+        )
         mints.append(mint)
 
     return mints
@@ -350,12 +344,9 @@ def parse_v2_burns(
     """
     burns = []
     for burn_index in burn_indexes:
-        try:
-            burn = parse_v2_burn(
-                logs, burn_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
-            )
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        burn = parse_v2_burn(
+             logs, burn_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
+        )
         burns.append(burn)
 
     return burns

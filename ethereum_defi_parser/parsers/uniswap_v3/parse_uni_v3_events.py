@@ -149,12 +149,10 @@ def parse_v3_trades(
     """
     trades = []
     for swap_index in swap_indexes:
-        try:
-            trade = parse_v3_trade(
-                logs, swap_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
-            )
-        except Exception as e:
-            logger.error(e, exc_info=True)
+
+        trade = parse_v3_trade(
+            logs, swap_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+        )
 
         if trade is not None:
             trades.append(trade)
@@ -231,19 +229,16 @@ def parse_v3_trade(logs, swap_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pa
 ########################################################################################
 # Liquidity provision (mint and burn events) parse functions
 ########################################################################################
-def parse_v3_mints(logs, mint_indexes, erc20_abi, uniswap_v3_pair_abi):
+def parse_v3_mints(logs, mint_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi):
     """Parse all v3 mints of the tx by identifying all mint events and parse them.
     Inpur arguments:
         mint_indexes: Index of where the mint event occur in the logs, e.g., [4, 7]
     """
     mints = []
     for mint_index in mint_indexes:
-        try:
-            mint = parse_v3_mint(
-                logs, mint_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
-            )
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        mint = parse_v3_mint(
+            logs, mint_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+        )
 
         if mint is not None:
             mints.append(mint)
@@ -320,12 +315,9 @@ def parse_v3_burns(
     """
     burns = []
     for burn_index in burn_indexes:
-        try:
-            burn = parse_v3_burn(
-                logs, burn_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
-            )
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        burn = parse_v3_burn(
+            logs, burn_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+        )
 
         if burn is not None:
             burns.append(burn)

@@ -91,43 +91,38 @@ def parse_v3_exact_input_single(data, erc20_abi, erc20_bytes32_abi, token_in="",
         sqrt_price_limit_x96 = decoded_args[7]
 
         # Get symbols from tokens and transform values to base units
-        try:
-            symbol_in, decimals_in = general_helpers.get_erc20_symbol(
-                token_in_address, erc20_abi, erc20_bytes32_abi
-            )
-            symbol_out, decimals_out = general_helpers.get_erc20_symbol(
-                token_out_address, erc20_abi, erc20_bytes32_abi
-            )
 
-            amount_in = amount_in * 10**-decimals_in
-            amount_out_minimum = amount_out_minimum * 10**-decimals_out
-            limit_exchange_rate = amount_in / amount_out_minimum
+        symbol_in, decimals_in = general_helpers.get_erc20_symbol(
+            token_in_address, erc20_abi, erc20_bytes32_abi
+        )
+        symbol_out, decimals_out = general_helpers.get_erc20_symbol(
+            token_out_address, erc20_abi, erc20_bytes32_abi
+        )
 
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        amount_in = amount_in * 10**-decimals_in
+        amount_out_minimum = amount_out_minimum * 10**-decimals_out
+        limit_exchange_rate = amount_in / amount_out_minimum
 
         # Append to swaps
-        try:
-            swaps.append(
-                [
-                    "exactInputSingle",
-                    symbol_in,
-                    symbol_out,
-                    decimals_in,
-                    decimals_out,
-                    token_in_address,
-                    token_out_address,
-                    fee,
-                    recipient,
-                    deadline,
-                    amount_in,
-                    amount_out_minimum,
-                    limit_exchange_rate,
-                    sqrt_price_limit_x96,
-                ]
-            )
-        except Exception as e:
-            logger.error(e, exc_info=True)
+
+        swaps.append(
+            [
+                "exactInputSingle",
+                symbol_in,
+                symbol_out,
+                decimals_in,
+                decimals_out,
+                token_in_address,
+                token_out_address,
+                fee,
+                recipient,
+                deadline,
+                amount_in,
+                amount_out_minimum,
+                limit_exchange_rate,
+                sqrt_price_limit_x96,
+            ]
+        )
 
         # Look for next occurrence, returns -1 if no occurance is found
         pos = data.find(sig_exact_input_single, end)
@@ -195,43 +190,36 @@ def parse_v3_exact_output_single(data, erc20_abi, erc20_bytes32_abi):
         sqrt_price_limit_x96 = decoded_args[7]
 
         # Get symbols from tokens and transform values to base units
-        try:
-            symbol_in, decimals_in = general_helpers.get_erc20_symbol(
-                token_in_address, erc20_abi, erc20_bytes32_abi
-            )
-            symbol_out, decimals_out = general_helpers.get_erc20_symbol(
-                token_out_address, erc20_abi, erc20_bytes32_abi
-            )
+        symbol_in, decimals_in = general_helpers.get_erc20_symbol(
+            token_in_address, erc20_abi, erc20_bytes32_abi
+        )
+        symbol_out, decimals_out = general_helpers.get_erc20_symbol(
+            token_out_address, erc20_abi, erc20_bytes32_abi
+        )
 
-            amount_in_minimum = amount_in_minimum * 10**-decimals_in
-            amount_out = amount_out * 10**-decimals_out
-            limit_exchange_rate = amount_in_minimum / amount_out
-
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        amount_in_minimum = amount_in_minimum * 10**-decimals_in
+        amount_out = amount_out * 10**-decimals_out
+        limit_exchange_rate = amount_in_minimum / amount_out
 
         # Append to swaps
-        try:
-            swaps.append(
-                [
-                    "exactOutputSingle",
-                    symbol_in,
-                    symbol_out,
-                    decimals_in,
-                    decimals_out,
-                    token_in_address,
-                    token_out_address,
-                    fee,
-                    recipient,
-                    deadline,
-                    amount_in_minimum,
-                    amount_out,
-                    limit_exchange_rate,
-                    sqrt_price_limit_x96,
-                ]
-            )
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        swaps.append(
+            [
+                "exactOutputSingle",
+                symbol_in,
+                symbol_out,
+                decimals_in,
+                decimals_out,
+                token_in_address,
+                token_out_address,
+                fee,
+                recipient,
+                deadline,
+                amount_in_minimum,
+                amount_out,
+                limit_exchange_rate,
+                sqrt_price_limit_x96,
+            ]
+        )
 
         # Look for next occurrence, returns -1 if no occurance is found
         pos = data.find(sig_exact_output_single, end)
