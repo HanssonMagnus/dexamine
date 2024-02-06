@@ -1,4 +1,4 @@
-name: Pylint
+name: Pytest and Pylint
 
 on:
   push:
@@ -46,3 +46,7 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         poetry run pylint ethereum_defi_parser/
+
+    - name: Run pytest
+      run: |
+        poetry run pytest ethereum_defi_parser/
