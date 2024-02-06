@@ -22,9 +22,9 @@ from shared import constants
 from parsers.uniswap_v3 import parse_uni_v3_events
 
 # Set up logger
-path_logs = constants.path_logs
+PATH_LOGS = constants.PATH_LOGS
 log_name = 'scripts/data_processing/uniswap_v3_mempool/eth_usdc.log'
-logging.basicConfig(filename=path_logs + log_name, level=logging.ERROR,
+logging.basicConfig(filename=PATH_LOGS + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)
 # Example log message
@@ -75,7 +75,7 @@ data_tuples = load_and_extract_columns_as_tuples(directory_path, columns)
 ###################################################################################################
 # Load ABIs
 ###################################################################################################
-erc20_abi = general_helpers.load_abi(constants.path_erc20_abi)
+erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
 
 ###################################################################################################
 # Prepare arguments for multiprocessing
@@ -101,8 +101,8 @@ def parse_raw_transaction(hash, raw_tx, erc20_abi):
         logger.error(e, exc_info=True)
 
     try:
-        swaps = parse_uni_v3_raw_tx.parse_v3_exact_input_single(data, erc20_abi, constants.usdc_token,
-                                                            constants.weth_token)
+        swaps = parse_uni_v3_raw_tx.parse_v3_exact_input_single(data, erc20_abi, constants.USDC_TOKEN_ADDRESS,
+                                                            constants.WETH_TOKEN_ADDRESS)
     except Exception as e:
         logger.error(e, exc_info=True)
 
@@ -161,14 +161,14 @@ def parse_raw_transaction(hash, raw_tx, erc20_abi):
             amount_1 = event[7]
             liquidity = event[8]
             tick = event[9]
-            sqrtPriceX96 = event[10]
+            sqrt_price_x96 = event[10]
             price = event[11]
             tick_lower = event[12]
             tick_upper = event[13]
             data = [timestamp, block_number, index, hash, from_address, to_address, value, gas,
                     gasPrice, maxPriorityFeePerGas, maxFeePerGas, type_of_event, dex_symbol,
                     symbol_0, symbol_1, decimals_0, decimals_1, amount_0, amount_1, liquidity,
-                    tick, sqrtPriceX96, price, tick_lower, tick_upper, to_type]
+                    tick, sqrt_price_x96, price, tick_lower, tick_upper, to_type]
             L.append(data)
     except Exception as e:
         logger.error(e, exc_info=True)
@@ -205,7 +205,7 @@ with multiprocessing.Manager() as manager:
 col_names= ['timestamp', 'block_number', 'index', 'hash', 'from_address', 'to_address', 'value',
             'gas', 'gasPrice', 'maxPriorityFeePerGas', 'maxFeePerGas', 'type_of_event', 'dex_symbol',
             'symbol_0', 'symbol_1', 'decimals_0', 'decimals_1', 'amount_0', 'amount_1', 'liquidity',
-            'tick', 'sqrtPriceX96', 'price', 'tick_lower', 'tick_upper', 'to_type']
+            'tick', 'sqrt_price_x96', 'price', 'tick_lower', 'tick_upper', 'to_type']
 
 df = pd.DataFrame(data=transaction_data, columns=col_names)
 

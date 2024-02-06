@@ -1,9 +1,15 @@
-# Parsers Documentation - `node-data` Project
+# Parsers Documentation - `ethereum-defi-parser` Project
 
 ## Uniswap v3: parse_uni_v3_events.py
 This file contains parsers for liquidity taking and liquidity provision events for Uniswap v3.
 
-##### `def parse_v2_trade(logs, swap_index, erc20_abi, uniswap_v3_pair_abi)`:
+##### `parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_address='')`
+Parse all Unsiwap v3 swaps, mints, and burns from a tx.
+Inputs:
+logs: Logs from transaction receipt.
+exchange_pair_address: string of the exchange pair smart contract address.
+
+##### `parse_v2_trade(logs, swap_index, erc20_abi, uniswap_v3_pair_abi)`
 The swap event in Uniswap v3 is rather straightforward and contain the following variables:
 
 - amount0: pool change in token0 (negative if the pool sends out the amount).
@@ -11,6 +17,23 @@ The swap event in Uniswap v3 is rather straightforward and contain the following
 - sqrtPriceX96: mid-price of the pool after the swap expressed in Q notation.
 - liquidity: in-range liquidity of pool after the swap.
 - tick: tick after the swap was executed.
+
+The functions parses out the following variables:
+- type_of_event: Specifies the type of event in this case "swap".
+- dex_symbol: The symbol of the decentralized exchange, here representing Uniswap v3.
+- symbol_0: The symbol of the first token in the trading pair.
+- symbol_1: The symbol of the second token in the trading pair.
+- decimals_0: The number of decimal places used by the first token.
+- decimals_1: The number of decimal places used by the second token.
+- amount_0: The amount of the first token in the transaction.
+- amount_1: The amount of the second token in the transaction.
+- liquidity: The liquidity of the pool after the swap.
+- tick: The tick after the swap was executed ('NA' for mints and burns).
+- sqrtPriceX96: The square root of the mid-price after the swap in X96 format ('NA' for mints and
+  burns).
+- price: The transformed mid-price after the swap in base units ('NA' for mints and burns).
+- tick_lower: The lower tick of the price range at which to provide liquidity ('NA' for swaps).
+- tick_upper: The upper tick of the price range at which to provide liquidity ('NA' for swaps).
 
 ## Uniswap v3: parse_uni_v3_raw_tx.py
 This file contains parsers for swaps from raw tx data (mempool) for Uniswap v3.

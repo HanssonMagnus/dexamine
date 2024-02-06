@@ -1,0 +1,455 @@
+"""
+This file contains unit tests for the functions in
+ethereum_defi_parser/shared/general_helper.py.
+
+* Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
+* License: GPL-3.0.
+* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+"""
+
+# Import packages
+from unittest.mock import mock_open, patch
+import importlib.resources as pkg_resources
+import pytest
+
+# Import modules
+from ethereum_defi_parser.shared import general_helpers, constants
+
+
+########################################################################################
+# Test RPC calls with mock node requests
+########################################################################################
+# Test successful retrieval of transaction data
+def test_get_tx_data_by_hash_success():
+    """Test for general_helpers.get_tx_data_by_hash when requests.post is successful."""
+    # Sample transaction hash and expected response
+    tx_hash = "0x125e0b641d4a4b08806bf52c0c6757648c9963bcda8681e4f996f09e00d4c2cc"
+    expected_response = general_helpers.get_json_test_data(
+        "node_responses/tx_data.json"
+    )
+
+    # Mock the requests.post method
+    with patch("requests.post") as mocked_post:
+        mocked_post.return_value.json.return_value = expected_response
+
+        # Call the function
+        response = general_helpers.get_tx_data_by_hash(tx_hash)
+
+        # Assertions
+        mocked_post.assert_called_once()
+        assert response == expected_response["result"]
+
+
+# Test handling of an error, such as transaction not found
+def test_get_tx_data_by_hash_not_found():
+    """Test for general_helpers.get_tx_data_by_hash when requests.post is not
+    successful."""
+    tx_hash = "0x125e0b641d4a4b08806bf52c0c6757648c9963bcda8681e4f996f09e00d4c2cc"
+    expected_response = {"jsonrpc": "2.0", "id": 1, "result": None}
+
+    with patch("requests.post") as mocked_post:
+        mocked_post.return_value.json.return_value = expected_response
+
+        response = general_helpers.get_tx_data_by_hash(tx_hash)
+
+        assert response is None
+
+
+## Test successful retrieval of transaction data
+def test_get_tx_data_by_block_and_index_success():
+    """Test for when requests.post is successful."""
+    # Sample transaction index and block number and expected response
+    block_number = "0xbcda99"
+    transaction_index = "0x3b"
+    expected_response = general_helpers.get_json_test_data(
+        "node_responses/tx_data.json"
+    )
+
+    # Mock the requests.post method
+    with patch("requests.post") as mocked_post:
+        mocked_post.return_value.json.return_value = expected_response
+
+        # Call the function
+        response = general_helpers.get_tx_data_by_block_and_index(
+            block_number, transaction_index
+        )
+
+        # Assertions
+        mocked_post.assert_called_once()
+        assert response == expected_response["result"]
+
+
+## Test handling of an error, such as transaction not found
+def test_get_tx_data_by_block_and_index_not_found():
+    """Test for when requests.post is not successful."""
+    block_number = "0xbcda99"
+    transaction_index = "0x3b"
+    expected_response = {"jsonrpc": "2.0", "id": 1, "result": None}
+
+    with patch("requests.post") as mocked_post:
+        mocked_post.return_value.json.return_value = expected_response
+
+        response = general_helpers.get_tx_data_by_block_and_index(
+            block_number, transaction_index
+        )
+
+        assert response is None
+
+
+## Test successful retrieval of receipt data
+def test_get_receipt_data_by_hash_success():
+    """Test for when requests.post is successful."""
+    # Sample transaction hash and expected response
+    tx_hash = "0x125e0b641d4a4b08806bf52c0c6757648c9963bcda8681e4f996f09e00d4c2cc"
+    expected_response = general_helpers.get_json_test_data(
+        "node_responses/receipt_data.json"
+    )
+
+    # Mock the requests.post method
+    with patch("requests.post") as mocked_post:
+        mocked_post.return_value.json.return_value = expected_response
+
+        # Call the function
+        response = general_helpers.get_receipt_data_by_hash(tx_hash)
+
+        # Assertions
+        mocked_post.assert_called_once()
+        assert response == expected_response["result"]
+
+
+# Test handling of an error, such as receipt not found
+def test_get_receipt_data_by_hash_not_found():
+    """Test for when requests.post is not successful."""
+    tx_hash = "0x125e0b641d4a4b08806bf52c0c6757648c9963bcda8681e4f996f09e00d4c2cc"
+    expected_response = {"jsonrpc": "2.0", "id": 1, "result": None}
+
+    with patch("requests.post") as mocked_post:
+        mocked_post.return_value.json.return_value = expected_response
+
+        response = general_helpers.get_receipt_data_by_hash(tx_hash)
+
+        assert response is None
+
+
+## Test successful retrieval of block data
+def test_get_block_data_by_block_number_success():
+    """Test for when requests.post is successful."""
+    # Sample block number and expected response
+    block_number = "0xbcda99"
+    expected_response = general_helpers.get_json_test_data(
+        "node_responses/block_data.json"
+    )
+
+    # Mock the requests.post method
+    with patch("requests.post") as mocked_post:
+        mocked_post.return_value.json.return_value = expected_response
+
+        # Call the function
+        response = general_helpers.get_block_data_by_block_number(block_number)
+
+        # Assertions
+        mocked_post.assert_called_once()
+        assert response == expected_response["result"]
+
+
+# Test handling of an error, such as receipt not found
+def test_get_block_data_by_block_number_not_found():
+    """Test for when requests.post is not successful."""
+    block_number = "0xbcda99"
+    expected_response = {"jsonrpc": "2.0", "id": 1, "result": None}
+
+    with patch("requests.post") as mocked_post:
+        mocked_post.return_value.json.return_value = expected_response
+
+        response = general_helpers.get_block_data_by_block_number(block_number)
+
+        assert response is None
+
+
+########################################################################################
+# Test ABI call functions
+########################################################################################
+
+
+########################################################################################
+# Parsing transaction logs
+########################################################################################
+def test_get_topics_0_normal_case():
+    """Test for when logs are complete with topics 0s."""
+    receipt_data = general_helpers.get_json_test_data(
+        "node_responses/receipt_data.json"
+    )
+    logs = receipt_data["result"]["logs"]
+    expected_result = [
+        "0x783cca1c0412dd0d695e784568c96da2e9c22ff989357a2e8b1d9b2b4e6b7118",
+        "0x98636036cb66a9c19a37435efc1e90142190214e8abeb821bdba3f2990dd4c95",
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c",
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x7a53080ba414158be7ec69b987b5fb7d07dee101fe85488f0853ae16239d0bde",
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x3067048beee31b25b2f1681f88dac838c8bba36af25bfb2b7cf7473a5847e35f",
+    ]
+    assert general_helpers.get_topics_0(logs) == expected_result
+
+
+def test_get_topics_0_no_topics():
+    """Test for when logs are missing topics 0s."""
+    logs = [{"data": "Some data"}, {"data": "More data"}]
+    expected = []
+    assert general_helpers.get_topics_0(logs) == expected
+
+
+def test_get_topics_0_empty_topics():
+    """Test for when topics 0 is empty."""
+    logs = [
+        {"topics": [], "data": "Some data"},
+        {"topics": ["0xcc"], "data": "More data"},
+    ]
+    expected = ["0xcc"]
+    assert general_helpers.get_topics_0(logs) == expected
+
+
+def test_get_topics_0_combination():
+    """Test for when topics 0 is missing, empty, and exsisting."""
+    logs = [
+        {"data": "Some data"},
+        {"topics": ["0xcc"], "data": "More data"},
+        {"topics": [], "data": "Even more data"},
+        {"topics": ["0xdd", "0xee"], "data": "Yet more data"},
+    ]
+    expected = ["0xcc", "0xdd"]
+    assert general_helpers.get_topics_0(logs) == expected
+
+
+def test_get_event_index_normal_case():
+    """Test for when topics0 is complete."""
+    topics0 = [
+        "0x783cca1c0412dd0d695e784568c96da2e9c22ff989357a2e8b1d9b2b4e6b7118",
+        "0x98636036cb66a9c19a37435efc1e90142190214e8abeb821bdba3f2990dd4c95",
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c",
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x7a53080ba414158be7ec69b987b5fb7d07dee101fe85488f0853ae16239d0bde",
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x3067048beee31b25b2f1681f88dac838c8bba36af25bfb2b7cf7473a5847e35f",
+    ]
+    expected_result = [5]
+    assert (
+        general_helpers.get_event_index(topics0, constants.UNISWAP_V3_MINT_EVENT)
+        == expected_result
+    )
+
+
+########################################################################################
+# Hexadecimal parsing
+########################################################################################
+def test_parse_signed_int_positive():
+    """Example hex for 1 in two's complement, 32 bytes."""
+    hex_str = "0000000000000000000000000000000000000000000000000000000000000001"
+    assert general_helpers.parse_signed_int(hex_str) == 1
+
+
+def test_parse_signed_int_negative():
+    """Example hex for -1 in two's complement, 32 bytes."""
+    hex_str = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    assert general_helpers.parse_signed_int(hex_str) == -1
+
+
+def test_parse_signed_int_max_positive():
+    """Maximum positive value for 32 bytes."""
+    hex_str = "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    assert general_helpers.parse_signed_int(hex_str) == 2**255 - 1
+
+
+def test_parse_signed_int_min_negative():
+    """Minimum negative value for 32 bytes."""
+    hex_str = "8000000000000000000000000000000000000000000000000000000000000000"
+    assert general_helpers.parse_signed_int(hex_str) == -(2**255)
+
+
+def test_parse_signed_int_edge_case():
+    """Test the conversion of a negative number represented in two's complement."""
+    hex_str = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"
+    assert general_helpers.parse_signed_int(hex_str) == -2
+
+
+########################################################################################
+# Parse transaction type from to address
+########################################################################################
+def test_parse_to_type_with_contract_creation():
+    """Test if to_address is "contract creation"."""
+    assert general_helpers.parse_to_type("contract_creation", []) == "contract_creation"
+
+
+def test_parse_to_type_with_mev_contract():
+    """Test if to_address is mev contract in list."""
+    mev_address = "0x_mev_contract_address"
+    mev_contracts_list = [mev_address]
+    assert general_helpers.parse_to_type(mev_address, mev_contracts_list) == "mev"
+
+
+def test_parse_to_type_with_uni_router():
+    uni_address = "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a"
+    assert general_helpers.parse_to_type(uni_address, []) == "uni"
+
+
+def test_parse_to_type_with_defi_address():
+    """Test if to_address is "defi", using a generic non-MEV, non-Uniswap address."""
+    defi_address = "0x_defi_contract_address"
+    assert general_helpers.parse_to_type(defi_address, []) == "defi"
+
+
+########################################################################################
+# Decode raw transaction from mempool
+########################################################################################
+def test_decode_mempool_tx_legacy():
+    """Decode a legacy transaction."""
+    raw_tx = "0xf8648085011bd4e6798252089401fc24e0e98d69a012667d8f88ee6595533ed2dd808026a0b781e5dff0578b30ab2651e2ae5c39f9a55f560c375d2a49957f64e51deba2caa03d29796ea80071bcb66f988583d962ed2fa74acc3e16b5ec0e659a27a7707da8"
+    expected = {
+        "_cached_rlp": "0xf8648085011bd4e6798252089401fc24e0e98d69a012667d8f88ee6595533ed2dd808026a0b781e5dff0578b30ab2651e2ae5c39f9a55f560c375d2a49957f64e51deba2caa03d29796ea80071bcb66f988583d962ed2fa74acc3e16b5ec0e659a27a7707da8",
+        "_data": "0x",
+        "_gas": 21000,
+        "_gas_price": 4761904761,
+        "_nonce": 0,
+        "_r": 83002761099386645858995637913074454428810264341220406988469950407888004162250,
+        "_s": 27664362587829906261959396639710599503250612382199861427221503821394144689576,
+        "_to": "0x01fc24e0e98d69a012667d8f88ee6595533ed2dd",
+        "_v": 38,
+        "_value": 0,
+    }
+    assert general_helpers.decode_mempool_tx(raw_tx) == expected
+
+
+def test_decode_mempool_tx_eip1559():
+    """Decode an EIP-1559 transaction."""
+    raw_tx = "0x02f877018309a49a843b9aca00855d21dba0008303345094c779d0ffad910eb7389aaacd9701e49986477a48881a596e4e2fb0e00080c080a0d34049f5b5efe3cf31bc150cf3ed65e34befb2a8eeb3d7bdefa50c9cd621bc8ba047e009a2cde12cbbde6f902f267f6185fbdf59f15a111b39cdd55839c6e235df"
+    expected = {
+        "_access_list": (),
+        "_cached_rlp": "0xf877018309a49a843b9aca00855d21dba0008303345094c779d0ffad910eb7389aaacd9701e49986477a48881a596e4e2fb0e00080c080a0d34049f5b5efe3cf31bc150cf3ed65e34befb2a8eeb3d7bdefa50c9cd621bc8ba047e009a2cde12cbbde6f902f267f6185fbdf59f15a111b39cdd55839c6e235df",
+        "_chain_id": 1,
+        "_data": "0x",
+        "_gas": 210000,
+        "_max_fee_per_gas": 400000000000,
+        "_max_priority_fee_per_gas": 1000000000,
+        "_nonce": 631962,
+        "_r": 95551599715045483471752351342558496344975130876885328391082779782712586779787,
+        "_s": 32510052496832404165760030483031856846147848528812411172527059535587920983519,
+        "_to": "0xc779d0ffad910eb7389aaacd9701e49986477a48",
+        "_value": 1898670000000000000,
+        "_y_parity": 0,
+    }
+    assert general_helpers.decode_mempool_tx(raw_tx) == expected
+
+
+########################################################################################
+# Test functions that load resources
+########################################################################################
+def test_get_json_test_data_success():
+    """Test for when a correct data file has been specified."""
+    sample_json_data = {"key": "value"}
+    sample_json_content = '{"key": "value"}'
+    m = mock_open(read_data=sample_json_content)
+    with patch("importlib.resources.open_text", m) as mocked_open:
+        with patch("json.load", return_value=sample_json_data):
+            # Call the function with a sample file path
+            result = general_helpers.get_json_test_data(
+                "uniswap_v2/uniswap_v2_by_positions.json"
+            )
+
+            # Verify the file was opened correctly
+            mocked_open.assert_called_once()
+
+            # Assert that the result matches the expected JSON data
+            assert result == sample_json_data
+
+
+def test_get_json_test_data_file_not_found():
+    """Test for when a wrong path to a data file has been specified."""
+    # Simulate a FileNotFoundError when attempting to open a non-existent file
+    with patch("importlib.resources.open_text", side_effect=FileNotFoundError):
+        with pytest.raises(FileNotFoundError):
+            # Attempt to load a file that does not exist
+            general_helpers.get_json_test_data("uniswap_v2/non_existent_file.json")
+
+
+def test_get_json_abi_success():
+    """Test for when a correct data file has been specified."""
+    sample_json_data = {"key": "value"}
+    sample_json_content = '{"key": "value"}'
+    m = mock_open(read_data=sample_json_content)
+    with patch("importlib.resources.open_text", m) as mocked_open:
+        with patch("json.load", return_value=sample_json_data):
+            # Call the function with a sample file path
+            result = general_helpers.get_json_abi("uniswap_v2/IUniswapV2Pair.json")
+
+            # Verify the file was opened correctly
+            mocked_open.assert_called_once()
+
+            # Assert that the result matches the expected JSON data
+            assert result == sample_json_data
+
+
+def test_get_json_test_abi_not_found():
+    """Test for when a wrong path to a data file has been specified."""
+    # Simulate a FileNotFoundError when attempting to open a non-existent file
+    with patch("importlib.resources.open_text", side_effect=FileNotFoundError):
+        with pytest.raises(FileNotFoundError):
+            # Attempt to load a file that does not exist
+            general_helpers.get_json_abi("uniswap_v2/non_existent_file.json")
+
+
+def test_get_txt_as_list_success():
+    """Test for when a correct text file has been specified."""
+    sample_text_content = "line1\nline2\n\nline4"
+    expected_list = ["line1", "line2", "line4"]
+    m = mock_open(read_data=sample_text_content)
+
+    with patch("importlib.resources.open_text", m) as mocked_open:
+        # Call the function with a sample file path
+        result = general_helpers.get_txt_as_list("lists/mev_contracts.txt")
+
+        # Verify the file was opened correctly
+        mocked_open.assert_called_once()
+
+        # Assert that the result matches the expected list
+        assert result == expected_list, "The function did not return the expected list"
+
+
+def test_get_txt_as_list_file_not_found():
+    """Test for when a wrong path to a text file has been specified."""
+    # Simulate a FileNotFoundError when attempting to open a non-existent file
+    with patch("importlib.resources.open_text", side_effect=FileNotFoundError):
+        with pytest.raises(FileNotFoundError):
+            # Attempt to load a file that does not exist
+            general_helpers.get_txt_as_list("lists/non_existent_file.txt")
+
+
+def test_get_csv_test_data_as_string():
+    """Test for loading csv data as a string."""
+    # Mock CSV content that you expect to read from the file
+    mock_csv_content = "column1,column2\nvalue1,value2\nvalue3,value4"
+    # The expected path components for the resource
+    resource_package = "ethereum_defi_parser.resources.test_data.uniswap_v2"
+    resource_name = "myfile.csv"
+
+    # Patch the open_text method from importlib.resources
+    with patch.object(pkg_resources, 'open_text', mock_open(read_data=mock_csv_content)) as mocked_open:
+        # Call the function with the path to the test data file
+        result = general_helpers.get_csv_test_data_as_string("uniswap_v2/myfile.csv")
+
+        # Verify that the open_text method was called correctly
+        mocked_open.assert_called_once_with(resource_package, resource_name)
+
+        # Assert that the result matches the mock CSV content
+        assert result == mock_csv_content
+
+
+########################################################################################
+# Transforming files
+########################################################################################
+def test_chifra_csv_to_json():
+    """Transform a chifra list to json format without duplicates."""
+    expected = general_helpers.get_json_test_data("uniswap_v2/uniswap_v2_by_positions.json")
+    csv_content = general_helpers.get_csv_test_data_as_string("uniswap_v2/uniswap_v2_by_positions.csv")
+    assert general_helpers.chifra_csv_to_json(csv_content) == expected

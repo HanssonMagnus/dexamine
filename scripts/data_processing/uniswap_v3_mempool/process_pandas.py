@@ -18,9 +18,9 @@ from shared import constants
 from parsers.uniswap_v3 import parse_uni_v3_raw_tx
 
 # Set up logger
-path_logs = constants.path_logs
+PATH_LOGS = constants.PATH_LOGS
 log_name = 'scripts/data_processing/uniswap_v3_mempool/eth_usdc.log'
-logging.basicConfig(filename=path_logs + log_name, level=logging.ERROR,
+logging.basicConfig(filename=PATH_LOGS + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)
 # Example log message
@@ -43,7 +43,7 @@ output_csv_file = '/media/m2_front/research/data/projects/quantum_defi/1_parsed/
 ###################################################################################################
 # Load ABIs
 ###################################################################################################
-erc20_abi = general_helpers.load_abi(constants.path_erc20_abi)
+erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
 
 ###################################################################################################
 # Step 1: Load Parquet Files
@@ -65,8 +65,9 @@ def parse_raw_tx_data(raw_tx, transaction_info, erc20_abi):
 
     parsed_swaps = []
     try:
-        swaps = parse_uni_v3_raw_tx.parse_v3_exact_input_single(data, erc20_abi, constants.usdc_token,
-                                                                constants.weth_token)
+        swaps = parse_uni_v3_raw_tx.parse_v3_exact_input_single(data, erc20_abi,
+                                                                constants.USDC_TOKEN_ADDRESS,
+                                                                constants.WETH_TOKEN_ADDRESS)
         if not swaps:
             return parsed_swaps
         for swap in swaps:

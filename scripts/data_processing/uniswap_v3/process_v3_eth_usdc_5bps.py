@@ -21,9 +21,9 @@ from shared import constants
 from parsers.uniswap_v3 import parse_uni_v3_events
 
 # Set up logger
-path_logs = constants.path_logs
+PATH_LOGS = constants.PATH_LOGS
 log_name = 'scripts/data_processing/uniswap_v3/eth_usdc.log'
-logging.basicConfig(filename=path_logs + log_name, level=logging.ERROR,
+logging.basicConfig(filename=PATH_LOGS + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)
 # Example log message
@@ -33,38 +33,38 @@ logger.error("Logging setup complete.")
 # Changeable variables: Blocks and output file.
 ###################################################################################################
 # Import test data
-#path_uni_v3_by_positions = constants.path_uni_v3_by_positions
+#PATH_UNISWAP_V3_BY_POSITIONS = constants.PATH_UNISWAP_V3_BY_POSITIONS
 #file_out = '/media/m2_front/research/data/projects/quantum_defi/0_raw/usdc_eth_5bps_october_2023_test.csv'
 
 # October 2023 data set
-#path_uni_v3_by_positions = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions_october.json'
+#PATH_UNISWAP_V3_BY_POSITIONS = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions_october.json'
 #file_out = '/media/m2_front/research/data/projects/quantum_defi/0_raw/usdc_eth_5bps_october_2023.csv'
 
 # Full data set
-path_uni_v3_by_positions = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions.json'
+PATH_UNISWAP_V3_BY_POSITIONS = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions.json'
 file_out = '/media/m2_front/research/data/projects/defi_price_impact/0_raw/usdc_eth_5bps_2023-11-23.csv'
 
 ###################################################################################################
 # Load tx data as a json dict.
 ###################################################################################################
-data = general_helpers.load_json(path_uni_v3_by_positions)
+data = general_helpers.load_json(PATH_UNISWAP_V3_BY_POSITIONS)
 
 # Flatten the dict into a list of tuples
 block_index_pairs = [(block, index) for block, indexes in data.items() for index in indexes]
 
 # Smart contract address of USDC-WETH pool
-uniswap_v3_usdc_eth = constants.uniswap_v3_usdc_eth_5bps
+uniswap_v3_usdc_eth = constants.UNISWAP_V3_USDC_WETH_5BPS_ADDRESS
 
 ###################################################################################################
 # Load ABIs
 ###################################################################################################
-erc20_abi = general_helpers.load_abi(constants.path_erc20_abi)
-uniswap_v3_pair_abi = general_helpers.load_abi(constants.path_uniswap_v3_pair_abi)
+erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
+uniswap_v3_pair_abi = general_helpers.load_abi(constants.PATH_UNISWAP_V3_PAIR_ABI)
 
 ###################################################################################################
 # Load MEV contracts
 ###################################################################################################
-mev_contracts = general_helpers.load_txt(constants.path_mev_contracts) # Generator object
+mev_contracts = general_helpers.load_txt(constants.PATH_MEV_CONTRACTS) # Generator object
 mev_contracts_list = list(mev_contracts)
 
 ###################################################################################################
@@ -151,14 +151,14 @@ def parse_transaction(block_number, index, erc20_abi, uniswap_v3_pair_abi, mev_c
             amount_1 = event[7]
             liquidity = event[8]
             tick = event[9]
-            sqrtPriceX96 = event[10]
+            sqrt_price_x96 = event[10]
             price = event[11]
             tick_lower = event[12]
             tick_upper = event[13]
             data = [timestamp, block_number, index, hash, from_address, to_address, value, gas,
                     gasPrice, maxPriorityFeePerGas, maxFeePerGas, type_of_event, dex_symbol,
                     symbol_0, symbol_1, decimals_0, decimals_1, amount_0, amount_1, liquidity,
-                    tick, sqrtPriceX96, price, tick_lower, tick_upper, to_type]
+                    tick, sqrt_price_x96, price, tick_lower, tick_upper, to_type]
             L.append(data)
     except Exception as e:
         logger.error(e, exc_info=True)
@@ -195,7 +195,7 @@ with multiprocessing.Manager() as manager:
 col_names= ['timestamp', 'block_number', 'index', 'hash', 'from_address', 'to_address', 'value',
             'gas', 'gasPrice', 'maxPriorityFeePerGas', 'maxFeePerGas', 'type_of_event', 'dex_symbol',
             'symbol_0', 'symbol_1', 'decimals_0', 'decimals_1', 'amount_0', 'amount_1', 'liquidity',
-            'tick', 'sqrtPriceX96', 'price', 'tick_lower', 'tick_upper', 'to_type']
+            'tick', 'sqrt_price_x96', 'price', 'tick_lower', 'tick_upper', 'to_type']
 
 df = pd.DataFrame(data=transaction_data, columns=col_names)
 

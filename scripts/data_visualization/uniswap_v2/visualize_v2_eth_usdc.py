@@ -15,9 +15,9 @@ from shared import constants
 from parsers.uniswap_v2 import parse_uni_v2_events
 
 # Set up logger
-path_logs = constants.path_logs
+PATH_LOGS = constants.PATH_LOGS
 log_name = 'scripts/data_visualization/uniswap_v2/eth_usdc.log'
-logging.basicConfig(filename=path_logs + log_name, level=logging.ERROR,
+logging.basicConfig(filename=PATH_LOGS + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)
 # Example log message

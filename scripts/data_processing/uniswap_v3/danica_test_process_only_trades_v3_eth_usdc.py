@@ -17,9 +17,9 @@ from shared import constants
 from parsers.uniswap_v3 import parse_uni_v3_events
 
 # Set up logger
-path_logs = constants.path_logs
+PATH_LOGS = constants.PATH_LOGS
 log_name = 'scripts/data_processing/uniswap_v3/eth_usdc.log'
-logging.basicConfig(filename=path_logs + log_name, level=logging.ERROR,
+logging.basicConfig(filename=PATH_LOGS + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)
 # Example log message
@@ -29,19 +29,19 @@ logger.error("Logging setup complete.")
 # Changeable variables: Blocks and output file.
 ###################################################################################################
 # Import test data
-#path_uni_v3_by_positions = constants.path_uni_v3_by_positions
-#file_out = os.path.join(constants.path_uni_v3_test_data_dir, 'parsed_trades_only_usdc_weth.csv')
-#file_out_selected = os.path.join(constants.path_uni_v3_test_data_dir, 'parsed_trades_only_usdc_weth_selected.csv')
+#PATH_UNISWAP_V3_BY_POSITIONS = constants.PATH_UNISWAP_V3_BY_POSITIONS
+#file_out = os.path.join(constants.PATH_UNISWAP_V3_TEST_DATA_DIR, 'parsed_trades_only_usdc_weth.csv')
+#file_out_selected = os.path.join(constants.PATH_UNISWAP_V3_TEST_DATA_DIR, 'parsed_trades_only_usdc_weth_selected.csv')
 
 # Full data set
-path_uni_v3_by_positions = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions_october_test.json'
+PATH_UNISWAP_V3_BY_POSITIONS = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions_october_test.json'
 file_out = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/test_parse/node_test.csv'
 file_out_selected ='/media/m2_front/research/data/trueblocks_lists/uniswap_v3/test_parse/node_test_selected.csv'
 
 ###################################################################################################
 # Load tx data as a json dict.
 ###################################################################################################
-data = general_helpers.load_json(path_uni_v3_by_positions)
+data = general_helpers.load_json(PATH_UNISWAP_V3_BY_POSITIONS)
 
 # Flatten the dict into a list of tuples
 block_index_pairs = [(block, index) for block, indexes in data.items() for index in indexes]
@@ -90,13 +90,12 @@ def parse_transaction(block_number, index):
     try:
         logs = receipt_data['logs']
         topics_0 = general_helpers.get_topics_0(logs)
-        swap_indexes = general_helpers.get_event_index(topics_0, constants.uniswap_v3_swap_event)
+        swap_indexes = general_helpers.get_event_index(topics_0, constants.UNISWAP_V3_SWAP_EVENT)
 
         # Load ABI
-        path_uniswap_v3_pair_abi = constants.path_uniswap_v3_pair_abi
-        uniswap_v3_pair_abi = general_helpers.load_abi(constants.path_uniswap_v3_pair_abi)
-        path_erc20_abi = constants.path_erc20_abi
-        erc20_abi = general_helpers.load_abi(constants.path_erc20_abi)
+        PATH_UNISWAP_V3_PAIR_ABI = constants.PATH_UNISWAP_V3_PAIR_ABI
+        uniswap_v3_pair_abi = general_helpers.load_abi(constants.PATH_UNISWAP_V3_PAIR_ABI)
+        erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
 
         trades = parse_uni_v3_events.parse_v3_trades(logs, swap_indexes, erc20_abi, uniswap_v3_pair_abi)
     except Exception as e:
@@ -114,14 +113,14 @@ def parse_transaction(block_number, index):
             amount1 = trade[6]
             liquidity = trade[7]
             tick = trade[8]
-            sqrtPriceX96 = trade[9]
+            sqrt_price_x96 = trade[9]
             price = trade[10]
             e_price = -amount0/amount1
             data = [timestamp, block_number, index, hash, from_address, to_address, value,
                     total_gas_cost, gas, gasPrice,
                          maxPriorityFeePerGas, maxFeePerGas, dex_symbol, symbol_0,
                         symbol_1, decimals_0, decimals_1, amount0, amount1, liquidity, tick,
-                    sqrtPriceX96, price, e_price]
+                    sqrt_price_x96, price, e_price]
             if symbol_0 == "USDC" and symbol_1 == "WETH":
                 L.append(data)
     except Exception as e:
@@ -158,7 +157,7 @@ col_names = ['timestamp', 'block_number', 'index', 'hash', 'from_address', 'to_a
              'total_gas_cost',
              'gas', 'gasPrice', 'maxPriorityFeePerGas', 'maxFeePerGas', 'dex_symbol', 'symbol_0',
              'symbol_1', 'decimals_0', 'decimals_1', 'amount0', 'amount1', 'liquidity', 'tick',
-             'sqrtPriceX96', 'price', 'e_price']
+             'sqrt_price_x96', 'price', 'e_price']
 
 df = pd.DataFrame(data=transaction_data, columns=col_names)
 

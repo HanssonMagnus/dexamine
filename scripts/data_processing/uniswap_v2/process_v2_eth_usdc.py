@@ -21,9 +21,9 @@ from shared import constants
 from parsers.uniswap_v2 import parse_uni_v2_events
 
 # Set up logger
-path_logs = constants.path_logs
+PATH_LOGS = constants.PATH_LOGS
 log_name = 'scripts/data_processing/uniswap_v2/eth_usdc.log'
-logging.basicConfig(filename=path_logs + log_name, level=logging.ERROR,
+logging.basicConfig(filename=PATH_LOGS + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)
 # Example log message
@@ -33,34 +33,34 @@ logger.error("Logging setup complete.")
 # Changeable variables: Blocks and output file.
 ###################################################################################################
 # Import test data
-#path_uni_v2_by_positions = constants.path_uni_v2_by_positions
-#file_out = os.path.join(constants.path_uni_v2_test_data_dir, 'parsed_events_usdc_weth.csv')
+#PATH_UNISWAP_V2_BY_POSITIONS = constants.PATH_UNISWAP_V2_BY_POSITIONS
+#file_out = os.path.join(constants.PATH_UNISWAP_V2_TEST_DATA_DIR, 'parsed_events_usdc_weth.csv')
 
 # Full data set
-path_uni_v2_by_positions = '/media/m2_front/research/data/projects/dex_price_discovery/0_raw/txes_eth_usdc.json'
+PATH_UNISWAP_V2_BY_POSITIONS = '/media/m2_front/research/data/projects/dex_price_discovery/0_raw/txes_eth_usdc.json'
 file_out = '/media/m2_front/research/data/projects/dex_price_discovery/1_parsed/events_usdc_weth.csv'
 
 ###################################################################################################
 # Load tx data as a json dict.
 ###################################################################################################
-data = general_helpers.load_json(path_uni_v2_by_positions)
+data = general_helpers.load_json(PATH_UNISWAP_V2_BY_POSITIONS)
 
 # Flatten the dict into a list of tuples
 block_index_pairs = [(block, index) for block, indexes in data.items() for index in indexes]
 
 # Smart contract address of USDC-WETH pool
-uniswap_v2_usdc_eth = constants.uniswap_v2_usdc_eth
+UNISWAP_V2_USDC_WETH_ADDRESS = constants.UNISWAP_V2_USDC_WETH_ADDRESS
 
 ###################################################################################################
 # Load ABIs
 ###################################################################################################
-erc20_abi = general_helpers.load_abi(constants.path_erc20_abi)
-uniswap_v2_pair_abi = general_helpers.load_abi(constants.path_uniswap_v2_pair_abi)
+erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
+uniswap_v2_pair_abi = general_helpers.load_abi(constants.PATH_UNISWAP_V2_PAIR_ABI)
 
 ###################################################################################################
 # Load MEV contracts
 ###################################################################################################
-mev_contracts = general_helpers.load_txt(constants.path_mev_contracts) # Generator object
+mev_contracts = general_helpers.load_txt(constants.PATH_MEV_CONTRACTS) # Generator object
 mev_contracts_list = list(mev_contracts)
 
 ###################################################################################################
@@ -91,7 +91,7 @@ def parse_transaction(block_number, index, erc20_abi, uniswap_v2_pair_abi, mev_c
         events = parse_uni_v2_events.parse_all_v2_events(logs,
                                                          uniswap_v2_erc20_abi=erc20_abi,
                                                          uniswap_v2_pair_abi=uniswap_v2_pair_abi,
-                                                         exchange_pair_address=uniswap_v2_usdc_eth)
+                                                         exchange_pair_address=UNISWAP_V2_USDC_WETH_ADDRESS)
     except Exception as e:
         logger.error(e, exc_info=True)
 
