@@ -23,7 +23,7 @@ At this moment in time only Ethereum Mainnet is supported.
 ### v0.1.1
 - Add support for Sushiswap.
 
-### v0.0.1
+### v0.1.0
 - Initial version with support for Uniswap v2 and v3.
 
 ## Parser Overview and Pipeline
