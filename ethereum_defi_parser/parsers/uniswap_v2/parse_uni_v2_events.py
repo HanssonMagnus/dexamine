@@ -8,14 +8,22 @@ This file contains the parser for Unsiwap v2 events.
 
 # Import packages
 import logging
+from dataclasses import dataclass, field
+from typing import Optional
 from web3 import Web3
 
 
 # Import modules
 from ethereum_defi_parser.shared import constants, general_helpers, uniswap_v2_parsing
+from ethereum_defi_parser.shared.general_classes import DexEvent
 
 # Get a logger
 logger = logging.getLogger(__name__)
+
+
+########################################################################################
+# Define a base event class for Uniswap v2 events
+########################################################################################
 
 
 ########################################################################################
@@ -249,7 +257,7 @@ def parse_v2_mints(
     mints = []
     for mint_index in mint_indexes:
         mint = parse_v2_mint(
-             logs, mint_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
+            logs, mint_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
         )
         mints.append(mint)
 
@@ -345,7 +353,7 @@ def parse_v2_burns(
     burns = []
     for burn_index in burn_indexes:
         burn = parse_v2_burn(
-             logs, burn_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
+            logs, burn_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
         )
         burns.append(burn)
 
