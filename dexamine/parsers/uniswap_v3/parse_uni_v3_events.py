@@ -3,7 +3,7 @@ This file contains the parser for Unsiwap v3 events.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
-* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+* Doc: https://github.com/HanssonMagnus/dexamine
 """
 
 # Import packages
@@ -11,7 +11,7 @@ import logging
 from web3 import Web3
 
 # Import modules
-from ethereum_defi_parser.shared import constants, general_helpers, uniswap_v3_parsing
+from dexamine.shared import constants, general_helpers, uniswap_v3_parsing
 
 # Get a logger
 logger = logging.getLogger(__name__)

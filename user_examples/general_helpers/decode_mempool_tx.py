@@ -12,10 +12,10 @@ from eth.vm.forks.arrow_glacier.transactions import ArrowGlacierTransactionBuild
 #sys.path.append(os.path.abspath('../../'))
 
 # Import scripts
-from ethereum_defi_parser.shared import general_helpers, constants
+from dexamine.shared import general_helpers, constants
 
 # Path to your Parquet file
-file_path = "../../ethereum_defi_parser/resources/test_data/mempool/2023-10-01_test.parquet"
+file_path = "../../dexamine/resources/test_data/mempool/2023-10-01_test.parquet"
 
 # Read the Parquet file
 try:

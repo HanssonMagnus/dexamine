@@ -3,7 +3,7 @@ This file contains the parser for Unsiwap v2 events.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
-* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+* Doc: https://github.com/HanssonMagnus/dexamine
 """
 
 # Import packages
@@ -14,8 +14,8 @@ from web3 import Web3
 
 
 # Import modules
-from ethereum_defi_parser.shared import constants, general_helpers, uniswap_v2_parsing
-from ethereum_defi_parser.shared.general_classes import DexEvent
+from dexamine.shared import constants, general_helpers, uniswap_v2_parsing
+from dexamine.shared.general_classes import DexEvent
 
 # Get a logger
 logger = logging.getLogger(__name__)

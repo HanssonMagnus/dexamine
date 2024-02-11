@@ -1,7 +1,7 @@
 """
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
-* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+* Doc: https://github.com/HanssonMagnus/dexamine
 """
 
 # Import packages
@@ -11,7 +11,7 @@ import json
 from pprint import pprint
 
 # Import scirpts
-from ethereum_defi_parser.shared import general_helpers
+from dexamine.shared import general_helpers
 
 # Maker with Bytes32 as "symbol:
 # 0x4d4b520000000000000000000000000000000000000000000000000000000000

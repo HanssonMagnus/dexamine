@@ -1,10 +1,10 @@
 """
 This file contains unit tests for the functions in
-ethereum_defi_parser/shared/general_helper.py.
+dexamine/shared/general_helper.py.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
-* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+* Doc: https://github.com/HanssonMagnus/dexamine
 """
 
 # Import packages
@@ -13,7 +13,7 @@ import importlib.resources as pkg_resources
 import pytest
 
 # Import modules
-from ethereum_defi_parser.shared import general_helpers, constants
+from dexamine.shared import general_helpers, constants
 
 
 ########################################################################################
@@ -477,7 +477,7 @@ def test_get_csv_test_data_as_string():
     # Mock CSV content that you expect to read from the file
     mock_csv_content = "column1,column2\nvalue1,value2\nvalue3,value4"
     # The expected path components for the resource
-    resource_package = "ethereum_defi_parser.resources.test_data.uniswap_v2"
+    resource_package = "dexamine.resources.test_data.uniswap_v2"
     resource_name = "myfile.csv"
 
     # Patch the open_text method from importlib.resources

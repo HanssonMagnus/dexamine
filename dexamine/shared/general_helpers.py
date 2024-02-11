@@ -3,7 +3,7 @@ This file contains general helper functions.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
-* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+* Doc: https://github.com/HanssonMagnus/dexamine
 """
 
 # Import packages
@@ -22,7 +22,7 @@ from eth.vm.forks.arrow_glacier.transactions import (
 from eth_utils import encode_hex, to_bytes
 
 # Import modules
-from ethereum_defi_parser.shared import constants
+from dexamine.shared import constants
 
 # Get a logger
 logger = logging.getLogger(__name__)
@@ -357,7 +357,7 @@ def load_abi(path_abi):
 ########################################################################################
 def get_json_test_data(test_data_file):
     """
-    Load a JSON test data file from ethereum_defi_parser/resources/test_data.
+    Load a JSON test data file from dexamine/resources/test_data.
 
     The `test_data_file` argument should include the subdirectory and filename. For example,
     "uniswap_v2/myfile.json" or "uniswap_v3/anotherfile.json".
@@ -367,7 +367,7 @@ def get_json_test_data(test_data_file):
                               including subdirectories if applicable.
     """
     # Dynamically construct the package path
-    package_path = "ethereum_defi_parser.resources.test_data"
+    package_path = "dexamine.resources.test_data"
 
     # Split the test_data_file into components (subdirectories + filename)
     path_components = test_data_file.split('/')
@@ -382,7 +382,7 @@ def get_json_test_data(test_data_file):
 
 def get_json_abi(abi_file):
     """
-    Load an ABI as a JSON file from ethereum_defi_parser/resources/abis.
+    Load an ABI as a JSON file from dexamine/resources/abis.
 
     The `abi_file` argument should include the subdirectory and filename. For example,
     "uniswap_v2/IUniswapV2Pair.json".
@@ -393,7 +393,7 @@ def get_json_abi(abi_file):
         abi_file (str): Relative path of ABI file within the abis directory.
     """
     # Dynamically construct the package path
-    package_path = "ethereum_defi_parser.resources.abis"
+    package_path = "dexamine.resources.abis"
 
     # Split the test_data_file into components (subdirectories + filename)
     path_components = abi_file.split('/')
@@ -409,7 +409,7 @@ def get_json_abi(abi_file):
 
 def get_txt_as_list(txt_file):
     """
-    Load a .txt file as a list from ethereum_defi_parser/resources/lists.
+    Load a .txt file as a list from dexamine/resources/lists.
 
     The `txt_file` argument should include the subdirectory and filename. For example,
     "mev_contracts.txt".
@@ -418,7 +418,7 @@ def get_txt_as_list(txt_file):
         txt_file (str): Relative path of the .txt file within the lists directory.
     """
     # Dynamically construct the package path
-    package_path = "ethereum_defi_parser.resources.lists"
+    package_path = "dexamine.resources.lists"
 
     # Split the txt_file into components (subdirectories + filename)
     path_components = txt_file.split('/')
@@ -435,7 +435,7 @@ def get_txt_as_list(txt_file):
 
 def get_csv_test_data_as_string(test_data_file):
     """
-    Load a CSV test data file as a string from ethereum_defi_parser/resources/test_data.
+    Load a CSV test data file as a string from dexamine/resources/test_data.
 
     The `test_data_file` argument should include the subdirectory and filename. E.g.,
     "uniswap_v2/myfile.csv" or "uniswap_v3/anotherfile.csv".
@@ -445,7 +445,7 @@ def get_csv_test_data_as_string(test_data_file):
                               directory, including subdirectories if applicable.
     """
     # Dynamically construct the package path
-    package_path = "ethereum_defi_parser.resources.test_data"
+    package_path = "dexamine.resources.test_data"
 
     # Split the test_data_file into components (subdirectories + filename)
     path_components = test_data_file.split('/')

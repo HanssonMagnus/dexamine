@@ -3,7 +3,7 @@ This file contains the parser for raw transactions containing Unsiwap v3 swaps.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
-* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+* Doc: https://github.com/HanssonMagnus/dexamine
 """
 
 # Import packages
@@ -12,7 +12,7 @@ from web3 import Web3
 import eth_abi
 
 # Import modules
-from ethereum_defi_parser.shared import general_helpers
+from dexamine.shared import general_helpers
 
 # Get a logger
 logger = logging.getLogger(__name__)

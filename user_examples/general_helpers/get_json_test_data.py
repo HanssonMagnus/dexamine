@@ -8,7 +8,7 @@ from pprint import pprint
 #sys.path.append(os.path.abspath('../../../../'))
 
 # Import scripts
-from ethereum_defi_parser.shared import general_helpers
+from dexamine.shared import general_helpers
 
 data = general_helpers.get_json_test_data("uniswap_v2/uniswap_v2_by_positions.json")
 

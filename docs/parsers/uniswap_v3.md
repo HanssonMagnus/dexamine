@@ -1,4 +1,4 @@
-# Parsers Documentation - `ethereum-defi-parser` Project
+# Parsers Documentation - `dexamine` Project
 
 ## Uniswap v3: parse_uni_v3_events.py
 This file contains parsers for liquidity taking and liquidity provision events for Uniswap v3.

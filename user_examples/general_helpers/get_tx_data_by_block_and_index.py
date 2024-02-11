@@ -8,7 +8,7 @@ from pprint import pprint
 sys.path.append(os.path.abspath('../../../../'))
 
 # Import scripts
-from ethereum_defi_parser.shared import general_helpers, constants
+from dexamine.shared import general_helpers, constants
 
 # Set up logger
 PATH_LOGS = constants.PATH_LOGS

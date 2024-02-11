@@ -1,9 +1,9 @@
 """
-This file contains constants used by the ethereum-defi-parser Python package.
+This file contains constants used by the dexamine Python package.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
-* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+* Doc: https://github.com/HanssonMagnus/dexamine
 """
 
 # Import packages

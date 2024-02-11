@@ -6,7 +6,7 @@ This file contains a unit test for general_helpers.chifra_csv_to_json().
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
-* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+* Doc: https://github.com/HanssonMagnus/dexamine
 """
 
 # Import packages
@@ -20,7 +20,7 @@ import importlib.resources as pkg_resources
 #sys.path.append(os.path.abspath('../../../../'))
 
 # Import scirpts
-from ethereum_defi_parser.shared import constants, general_helpers
+from dexamine.shared import constants, general_helpers
 
 # Read in the chifra csv file
 #path_input = constants.PATH_UNISWAP_V2_TEST_DATA_DIR + "uni_v2_by_positions.csv"

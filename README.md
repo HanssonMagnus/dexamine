@@ -12,7 +12,7 @@ science.
 ### Project Information
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Made with Python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://python.org)
-[![pytest and pylint](https://github.com/HanssonMagnus/ethereum-defi-parser/actions/workflows/pytest-and-pylint.yml/badge.svg)](https://github.com/HanssonMagnus/ethereum-defi-parser/actions/workflows/pytest-and-pylint.yml)
+[![pytest and pylint](https://github.com/HanssonMagnus/dexamine/actions/workflows/pytest-and-pylint.yml/badge.svg)](https://github.com/HanssonMagnus/dexamine/actions/workflows/pytest-and-pylint.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 

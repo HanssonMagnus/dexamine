@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ethereum-defi-parser"
+name = "dexamine"
 version = "0.1.0"
 description = "Parsing DeFi blockchain data from Ethereum archive nodes."
 authors = ["Magnus Hansson <hansson.carl.magnus@gmail.com>"]

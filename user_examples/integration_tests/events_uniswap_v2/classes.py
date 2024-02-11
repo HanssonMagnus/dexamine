@@ -5,7 +5,7 @@ from pprint import pprint
 
 
 # Import modules
-from ethereum_defi_parser.shared.general_classes import DexEvent
+from dexamine.shared.general_classes import DexEvent
 
 
 ########################################################################################

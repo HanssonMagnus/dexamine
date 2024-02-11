@@ -3,14 +3,14 @@ This file contains helper functions for parsers.uniswap_v3.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
-* Doc: https://github.com/HanssonMagnus/ethereum-defi-parser
+* Doc: https://github.com/HanssonMagnus/dexamine
 """
 
 # Import packages
 from web3 import Web3
 
 # Import modules
-from ethereum_defi_parser.shared import constants
+from dexamine.shared import constants
 
 
 ########################################################################################
