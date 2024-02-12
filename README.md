@@ -2,10 +2,9 @@
 Navigate the currents of DEX data with `dexamine` -- your agile guide through the
 digital depths.
 
-`dexamine` is a Python package that focuses on examining decentralize exchange (DEX)
-data. Built on top of an Ethereum archive node, it provides a robust toolset for
-transforming complex DEX transactions into structured datasets for research and data
-science.
+`dexamine` is a Python package to examine decentralize exchange (DEX) data. Built on top
+of an Ethereum archive node, it provides a robust toolset for transforming complex DEX
+transactions into structured datasets for research and data science.
 
 *Data divers and blockchain biologists, ready your nets -- a new exploration awaits!*
 

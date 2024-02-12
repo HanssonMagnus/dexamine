@@ -23,6 +23,7 @@ from eth_utils import encode_hex, to_bytes
 
 # Import modules
 from dexamine.shared import constants
+from dexamine.shared.general_classes import EthereumToType
 
 # Get a logger
 logger = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 ########################################################################################
 # RPC call functions
 ########################################################################################
-def get_tx_receipt_block_by_index(block_hex, index_hex):
+def get_tx_receipt_block_by_index(block_hex: str, index_hex: str) -> tuple[dict, dict, dict]:
     """
     Get tx, receipt, and block response from node.
 
@@ -50,7 +51,7 @@ def get_tx_receipt_block_by_index(block_hex, index_hex):
     return tx_data, receipt_data, block_data
 
 
-def get_tx_data_by_hash(tx_hash):
+def get_tx_data_by_hash(tx_hash: str) -> dict:
     """
     Get tx response from node.
 
@@ -75,7 +76,7 @@ def get_tx_data_by_hash(tx_hash):
     return tx_data
 
 
-def get_tx_data_by_block_and_index(block_hex, index_hex):
+def get_tx_data_by_block_and_index(block_hex: str, index_hex: str) -> dict:
     """Get tx response from node."""
     url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
@@ -91,7 +92,7 @@ def get_tx_data_by_block_and_index(block_hex, index_hex):
     return tx_data
 
 
-def get_receipt_data_by_hash(tx_hash):
+def get_receipt_data_by_hash(tx_hash: str) -> dict:
     """Get receipt response from node."""
     url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
@@ -109,7 +110,7 @@ def get_receipt_data_by_hash(tx_hash):
     return receipt_data
 
 
-def get_block_data_by_block_number(block_hex):
+def get_block_data_by_block_number(block_hex: str) -> dict:
     """Get block response from node."""
     url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
@@ -130,7 +131,7 @@ def get_block_data_by_block_number(block_hex):
 ########################################################################################
 # ABI call functions
 ########################################################################################
-def get_erc20_symbol(token_address, erc20_abi, erc20_bytes32_abi):
+def get_erc20_symbol(token_address: str, erc20_abi: dict, erc20_bytes32_abi: dict[str, int]) -> tuple:
     """
     Match an ERC-20 token smart contract address to its symbol and get the number of
     decimals for that ERC-20 token.
@@ -166,7 +167,7 @@ def get_erc20_symbol(token_address, erc20_abi, erc20_bytes32_abi):
 ########################################################################################
 # Parsing transaction logs
 ########################################################################################
-def get_topics_0(logs):
+def get_topics_0(logs: dict) -> list:
     """Return list of all "topic 0"s in logs."""
     topics_0 = []
     for log in logs:
@@ -178,7 +179,7 @@ def get_topics_0(logs):
     return topics_0
 
 
-def get_event_index(topics_0, event):
+def get_event_index(topics_0: list, event: str) -> list:
     """Returns: list, index of where in topics_0 the "event" occurs."""
     event_index = []
     for i, topic in enumerate(topics_0):
@@ -190,14 +191,14 @@ def get_event_index(topics_0, event):
 ########################################################################################
 # Bytes32 parsing
 ########################################################################################
-def bytes32_to_string(bytes32):
+def bytes32_to_string(bytes32: bytes) -> str:
     """Decode using utf-8 and then strip the null characters."""
     return bytes32.decode('utf-8').rstrip('\x00')
 
 ########################################################################################
 # Hexadecimal parsing
 ########################################################################################
-def parse_signed_int(hex_str):
+def parse_signed_int(hex_str: str) -> int:
     """
     Parses a hexadecimal string representing a signed integer in two's complement
     format.
@@ -229,7 +230,7 @@ def parse_signed_int(hex_str):
 ########################################################################################
 # Parse transaction type from to address
 ########################################################################################
-def parse_to_type(to_address, mev_contracts_list):
+def parse_to_type(to_address: str, mev_contracts_list: list) -> str:
     """
     Parse the transaction to_address.
 
@@ -245,8 +246,8 @@ def parse_to_type(to_address, mev_contracts_list):
     script. Ensure that 'contract_creation' strings will not raise ValueError as it is
     not a HEX string.
     """
-    if to_address == "contract_creation":
-        return "contract_creation"
+    if to_address == EthereumToType.CONTRACT_CREATION.value:
+        return EthereumToType.CONTRACT_CREATION.value
 
     # Transform HEX address to checksum address
     try:
@@ -255,24 +256,12 @@ def parse_to_type(to_address, mev_contracts_list):
         logger.error(e, exc_info=True)
 
     # Assign which route the transaction took to execution.
-    if to_address in mev_contracts_list:
-        to_type = "mev"
-    elif to_address == constants.UNISWAP_V3_ROUTER_ADDRESS:
-        to_type = "uni"
-    elif to_address == constants.UNISWAP_V3_POSITIONS_NFT_ADDRESS:
-        to_type = "uni"
-    elif to_address == constants.UNISWAP_UNIVERSAL_ROUTER_ADDRESS:
-        to_type = "uni"
-    elif to_address == constants.UNISWAP_V3_MIGRATOR_ADDRESS:
-        to_type = "uni"
-    elif to_address == constants.UNISWAP_V2_ROUTER_ADDRESS:
-        to_type = "uni"
-    elif to_address == constants.UNISWAP_V3_ROUTER_2_ADDRESS:
-        to_type = "uni"
-    elif to_address == constants.UNISWAP_V2_ROUTER_2_ADDRESS:
-        to_type = "uni"
+    if to_address in constants.uniswap_address_list:
+        to_type = EthereumToType.UNI.value
+    elif to_address in mev_contracts_list:
+        to_type = EthereumToType.MEV.value
     else:
-        to_type = "defi"
+        to_type = EthereumToType.DEFI.value
 
     return to_type
 
@@ -280,7 +269,7 @@ def parse_to_type(to_address, mev_contracts_list):
 ########################################################################################
 # Decode raw transaction from mempool
 ########################################################################################
-def decode_mempool_tx(raw_tx):
+def decode_mempool_tx(raw_tx: str) -> dict:
     """
     Decodes both EIP-1559 and Legacy Ethereum transactions.
     - 1559 tx: dict_keys(['type_id', '_inner'])
@@ -325,8 +314,10 @@ def decode_mempool_tx(raw_tx):
 
 ########################################################################################
 # Loading files
+# Am I actually using these still? I think that they will be replaced by load resources
+# files below.
 ########################################################################################
-def load_json(path_json):
+def load_json(path_json: str) -> dict:
     """Load a JSON file, e.g., a dictionary with blockNumber as key and txIndex as
     values."""
     with open(path_json, "r", encoding="utf-8") as file:
@@ -355,7 +346,7 @@ def load_abi(path_abi):
 ########################################################################################
 # Load resource files
 ########################################################################################
-def get_json_test_data(test_data_file):
+def get_json_test_data(test_data_file: str) -> dict:
     """
     Load a JSON test data file from dexamine/resources/test_data.
 
@@ -380,7 +371,7 @@ def get_json_test_data(test_data_file):
     with resources.open_text(resource_path, file_name) as file:
         return json.load(file)
 
-def get_json_abi(abi_file):
+def get_json_abi(abi_file: str) -> dict:
     """
     Load an ABI as a JSON file from dexamine/resources/abis.
 
@@ -407,7 +398,7 @@ def get_json_abi(abi_file):
         return json.load(file)['abi']
 
 
-def get_txt_as_list(txt_file):
+def get_txt_as_list(txt_file: str) -> list:
     """
     Load a .txt file as a list from dexamine/resources/lists.
 
@@ -433,7 +424,7 @@ def get_txt_as_list(txt_file):
         return [line.strip() for line in file if line.strip()]
 
 
-def get_csv_test_data_as_string(test_data_file):
+def get_csv_test_data_as_string(test_data_file: str) -> str:
     """
     Load a CSV test data file as a string from dexamine/resources/test_data.
 
@@ -461,7 +452,7 @@ def get_csv_test_data_as_string(test_data_file):
 ########################################################################################
 # Transforming files
 ########################################################################################
-def chifra_csv_to_json(csv_content):
+def chifra_csv_to_json(csv_content: str) -> dict[str, list[str]]:
     """
     Transforms CSV content with blockNumber and transactionIndex to a JSON-like dict
     with the block as the key and the transactionIndex as values for that block. 'chifra
@@ -481,7 +472,7 @@ def chifra_csv_to_json(csv_content):
     csv_reader = csv.reader(csv_file)
     next(csv_reader, None)  # Skip the headers
 
-    tx_dict = {}
+    tx_dict: dict[str, list[str]] = {}
     for row in csv_reader:
         block_number, tx_index = row[0], row[1]
         try:
@@ -492,7 +483,7 @@ def chifra_csv_to_json(csv_content):
             tx_dict[block_number].append(tx_index)
     return tx_dict
 
-def filter_blocks(input_file, output_file, start_block, end_block):
+def filter_blocks(input_file: str , output_file: str, start_block: int, end_block: int) -> dict:
     """
     This function reads a JSON file containing Ethereum blocks and their transactions,
     filters the blocks based on a specified range, and writes the filtered data to a new

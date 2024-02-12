@@ -87,7 +87,29 @@ class UniswapV2Swap(UniswapV2Event):
 
     # Class methods
     def get_event_data(self) -> dict:
-        """Return the swap object as a dict."""
+        """
+        Return the swap object as a dict.
+
+        Return:
+            {
+            'amount_0': float,
+            'amount_0_in': float,
+            'amount_0_out': float,
+            'amount_1': float,
+            'amount_1_in':float,
+            'amount_1_out':float,
+            'decimals_0': int,
+            'decimals_1': int,
+            'dex_symbol': 'UniswapV2',
+            'event_type': 'swap',
+            'invariant': float,
+            'mid_price': float,
+            'reserve_0': float,
+            'reserve_1': float,
+            'symbol_0': str,
+            'symbol_1': str}
+
+        """
         return asdict(self)
 
 @dataclass
@@ -122,7 +144,29 @@ class UniswapV2Lp(UniswapV2Event):
 
     # Class methods
     def get_event_data(self) -> dict:
-        """Return the lp object as a dict with all variables of a swap."""
+        """
+        Return the lp object as a dict with all variables of a swap.
+
+        Return:
+            {
+            'amount_0': float,
+            'amount_0_in': None,
+            'amount_0_out': None,
+            'amount_1': float,
+            'amount_1_in':None,
+            'amount_1_out':None,
+            'decimals_0': int,
+            'decimals_1': int,
+            'dex_symbol': 'UniswapV2',
+            'event_type': 'swap',
+            'invariant': float,
+            'mid_price': float,
+            'reserve_0': float,
+            'reserve_1': float,
+            'symbol_0': str,
+            'symbol_1': str}
+
+        """
         event_data = asdict(self)
         # Add swap-specific amounts as None
         event_data['amount_0_in'] = None
@@ -178,6 +222,7 @@ lp_event = UniswapV2Lp(
     amount_0=500,
     amount_1=500,
 )
+
 
 pprint(asdict(dex_event))
 pprint(type(dex_event))

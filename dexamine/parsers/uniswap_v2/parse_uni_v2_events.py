@@ -15,7 +15,7 @@ from web3 import Web3
 
 # Import modules
 from dexamine.shared import constants, general_helpers, uniswap_v2_parsing
-from dexamine.shared.general_classes import DexEvent
+from dexamine.shared.general_classes import DexEvent, DexEventType
 
 # Get a logger
 logger = logging.getLogger(__name__)

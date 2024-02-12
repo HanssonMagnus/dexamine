@@ -51,6 +51,6 @@ jobs:
       run: |
         poetry run pytest dexamine/
 
-    - name: Analysing the code with pylint
+    - name: Run pylint
       run: |
         poetry run pylint --errors-only dexamine/

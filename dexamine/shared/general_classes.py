@@ -24,7 +24,7 @@ class DexEvent:
     decimals_1: int  # Number of decimals of token 1.
 
     @staticmethod
-    def transform_to_base(amount: int, decimals: int) -> float:
+    def transform_to_base(amount: int, decimals: int) -> float | int:
         """
         Transforms token amounts to base values based on their decimals. Raise
         ValueError if the amount is None.
@@ -36,16 +36,19 @@ class DexEvent:
 
 class DexEventType(Enum):
     """Class of predefined DEX event types."""
-    SWAP = "swap" # Uniswap swap event.
-    MINT = "mint" # Uniswap mint event.
-    BURN = "burn" # Uniswap burn event.
+
+    SWAP = "swap"  # Uniswap swap event.
+    MINT = "mint"  # Uniswap mint event.
+    BURN = "burn"  # Uniswap burn event.
+
 
 ########################################################################################
 # General classes
 ########################################################################################
 class EthereumToType(Enum):
     """Class of types of Ethereum to addresses."""
-    UNI = "uni" # Transaction is sent directly to any of Uniswap's addresses.
-    DEFI = "defi" # Transaction is sent to DeFi contract.
-    MEV = "mev" # Transaction is sent to MEV bot.
-    CONTRACT = "contract" # If to_address is empty it is a contract creating tx.
+
+    UNI = "uni"  # Transaction is sent directly to any of Uniswap's addresses.
+    DEFI = "defi"  # Transaction is sent to DeFi contract.
+    MEV = "mev"  # Transaction is sent to MEV bot.
+    CONTRACT_CREATION = "contract_creation"  # If to_address is empty.

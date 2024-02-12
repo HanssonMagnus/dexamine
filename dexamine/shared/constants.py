@@ -57,7 +57,9 @@ PATH_UNISWAP_V2_PAIR_ABI = os.path.join(
 )
 
 # Path to Uniswap v2 test data
-PATH_UNISWAP_V2_TEST_DATA_DIR = os.path.join(BASE_DIR, "../resources/test_data/uniswap_v2/")
+PATH_UNISWAP_V2_TEST_DATA_DIR = os.path.join(
+    BASE_DIR, "../resources/test_data/uniswap_v2/"
+)
 PATH_UNISWAP_V2_BY_POSITIONS = os.path.join(
     BASE_DIR, "../resources/test_data/uniswap_v2/uni_v2_by_positions.json"
 )
@@ -99,7 +101,9 @@ PATH_UNISWAP_V3_PAIR_ABI = os.path.join(
 )
 
 # Path to Uniswap v3 test data
-PATH_UNISWAP_V3_TEST_DATA_DIR = os.path.join(BASE_DIR, "../resources/test_data/uniswap_v3/")
+PATH_UNISWAP_V3_TEST_DATA_DIR = os.path.join(
+    BASE_DIR, "../resources/test_data/uniswap_v3/"
+)
 PATH_UNISWAP_V3_BY_POSITIONS = os.path.join(
     BASE_DIR, "../resources/test_data/uniswap_v3/uni_v3_by_positions.json"
 )
@@ -124,3 +128,16 @@ UNISWAP_V3_DECREASE_LIQUIDITY_EVENT = (
 
 # Unsiwap v3 pools
 UNISWAP_V3_USDC_WETH_5BPS_ADDRESS = "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640"
+
+########################################################################################
+# Lists
+########################################################################################
+uniswap_address_list = [
+    UNISWAP_V3_ROUTER_ADDRESS,
+    UNISWAP_V3_POSITIONS_NFT_ADDRESS,
+    UNISWAP_UNIVERSAL_ROUTER_ADDRESS,
+    UNISWAP_V3_MIGRATOR_ADDRESS,
+    UNISWAP_V2_ROUTER_ADDRESS,
+    UNISWAP_V3_ROUTER_2_ADDRESS,
+    UNISWAP_V2_ROUTER_2_ADDRESS,
+]
