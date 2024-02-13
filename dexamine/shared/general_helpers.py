@@ -179,6 +179,15 @@ def get_topics_0(logs: dict) -> list:
     return topics_0
 
 
+def get_event_indexes(topics_0: list, events: list) -> list:
+    """Returns: list, index of where in topics_0 the "event" occurs."""
+    event_indexes = []
+    for i, topic in enumerate(topics_0):
+        if topic in events:
+            event_indexes.append(i)
+    return event_indexes
+
+# THIS FUNCTION SHOULD BE REPLACED BY THE ONE ABOVE FOR ALL OCCURANCES
 def get_event_index(topics_0: list, event: str) -> list:
     """Returns: list, index of where in topics_0 the "event" occurs."""
     event_index = []

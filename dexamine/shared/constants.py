@@ -18,7 +18,7 @@ NODE_URL = "http://localhost:8545"
 # General paths
 ########################################################################################
 # Set path for logging
-PATH_LOGS = "/media/m2_front/research/logs/node-data/"
+PATH_LOGS = "/media/m2_front/research/logs/dexamine/"
 
 # Absolute path of the directory where constants.py is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -31,8 +31,9 @@ PATH_MEV_CONTRACTS = os.path.join(BASE_DIR, "../resources/lists/mev_contracts.tx
 
 # Path to general ABIs
 PATH_ERC20_ABI = os.path.join(BASE_DIR, "../resources/abis/erc20/ERC20_abi.json")
+PATH_ERC20_BYTES_ABI = os.path.join(BASE_DIR, "../resources/abis/erc20/ERC20_bytes32_abi.json")
 
-# Path to Uniswap v2 test data
+# Path to mempool test data
 PATH_MEMPOOL_TEST_DATA_DIR = os.path.join(BASE_DIR, "../resources/test_data/mempool/")
 PATH_MEMPOOL_TEST_DATA = os.path.join(
     BASE_DIR, "../resources/test_data/mempool/2023-10-01_test.parquet"
@@ -61,7 +62,7 @@ PATH_UNISWAP_V2_TEST_DATA_DIR = os.path.join(
     BASE_DIR, "../resources/test_data/uniswap_v2/"
 )
 PATH_UNISWAP_V2_BY_POSITIONS = os.path.join(
-    BASE_DIR, "../resources/test_data/uniswap_v2/uni_v2_by_positions.json"
+    BASE_DIR, "../resources/test_data/uniswap_v2/uniswap_v2_by_positions.json"
 )
 
 # Unsiwp v2 events

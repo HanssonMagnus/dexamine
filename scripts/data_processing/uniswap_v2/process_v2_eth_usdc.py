@@ -15,14 +15,13 @@ from pprint import pprint
 # Set the path to the root of the project
 sys.path.append(os.path.abspath('../../../'))
 
-# Import scripts
-from shared import general_helpers
-from shared import constants
-from parsers.uniswap_v2 import parse_uni_v2_events
+# Import modules
+from dexamine.shared import constants, general_helpers
+from dexamine.parsers import uniswap_v2_parser
 
 # Set up logger
 PATH_LOGS = constants.PATH_LOGS
-log_name = 'scripts/data_processing/uniswap_v2/eth_usdc.log'
+log_name = 'scripts/data_processing/uniswap_v2/usdc_weth.log'
 logging.basicConfig(filename=PATH_LOGS + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)
@@ -33,12 +32,12 @@ logger.error("Logging setup complete.")
 # Changeable variables: Blocks and output file.
 ###################################################################################################
 # Import test data
-#PATH_UNISWAP_V2_BY_POSITIONS = constants.PATH_UNISWAP_V2_BY_POSITIONS
-#file_out = os.path.join(constants.PATH_UNISWAP_V2_TEST_DATA_DIR, 'parsed_events_usdc_weth.csv')
+PATH_UNISWAP_V2_BY_POSITIONS = constants.PATH_UNISWAP_V2_BY_POSITIONS
+file_out = os.path.join(constants.PATH_UNISWAP_V2_TEST_DATA_DIR, 'parsed_events_usdc_weth.csv')
 
 # Full data set
-PATH_UNISWAP_V2_BY_POSITIONS = '/media/m2_front/research/data/projects/dex_price_discovery/0_raw/txes_eth_usdc.json'
-file_out = '/media/m2_front/research/data/projects/dex_price_discovery/1_parsed/events_usdc_weth.csv'
+#PATH_UNISWAP_V2_BY_POSITIONS = '/media/m2_front/research/data/projects/dex_price_discovery/0_raw/txes_eth_usdc.json'
+#file_out = '/media/m2_front/research/data/projects/dex_price_discovery/1_parsed/events_usdc_weth.csv'
 
 ###################################################################################################
 # Load tx data as a json dict.
@@ -55,6 +54,7 @@ UNISWAP_V2_USDC_WETH_ADDRESS = constants.UNISWAP_V2_USDC_WETH_ADDRESS
 # Load ABIs
 ###################################################################################################
 erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
+erc20_bytes32_abi = general_helpers.load_abi(constants.PATH_ERC20_BYTES_ABI)
 uniswap_v2_pair_abi = general_helpers.load_abi(constants.PATH_UNISWAP_V2_PAIR_ABI)
 
 ###################################################################################################
@@ -66,7 +66,7 @@ mev_contracts_list = list(mev_contracts)
 ###################################################################################################
 # Prepare arguments for multiprocessing
 ###################################################################################################
-args_for_multiprocessing = [(block, index, erc20_abi, uniswap_v2_pair_abi, mev_contracts_list) for block, index in block_index_pairs]
+args_for_multiprocessing = [(block, index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi, mev_contracts_list) for block, index in block_index_pairs]
 
 ###################################################################################################
 # Def multiprocess function
@@ -76,7 +76,7 @@ args_for_multiprocessing = [(block, index, erc20_abi, uniswap_v2_pair_abi, mev_c
 # 'maxFeePerGas', 'hash', 'input', 'nonce', 'to', 'transactionIndex', 'value', 'type',
 # 'accessList', 'chainId', 'v', 'r', 's'])
 ###################################################################################################
-def parse_transaction(block_number, index, erc20_abi, uniswap_v2_pair_abi, mev_contracts_list):
+def parse_transaction(block_number, index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi, mev_contracts_list):
     events = None # Initialize events to None
 
     try:
@@ -88,8 +88,9 @@ def parse_transaction(block_number, index, erc20_abi, uniswap_v2_pair_abi, mev_c
     # Collect events
     try:
         logs = receipt_data['logs']
-        events = parse_uni_v2_events.parse_all_v2_events(logs,
-                                                         uniswap_v2_erc20_abi=erc20_abi,
+        events = uniswap_v2_parser.parse_all_uniswap_v2_events(logs,
+                                                         erc20_abi=erc20_abi,
+                                                         erc20_bytes32_abi=erc20_bytes32_abi,
                                                          uniswap_v2_pair_abi=uniswap_v2_pair_abi,
                                                          exchange_pair_address=UNISWAP_V2_USDC_WETH_ADDRESS)
     except Exception as e:
@@ -137,21 +138,28 @@ def parse_transaction(block_number, index, erc20_abi, uniswap_v2_pair_abi, mev_c
     # Append txes to global list
     try:
         for event in events:
-            type_of_event = event[0]
-            dex_symbol = event[1]
-            symbol_0 = event[2]
-            symbol_1 = event[3]
-            decimals_0 = event[4]
-            decimals_1 = event[5]
-            dxt = event[6]
-            dyt = event[7]
-            xt1 = event[8]
-            yt1 = event[9]
-            pt1 = event[10]
-            kt1 = event[11]
+            amount_0 = event['amount_0']
+            amount_0_in = event['amount_0_in']
+            amount_0_out = event['amount_0_out']
+            amount_1 = event['amount_1']
+            amount_1_in = event['amount_1_in']
+            amount_1_out = event['amount_1_out']
+            decimals_0 = event['decimals_0']
+            decimals_1 = event['decimals_1']
+            dex_symbol = event['dex_symbol']
+            event_type = event['event_type']
+            invariant = event['invariant']
+            mid_price = event['mid_price']
+            reserve_0 = event['reserve_0']
+            reserve_1 = event['reserve_1']
+            symbol_0 = event['symbol_0']
+            symbol_1 = event['symbol_1']
+
             data = [timestamp, block_number, index, hash, from_address, to_address, value, gas, gasPrice,
-                         maxPriorityFeePerGas, maxFeePerGas, type_of_event, dex_symbol, symbol_0,
-                        symbol_1, decimals_0, decimals_1, dxt, dyt, xt1, yt1, pt1, kt1, to_type]
+                         maxPriorityFeePerGas, maxFeePerGas, event_type, dex_symbol, symbol_0,
+                        symbol_1, decimals_0, decimals_1, amount_0, amount_1,
+                    amount_0_in, amount_0_out, amount_1_in, amount_1_out, reserve_0,
+                    reserve_1, mid_price, invariant, to_type]
             L.append(data)
     except Exception as e:
         logger.error(e, exc_info=True)
@@ -187,8 +195,9 @@ with multiprocessing.Manager() as manager:
 #             'gas_fee_cap']
 col_names= ['timestamp', 'block_number', 'index', 'hash', 'from_address', 'to_address', 'value',
             'gas', 'gasPrice', 'maxPriorityFeePerGas', 'maxFeePerGas', 'type_of_event', 'dex_symbol',
-            'symbol_0', 'symbol_1', 'decimals_0', 'decimals_1', 'dxt', 'dyt', 'xt1', 'yt1', 'pt1',
-            'kt1', 'to_type']
+            'symbol_0', 'symbol_1', 'decimals_0', 'decimals_1', 'amount_0', 'amount_1',
+            'amount_0_in', 'amount_0_out', 'amount_1_in', 'amount_1_out', 'reserve_0',
+            'reserve_1', 'mid_price', 'invariant', 'to_type']
 
 df = pd.DataFrame(data=transaction_data, columns=col_names)
 
