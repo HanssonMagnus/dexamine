@@ -24,7 +24,7 @@ class DexEvent:
     decimals_1: int  # Number of decimals of token 1.
 
     @staticmethod
-    def transform_to_base(amount: int, decimals: int) -> float | int:
+    def transform_to_base(amount: int | float, decimals: int) -> float | int:
         """
         Transforms token amounts to base values based on their decimals. Raise
         ValueError if the amount is None.

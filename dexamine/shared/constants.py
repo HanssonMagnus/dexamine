@@ -106,7 +106,7 @@ PATH_UNISWAP_V3_TEST_DATA_DIR = os.path.join(
     BASE_DIR, "../resources/test_data/uniswap_v3/"
 )
 PATH_UNISWAP_V3_BY_POSITIONS = os.path.join(
-    BASE_DIR, "../resources/test_data/uniswap_v3/uni_v3_by_positions.json"
+    BASE_DIR, "../resources/test_data/uniswap_v3/uniswap_v3_by_positions.json"
 )
 
 # Uniswap v3 events

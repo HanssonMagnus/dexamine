@@ -22,12 +22,13 @@ source $CONFIG_FILE
 echo "Querying contract: $CONTRACT_ADDRESS"
 echo "The chifra csv will be saved at: $OUTPUT_FILE_CSV"
 echo "The json will be saved at: $OUTPUT_FILE_JSON"
+echo "The Python log will be saved at: $LOG_PATH"
 
 # Run chifra script
 ./query_contract.sh $CONTRACT_ADDRESS $OUTPUT_FILE_CSV
 
 # Run the Python script that transforms the chifra csv to json
-python csv_to_json.py $OUTPUT_FILE_CSV $OUTPUT_FILE_JSON
+python csv_to_json.py $OUTPUT_FILE_CSV $OUTPUT_FILE_JSON $LOG_PATH
 
 # Print time elapsed
 end_time="$(date -u +%s)"

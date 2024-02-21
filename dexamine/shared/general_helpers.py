@@ -7,6 +7,7 @@ This file contains general helper functions.
 """
 
 # Import packages
+from typing import Any
 import logging
 import csv
 from io import StringIO
@@ -32,7 +33,9 @@ logger = logging.getLogger(__name__)
 ########################################################################################
 # RPC call functions
 ########################################################################################
-def get_tx_receipt_block_by_index(block_hex: str, index_hex: str) -> tuple[dict, dict, dict]:
+def get_tx_receipt_block_by_index(
+    block_hex: str, index_hex: str
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     """
     Get tx, receipt, and block response from node.
 
@@ -51,7 +54,7 @@ def get_tx_receipt_block_by_index(block_hex: str, index_hex: str) -> tuple[dict,
     return tx_data, receipt_data, block_data
 
 
-def get_tx_data_by_hash(tx_hash: str) -> dict:
+def get_tx_data_by_hash(tx_hash: str) -> dict[str, Any]:
     """
     Get tx response from node.
 
@@ -76,7 +79,7 @@ def get_tx_data_by_hash(tx_hash: str) -> dict:
     return tx_data
 
 
-def get_tx_data_by_block_and_index(block_hex: str, index_hex: str) -> dict:
+def get_tx_data_by_block_and_index(block_hex: str, index_hex: str) -> dict[str, Any]:
     """Get tx response from node."""
     url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
@@ -92,7 +95,7 @@ def get_tx_data_by_block_and_index(block_hex: str, index_hex: str) -> dict:
     return tx_data
 
 
-def get_receipt_data_by_hash(tx_hash: str) -> dict:
+def get_receipt_data_by_hash(tx_hash: str) -> dict[str, Any]:
     """Get receipt response from node."""
     url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
@@ -110,7 +113,7 @@ def get_receipt_data_by_hash(tx_hash: str) -> dict:
     return receipt_data
 
 
-def get_block_data_by_block_number(block_hex: str) -> dict:
+def get_block_data_by_block_number(block_hex: str) -> dict[str, Any]:
     """Get block response from node."""
     url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
@@ -131,7 +134,9 @@ def get_block_data_by_block_number(block_hex: str) -> dict:
 ########################################################################################
 # ABI call functions
 ########################################################################################
-def get_erc20_symbol(token_address: str, erc20_abi: dict, erc20_bytes32_abi: dict[str, int]) -> tuple:
+def get_erc20_symbol(
+    token_address: str, erc20_abi: dict[str, Any], erc20_bytes32_abi: dict[str, Any]
+) -> tuple[str, int]:
     """
     Match an ERC-20 token smart contract address to its symbol and get the number of
     decimals for that ERC-20 token.
@@ -154,7 +159,7 @@ def get_erc20_symbol(token_address: str, erc20_abi: dict, erc20_bytes32_abi: dic
         token_contract = w3.eth.contract(address=token_address, abi=erc20_abi)
         symbol = token_contract.functions.symbol().call()
         decimals = token_contract.functions.decimals().call()
-    except (OverflowError) as e:  # some tokens return symbol as bytes32
+    except OverflowError as e:  # some tokens return symbol as bytes32
         logger.error(e, exc_info=True)
         token_contract = w3.eth.contract(address=token_address, abi=erc20_bytes32_abi)
         symbol = token_contract.functions.symbol().call()
@@ -167,7 +172,7 @@ def get_erc20_symbol(token_address: str, erc20_abi: dict, erc20_bytes32_abi: dic
 ########################################################################################
 # Parsing transaction logs
 ########################################################################################
-def get_topics_0(logs: dict) -> list:
+def get_topics_0(logs: list[dict[str, Any]]) -> list:
     """Return list of all "topic 0"s in logs."""
     topics_0 = []
     for log in logs:
@@ -187,6 +192,7 @@ def get_event_indexes(topics_0: list, events: list) -> list:
             event_indexes.append(i)
     return event_indexes
 
+
 # THIS FUNCTION SHOULD BE REPLACED BY THE ONE ABOVE FOR ALL OCCURANCES
 def get_event_index(topics_0: list, event: str) -> list:
     """Returns: list, index of where in topics_0 the "event" occurs."""
@@ -202,7 +208,8 @@ def get_event_index(topics_0: list, event: str) -> list:
 ########################################################################################
 def bytes32_to_string(bytes32: bytes) -> str:
     """Decode using utf-8 and then strip the null characters."""
-    return bytes32.decode('utf-8').rstrip('\x00')
+    return bytes32.decode("utf-8").rstrip("\x00")
+
 
 ########################################################################################
 # Hexadecimal parsing
@@ -352,6 +359,7 @@ def load_abi(path_abi):
         data = json.load(file)
         return data["abi"]  # How they are constructed in this repo
 
+
 ########################################################################################
 # Load resource files
 ########################################################################################
@@ -370,15 +378,16 @@ def get_json_test_data(test_data_file: str) -> dict:
     package_path = "dexamine.resources.test_data"
 
     # Split the test_data_file into components (subdirectories + filename)
-    path_components = test_data_file.split('/')
+    path_components = test_data_file.split("/")
 
     # Construct the resource path by joining the package path with the relative file path
-    resource_path = '.'.join([package_path] + path_components[:-1])
+    resource_path = ".".join([package_path] + path_components[:-1])
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
     with resources.open_text(resource_path, file_name) as file:
         return json.load(file)
+
 
 def get_json_abi(abi_file: str) -> dict:
     """
@@ -396,15 +405,15 @@ def get_json_abi(abi_file: str) -> dict:
     package_path = "dexamine.resources.abis"
 
     # Split the test_data_file into components (subdirectories + filename)
-    path_components = abi_file.split('/')
+    path_components = abi_file.split("/")
 
     # Construct the resource path by joining the package path with the relative file path
-    resource_path = '.'.join([package_path] + path_components[:-1])
+    resource_path = ".".join([package_path] + path_components[:-1])
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
     with resources.open_text(resource_path, file_name) as file:
-        return json.load(file)['abi']
+        return json.load(file)["abi"]
 
 
 def get_txt_as_list(txt_file: str) -> list:
@@ -421,10 +430,10 @@ def get_txt_as_list(txt_file: str) -> list:
     package_path = "dexamine.resources.lists"
 
     # Split the txt_file into components (subdirectories + filename)
-    path_components = txt_file.split('/')
+    path_components = txt_file.split("/")
 
     # Construct resource path by joining the package path with the relative file path
-    resource_path = '.'.join([package_path] + path_components[:-1])
+    resource_path = ".".join([package_path] + path_components[:-1])
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
@@ -448,15 +457,16 @@ def get_csv_test_data_as_string(test_data_file: str) -> str:
     package_path = "dexamine.resources.test_data"
 
     # Split the test_data_file into components (subdirectories + filename)
-    path_components = test_data_file.split('/')
+    path_components = test_data_file.split("/")
 
     # Construct the resource path by joining the package path with the relative file path
-    resource_path = '.'.join([package_path] + path_components[:-1])
+    resource_path = ".".join([package_path] + path_components[:-1])
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
     with resources.open_text(resource_path, file_name) as file:
         return file.read()
+
 
 ########################################################################################
 # Transforming files
@@ -468,7 +478,9 @@ def chifra_csv_to_json(csv_content: str) -> dict[str, list[str]]:
     list' can return duplicates of transactions, and this transformation avoids that.
 
     Args:
-        csv_content (str): CSV content as a string.
+        csv_content (str): CSV content as a string. Which can be read in, e.g., like:
+            with open(path_input, mode='r', encoding='utf-8') as file:
+                csv_content = file.read()
 
     Returns:
         dict: A dictionary with block numbers as keys and lists of transaction indices
@@ -492,7 +504,10 @@ def chifra_csv_to_json(csv_content: str) -> dict[str, list[str]]:
             tx_dict[block_number].append(tx_index)
     return tx_dict
 
-def filter_blocks(input_file: str , output_file: str, start_block: int, end_block: int) -> dict:
+
+def filter_blocks(
+    input_file: str, output_file: str, start_block: int, end_block: int
+) -> dict:
     """
     This function reads a JSON file containing Ethereum blocks and their transactions,
     filters the blocks based on a specified range, and writes the filtered data to a new

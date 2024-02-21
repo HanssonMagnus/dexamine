@@ -8,6 +8,7 @@ This file contains helper functions for parsers.uniswap_v2.
 
 # Import packages
 import logging
+from typing import Any
 from web3 import Web3
 
 # Import modules
@@ -19,7 +20,8 @@ logger = logging.getLogger(__name__)
 ########################################################################################
 # Uniswap v2 ABI call node functions
 ########################################################################################
-def get_v2_pair(v2_pair_address, uniswap_v2_pair_abi):
+def get_v2_pair(v2_pair_address: str, uniswap_v2_pair_abi: dict[str, Any],
+) -> tuple[str, str]:
     """Get meta data for an v2 pair from node."""
     url = constants.NODE_URL
     w3 = Web3(Web3.HTTPProvider(url))
@@ -30,12 +32,12 @@ def get_v2_pair(v2_pair_address, uniswap_v2_pair_abi):
     return token0, token1
 
 
-def get_v2_dex(v2_pair_address, uniswap_v2_erc20_abi):
+def get_v2_dex(v2_pair_address: str, erc20_abi: dict[str, Any]) -> str:
     """Get meta data for an v2 DEX from node."""
     url = constants.NODE_URL
     w3 = Web3(Web3.HTTPProvider(url))
     v2_pair_address = Web3.to_checksum_address(v2_pair_address)
-    dex_contract = w3.eth.contract(address=v2_pair_address, abi=uniswap_v2_erc20_abi)
+    dex_contract = w3.eth.contract(address=v2_pair_address, abi=erc20_abi)
     dex_symbol = dex_contract.functions.symbol().call()
     return dex_symbol
 
@@ -84,7 +86,7 @@ def has_uniswap_v2_mint_event(topics_0):
     uniswap_v2_mint_event = constants.UNISWAP_V2_MINT_EVENT
     return uniswap_v2_mint_event in topics_0
 
-def sync_event_is_before_event(logs, event_index):
+def sync_event_is_before_event(logs: list[dict[str, Any]], event_index: int) -> bool:
     """
     Check that the event prior to the swap/mint/burn event is a sync event and that the
     events have the same address in the logs.

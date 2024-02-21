@@ -1,6 +1,6 @@
-# Output run 2023-12-11:
-# [4156261 rows x 24 columns]
-# 'Elapsed time: 0 days, 04:40:35'
+# Output run 2024-02-16:
+# [5088482 rows x 28 columns]
+# 'Elapsed time: 0 days, 05:46:43'
 #
 # Import packages
 import time
@@ -32,12 +32,17 @@ logger.error("Logging setup complete.")
 # Changeable variables: Blocks and output file.
 ###################################################################################################
 # Import test data
-PATH_UNISWAP_V2_BY_POSITIONS = constants.PATH_UNISWAP_V2_BY_POSITIONS
-file_out = os.path.join(constants.PATH_UNISWAP_V2_TEST_DATA_DIR, 'parsed_events_usdc_weth.csv')
+#PATH_UNISWAP_V2_BY_POSITIONS = constants.PATH_UNISWAP_V2_BY_POSITIONS
+#file_out = os.path.join(constants.PATH_UNISWAP_V2_TEST_DATA_DIR, 'parsed_events_usdc_weth.csv')
 
 # Full data set
-#PATH_UNISWAP_V2_BY_POSITIONS = '/media/m2_front/research/data/projects/dex_price_discovery/0_raw/txes_eth_usdc.json'
-#file_out = '/media/m2_front/research/data/projects/dex_price_discovery/1_parsed/events_usdc_weth.csv'
+PATH_UNISWAP_V2_BY_POSITIONS = "/media/m2_front/research/data/trueblocks_lists/uniswap_v2/usdc_weth/2024-02-13_usdc_weth_positions.json"
+file_out = "/media/m2_front/research/data/projects/dex_price_discovery/uniswap_v2/1_parsed/events_usdc_weth.csv"
+
+# Check that the output path exists
+if not os.path.exists(os.path.dirname(file_out)):
+    logger.error("file_out directory does not exist.")
+    sys.exit(1)
 
 ###################################################################################################
 # Load tx data as a json dict.

@@ -1,6 +1,6 @@
-# Output run 2024-01-09:
-# [5694177 rows x 26 columns]
-# 'Elapsed time: 0 days, 06:14:56'
+# Output run 2024-02-19:
+# [6220766 rows x 26 columns]
+# 'Elapsed time: 0 days, 06:48:26'
 #
 # Import packages
 import time
@@ -16,13 +16,13 @@ from pprint import pprint
 sys.path.append(os.path.abspath('../../../'))
 
 # Import scripts
-from shared import general_helpers
-from shared import constants
-from parsers.uniswap_v3 import parse_uni_v3_events
+from dexamine.shared import general_helpers
+from dexamine.shared import constants
+from dexamine.parsers import uniswap_v3_parser
 
 # Set up logger
 PATH_LOGS = constants.PATH_LOGS
-log_name = 'scripts/data_processing/uniswap_v3/eth_usdc.log'
+log_name = 'scripts/data_processing/uniswap_v3/usdc_weth_5bps.log'
 logging.basicConfig(filename=PATH_LOGS + log_name, level=logging.ERROR,
     format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
 logger = logging.getLogger(__name__)
@@ -34,15 +34,16 @@ logger.error("Logging setup complete.")
 ###################################################################################################
 # Import test data
 #PATH_UNISWAP_V3_BY_POSITIONS = constants.PATH_UNISWAP_V3_BY_POSITIONS
-#file_out = '/media/m2_front/research/data/projects/quantum_defi/0_raw/usdc_eth_5bps_october_2023_test.csv'
-
-# October 2023 data set
-#PATH_UNISWAP_V3_BY_POSITIONS = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions_october.json'
-#file_out = '/media/m2_front/research/data/projects/quantum_defi/0_raw/usdc_eth_5bps_october_2023.csv'
+#file_out = os.path.join(constants.PATH_UNISWAP_V3_TEST_DATA_DIR, 'parsed_events_usdc_weth_5bps.csv')
 
 # Full data set
-PATH_UNISWAP_V3_BY_POSITIONS = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/2023-11-23_eth_usdc_05_positions.json'
-file_out = '/media/m2_front/research/data/projects/defi_price_impact/0_raw/usdc_eth_5bps_2023-11-23.csv'
+PATH_UNISWAP_V3_BY_POSITIONS = "/media/m2_front/research/data/trueblocks_lists/uniswap_v3/usdc_weth/2024-02-13_usdc_weth_5bps_positions.json"
+file_out = "/media/m2_front/research/data/projects/dex_price_discovery/uniswap_v3/1_parsed/events_usdc_weth_5bps.csv"
+
+# Check that the output path exists
+if not os.path.exists(os.path.dirname(file_out)):
+    logger.error("file_out directory does not exist.")
+    sys.exit(1)
 
 ###################################################################################################
 # Load tx data as a json dict.
@@ -59,6 +60,7 @@ uniswap_v3_usdc_eth = constants.UNISWAP_V3_USDC_WETH_5BPS_ADDRESS
 # Load ABIs
 ###################################################################################################
 erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
+erc20_bytes32_abi = general_helpers.load_abi(constants.PATH_ERC20_BYTES_ABI)
 uniswap_v3_pair_abi = general_helpers.load_abi(constants.PATH_UNISWAP_V3_PAIR_ABI)
 
 ###################################################################################################
@@ -70,8 +72,7 @@ mev_contracts_list = list(mev_contracts)
 ###################################################################################################
 # Prepare arguments for multiprocessing
 ###################################################################################################
-args_for_multiprocessing = [(block, index, erc20_abi, uniswap_v3_pair_abi, mev_contracts_list) for block, index in block_index_pairs]
-
+args_for_multiprocessing = [(block, index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi, mev_contracts_list) for block, index in block_index_pairs]
 ###################################################################################################
 # Def multiprocess function
 #
@@ -80,7 +81,8 @@ args_for_multiprocessing = [(block, index, erc20_abi, uniswap_v3_pair_abi, mev_c
 # 'maxFeePerGas', 'hash', 'input', 'nonce', 'to', 'transactionIndex', 'value', 'type',
 # 'accessList', 'chainId', 'v', 'r', 's'])
 ###################################################################################################
-def parse_transaction(block_number, index, erc20_abi, uniswap_v3_pair_abi, mev_contracts_list):
+def parse_transaction(block_number, index, erc20_abi, erc20_bytes32_abi,
+                      uniswap_v3_pair_abi, mev_contracts_list):
     events = None # Initialize events to None
 
     try:
@@ -92,8 +94,9 @@ def parse_transaction(block_number, index, erc20_abi, uniswap_v3_pair_abi, mev_c
     # Collect events
     try:
         logs = receipt_data['logs']
-        events = parse_uni_v3_events.parse_all_v3_events(logs,
+        events = uniswap_v3_parser.parse_all_v3_events(logs,
                                                          erc20_abi=erc20_abi,
+                                                         erc20_bytes32_abi=erc20_bytes32_abi,
                                                          uniswap_v3_pair_abi=uniswap_v3_pair_abi,
                                                          exchange_pair_address=uniswap_v3_usdc_eth)
     except Exception as e:

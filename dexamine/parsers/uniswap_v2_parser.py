@@ -9,6 +9,7 @@ This file contains the parser for Uniswap v2 events.
 # Import packages
 import logging
 from dataclasses import dataclass, field, asdict
+from typing import Any
 from web3 import Web3
 
 
@@ -29,12 +30,12 @@ class UniswapV2Event(DexEvent):
     Data class for Uniswap v2 events that includes the sync event.
     """
 
-    reserve_0: int  # Inventory of token 0 in the liquidity pool after the event.
-    reserve_1: int  # Inventory of token 1 in the liquidity pool after the event.
+    reserve_0: int | float # Inventory of token 0 in the liquidity pool after the event.
+    reserve_1: int | float # Inventory of token 1 in the liquidity pool after the event.
     mid_price: float = field(init=False)  # Mid-price after the event.
     invariant: float = field(init=False)  # Invariant after the event.
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
 
         # Validate that the reserves are positive
         if self.reserve_0 <= 0:
@@ -66,15 +67,15 @@ class UniswapV2Swap(UniswapV2Event):
     Data class for Uniswap v2 swap event.
     """
 
-    amount_0_in: int  # Token 0 into pool (only in swap events).
-    amount_0_out: int  # Token 0 out of pool (only in swap events).
-    amount_1_in: int  # Token 1 into pool (only in swap events).
-    amount_1_out: int  # Token 1 out of pool (only in swap events).
+    amount_0_in: int | float # Token 0 into pool (only in swap events).
+    amount_0_out: int | float # Token 0 out of pool (only in swap events).
+    amount_1_in: int | float # Token 1 into pool (only in swap events).
+    amount_1_out: int | float # Token 1 out of pool (only in swap events).
     amount_0: float = field(init=False)  # Net flow of token 0 from liquidity pool
     amount_1: float = field(init=False)  # Net flow of token 1 from liquidity pool
     event_type: str = DexEventType.SWAP.value
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()  # Call the parent class __post_init__
 
         # Validate that all swap amounts are provided
@@ -109,7 +110,7 @@ class UniswapV2Swap(UniswapV2Event):
             )
 
     # Class methods
-    def get_event_data(self) -> dict:
+    def get_event_data(self) -> dict[str, float | int | str | None]:
         """
         Return the swap object as a dict.
 
@@ -143,10 +144,10 @@ class UniswapV2Lp(UniswapV2Event):
     """
 
     event_type: str = field(init=False)  # "mint" or "burn"
-    amount_0: int  # Net flow of token 0 from the liquidity pool.
-    amount_1: int  # Net flow of token 1 from the liquidity pool.
+    amount_0: int | float # Net flow of token 0 from the liquidity pool.
+    amount_1: int | float # Net flow of token 1 from the liquidity pool.
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()  # Call the parent class __post_init__
 
         # Validate that both amounts are provided
@@ -172,7 +173,7 @@ class UniswapV2Lp(UniswapV2Event):
             self.event_type = DexEventType.BURN.value
 
     # Class methods
-    def get_event_data(self) -> dict:
+    def get_event_data(self) -> dict[str, float | int | str | None]:
         """
         Return the lp object as a dict with all variables of a swap.
 
@@ -209,12 +210,12 @@ class UniswapV2Lp(UniswapV2Event):
 # Parse all Uniswap v2 swaps, mints, and burns from a transaction
 ########################################################################################
 def parse_all_uniswap_v2_events(
-    logs: dict,
-    erc20_abi: dict,
-    erc20_bytes32_abi: dict,
-    uniswap_v2_pair_abi: dict,
+    logs: list[dict[str, Any]],
+    erc20_abi: dict[str, Any],
+    erc20_bytes32_abi: dict[str, Any],
+    uniswap_v2_pair_abi: dict[str, Any],
     exchange_pair_address: str = "",
-) -> list:
+) -> list[dict[str, float | int | str | None]]:
     """Parse all swaps, mints, and burns from a tx.
     Args:
         logs (dict): Logs from a transaction's receipt.
@@ -299,12 +300,12 @@ def parse_all_uniswap_v2_events(
 # Swap parse functions
 ########################################################################################
 def parse_uniswap_v2_swaps(
-    logs: dict,
-    swap_indexes: list,
-    erc20_abi: dict,
-    erc20_bytes32_abi: dict,
-    uniswap_v2_pair_abi: dict,
-) -> list:
+    logs: list[dict[str, Any]],
+    swap_indexes: list[int],
+    erc20_abi: dict[str, Any],
+    erc20_bytes32_abi: dict[str, Any],
+    uniswap_v2_pair_abi: dict[str, Any],
+) -> list[dict[str, float | int | str | None] | None]:
     """
     Parse all v2 trades of the tx by identifying all swap events and parse them.
 
@@ -323,12 +324,12 @@ def parse_uniswap_v2_swaps(
 
 
 def parse_uniswap_v2_swap(
-    logs: dict,
+    logs: list[dict[str, Any]],
     swap_index: int,
-    erc20_abi: dict,
-    erc20_bytes32_abi: dict,
-    uniswap_v2_pair_abi: dict,
-) -> dict | None:
+    erc20_abi: dict[str, Any],
+    erc20_bytes32_abi: dict[str, Any],
+    uniswap_v2_pair_abi: dict[str, Any],
+) -> dict[str, float | int | str | None] | None:
     """
     Parse a Uniswap v2 swap event.
     Args:
@@ -399,12 +400,12 @@ def parse_uniswap_v2_swap(
 # Liquidity provision parse functions
 ########################################################################################
 def parse_uniswap_v2_lps(
-    logs: dict,
-    lp_indexes: list,
-    erc20_abi: dict,
-    erc20_bytes32_abi: dict,
-    uniswap_v2_pair_abi: dict,
-) -> list:
+    logs: list[dict[str, Any]],
+    lp_indexes: list[int],
+    erc20_abi: dict[str, Any],
+    erc20_bytes32_abi: dict[str, Any],
+    uniswap_v2_pair_abi: dict[str, Any],
+) -> list[dict[str, float | int | str | None] | None]:
     """
     Parse all Uniswap v2 LP events (mints and burns) in the transaction logs.
 
@@ -426,12 +427,12 @@ def parse_uniswap_v2_lps(
 
 
 def parse_uniswap_v2_lp(
-    logs: dict,
+    logs: list[dict[str, Any]],
     lp_index: int,
-    erc20_abi: dict,
-    erc20_bytes32_abi: dict,
-    uniswap_v2_pair_abi: dict,
-) -> dict | None:
+    erc20_abi: dict[str, Any],
+    erc20_bytes32_abi: dict[str, Any],
+    uniswap_v2_pair_abi: dict[str, Any],
+) -> dict[str, float | int | str | None] | None:
     """
     Parse a Uniswap v2 lp event (mint or burn).
 

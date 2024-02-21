@@ -1,8 +1,8 @@
 # Get all tx positions form contract
 
 #### Main Script - `main.sh`
-`main.sh` is the primary script that orchestrates the overall data extraction and processing
-workflow.
+`main.sh` is the primary script that orchestrates the overall data extraction and
+processing workflow.
 
 ```bash
 ./main.sh [optional: path to custom config file]
