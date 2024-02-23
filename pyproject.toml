@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "dexamine"
 version = "0.1.0"
-description = "Parsing DeFi blockchain data from Ethereum archive nodes."
+description = "Examine DEX data from Ethereum archive nodes."
 authors = ["Magnus Hansson <hansson.carl.magnus@gmail.com>"]
 license = "GPL-3.0"
 readme = "README.md"

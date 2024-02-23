@@ -6,7 +6,7 @@ This file contains general classes that are shared among the parsers.
 * Doc: https://github.com/HanssonMagnus/dexamine
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from enum import Enum
 
 
@@ -32,6 +32,10 @@ class DexEvent:
         if amount is None:
             raise ValueError("Amount cannot be None for base unit transformation.")
         return amount * 10**-decimals if decimals > 0 else amount
+
+    def get_event_data(self) -> dict[str, float | int | str | None]:
+        """Return dataclass object as dict."""
+        return asdict(self)
 
 
 class DexEventType(Enum):
