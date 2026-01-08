@@ -346,49 +346,6 @@ def test_parse_to_type_with_defi_address():
     defi_address = "0x_defi_contract_address"
     assert general_helpers.parse_to_type(defi_address, []) == "smart_contract"
 
-
-########################################################################################
-# Decode raw transaction from mempool
-########################################################################################
-def test_decode_mempool_tx_legacy():
-    """Decode a legacy transaction."""
-    raw_tx = "0xf8648085011bd4e6798252089401fc24e0e98d69a012667d8f88ee6595533ed2dd808026a0b781e5dff0578b30ab2651e2ae5c39f9a55f560c375d2a49957f64e51deba2caa03d29796ea80071bcb66f988583d962ed2fa74acc3e16b5ec0e659a27a7707da8"
-    expected = {
-        "_cached_rlp": "0xf8648085011bd4e6798252089401fc24e0e98d69a012667d8f88ee6595533ed2dd808026a0b781e5dff0578b30ab2651e2ae5c39f9a55f560c375d2a49957f64e51deba2caa03d29796ea80071bcb66f988583d962ed2fa74acc3e16b5ec0e659a27a7707da8",
-        "_data": "0x",
-        "_gas": 21000,
-        "_gas_price": 4761904761,
-        "_nonce": 0,
-        "_r": 83002761099386645858995637913074454428810264341220406988469950407888004162250,
-        "_s": 27664362587829906261959396639710599503250612382199861427221503821394144689576,
-        "_to": "0x01fc24e0e98d69a012667d8f88ee6595533ed2dd",
-        "_v": 38,
-        "_value": 0,
-    }
-    assert general_helpers.decode_mempool_tx(raw_tx) == expected
-
-
-def test_decode_mempool_tx_eip1559():
-    """Decode an EIP-1559 transaction."""
-    raw_tx = "0x02f877018309a49a843b9aca00855d21dba0008303345094c779d0ffad910eb7389aaacd9701e49986477a48881a596e4e2fb0e00080c080a0d34049f5b5efe3cf31bc150cf3ed65e34befb2a8eeb3d7bdefa50c9cd621bc8ba047e009a2cde12cbbde6f902f267f6185fbdf59f15a111b39cdd55839c6e235df"
-    expected = {
-        "_access_list": (),
-        "_cached_rlp": "0xf877018309a49a843b9aca00855d21dba0008303345094c779d0ffad910eb7389aaacd9701e49986477a48881a596e4e2fb0e00080c080a0d34049f5b5efe3cf31bc150cf3ed65e34befb2a8eeb3d7bdefa50c9cd621bc8ba047e009a2cde12cbbde6f902f267f6185fbdf59f15a111b39cdd55839c6e235df",
-        "_chain_id": 1,
-        "_data": "0x",
-        "_gas": 210000,
-        "_max_fee_per_gas": 400000000000,
-        "_max_priority_fee_per_gas": 1000000000,
-        "_nonce": 631962,
-        "_r": 95551599715045483471752351342558496344975130876885328391082779782712586779787,
-        "_s": 32510052496832404165760030483031856846147848528812411172527059535587920983519,
-        "_to": "0xc779d0ffad910eb7389aaacd9701e49986477a48",
-        "_value": 1898670000000000000,
-        "_y_parity": 0,
-    }
-    assert general_helpers.decode_mempool_tx(raw_tx) == expected
-
-
 ########################################################################################
 # Test functions that load resources
 ########################################################################################

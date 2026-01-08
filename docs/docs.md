@@ -1,4 +1,4 @@
-# Documentation for node-data project
+# Documentation for `dexamine`
 
 - [Miscellaneous](./misc/misc_docs)
 - [Parsers](./parsers/)

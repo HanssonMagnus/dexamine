@@ -6,6 +6,8 @@ digital depths.
 of an Ethereum archive node, it provides a robust toolset for transforming complex DEX
 transactions into structured datasets for research and data science.
 
+This repository focuses on **Uniswap v2/v3 parsing from transaction receipt logs**.
+
 *Data divers and blockchain biologists, ready your nets -- a new exploration awaits!*
 
 ### Project Information
@@ -18,37 +20,13 @@ transactions into structured datasets for research and data science.
 ## Release Notes
 
 ### v0.1.0
-- Initial version with support for Uniswap v2, Uniswap v3, and Sushiswap.
+- Initial version with support for Uniswap v2 and Uniswap v3.
 
 ## Parser Overview and Pipeline
-<table>
-<tr><th>Constant Product Markets</th><th>Liquidity Aggregators</th><th>Other AMMs</th></tr>
-<tr><td>
-
 | Protocol | Status |
-|------------|--------|
+|---|---|
 | Uniswap v2 | ✅ |
 | Uniswap v3 | ✅ |
-| Sushiswap | 🕒 |
-| PancakeSwap | ❌ |
-
-</td><td>
-
-| Protocol | Status |
-|------------|--------|
-| 1Inch | ❌ |
-| CoW Swap | ❌ |
-| Matcha | ❌ |
-
-</td><td>
-
-| Protocol | Status |
-|------------|--------|
-| Balancer | ❌ |
-| Curve | ❌ |
-
-</td></tr>
-</table>
 
 
 ✅: Included. 🕒: Under development. ❌: Not prioritized at the moment.
