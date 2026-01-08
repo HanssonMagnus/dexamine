@@ -17,25 +17,27 @@ from pprint import pprint
 import importlib.resources as pkg_resources
 
 # Set the path to the root of the project
-#sys.path.append(os.path.abspath('../../../../'))
+# sys.path.append(os.path.abspath('../../../../'))
 
 # Import scirpts
 from dexamine.shared import constants, general_helpers
 
 # Read in the chifra csv file
-#path_input = constants.PATH_UNISWAP_V2_TEST_DATA_DIR + "uni_v2_by_positions.csv"
+# path_input = constants.PATH_UNISWAP_V2_TEST_DATA_DIR + "uni_v2_by_positions.csv"
 
 # Output the json file
-#path_output = constants.PATH_UNISWAP_V2_BY_POSITIONS
+# path_output = constants.PATH_UNISWAP_V2_BY_POSITIONS
 
-csv_content = general_helpers.get_csv_test_data_as_string("uniswap_v2/uniswap_v2_by_positions.csv")
+csv_content = general_helpers.get_csv_test_data_as_string(
+    "uniswap_v2/uniswap_v2_by_positions.csv"
+)
 
-#pprint(csv_content)
+# pprint(csv_content)
 # Create json/dict of transactions
 tx_dict = general_helpers.chifra_csv_to_json(csv_content)
 pprint(tx_dict)
 
 # Save dictionary as JSON
-#with open(path_output, 'w+', encoding="utf-8") as fjson:
+# with open(path_output, 'w+', encoding="utf-8") as fjson:
 #    json.dump(tx_dict, fjson, indent=4)
-#fjson.close()
+# fjson.close()

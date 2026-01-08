@@ -22,8 +22,8 @@ class UniswapV3Swap(DexEvent):
 
     sender: str  # Address that initiated the swap call, and that received the callback.
     recipient: str  # The address that received the output of the swap.
-    amount_0: int | float # The delta of the token0 balance of the pool.
-    amount_1: int | float # The delta of the token1 balance of the pool.
+    amount_0: int | float  # The delta of the token0 balance of the pool.
+    amount_1: int | float  # The delta of the token1 balance of the pool.
     sqrt_price_x96: float  # The sqrt(price) of the pool after the swap, as a Q64.96.
     virtual_liquidity: int  # The virtual liquidity of the pool after the swap.
     tick: int  # The log base 1.0001 of price of the pool after the swap.
@@ -128,8 +128,8 @@ class UniswapV3Mint(DexEvent):
     tick_lower: int  # The lower tick of the position.
     tick_upper: int  # The upper tick of the position.
     amount: int  # The amount of liquidity minted to the position range.
-    amount_0: int | float # How much token0 was required for the minted liquidity.
-    amount_1: int | float # How much token1 was required for the minted liquidity.
+    amount_0: int | float  # How much token0 was required for the minted liquidity.
+    amount_1: int | float  # How much token1 was required for the minted liquidity.
     event_type: str = DexEventType.MINT.value
 
     def __post_init__(self) -> None:
@@ -189,8 +189,8 @@ class UniswapV3Burn(DexEvent):
     tick_lower: int  # The lower tick of the position.
     tick_upper: int  # The upper tick of the position.
     amount: int  # The amount of liquidity to remove.
-    amount_0: int | float # The amount of token0 withdrawn.
-    amount_1: int | float # The amount of token1 withdrawn.
+    amount_0: int | float  # The amount of token0 withdrawn.
+    amount_1: int | float  # The amount of token1 withdrawn.
     event_type: str = DexEventType.BURN.value
 
     def __post_init__(self) -> None:
@@ -307,4 +307,8 @@ pprint(type(mint_event))
 pprint(burn_event.get_event_data())
 pprint(type(burn_event))
 
-pprint(swap_event.get_event_data().keys() == mint_event.get_event_data().keys() == burn_event.get_event_data().keys())
+pprint(
+    swap_event.get_event_data().keys()
+    == mint_event.get_event_data().keys()
+    == burn_event.get_event_data().keys()
+)

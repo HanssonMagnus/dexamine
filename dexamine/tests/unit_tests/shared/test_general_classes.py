@@ -28,27 +28,35 @@ def test_dex_event_initialization():
     assert dex_event.decimals_1 == 6
     assert dex_event.event_index == 10
 
+
 # Test for transform_to_base with standard input
 def test_transform_to_base_normal():
     assert DexEvent.transform_to_base(1000, 2) == 10
 
+
 # Test for transform_to_base with zero decimals
 def test_transform_to_base_zero_decimals():
     assert DexEvent.transform_to_base(1000, 0) == 1000
+
 
 # Test for transform_to_base with None amount
 def test_transform_to_base_none_amount():
     with pytest.raises(ValueError):
         DexEvent.transform_to_base(None, 2)
 
+
 # Test for transform_to_base with boundary conditions
-@pytest.mark.parametrize("amount,decimals,expected", [
-    (1e18, 18, 1),
-    (1, 0, 1),
-    (-1e18, 18, -1),
-])
+@pytest.mark.parametrize(
+    "amount,decimals,expected",
+    [
+        (1e18, 18, 1),
+        (1, 0, 1),
+        (-1e18, 18, -1),
+    ],
+)
 def test_transform_to_base_boundary_conditions(amount, decimals, expected):
     assert DexEvent.transform_to_base(amount, decimals) == expected
+
 
 ########################################################################################
 # Test for DexEventType
@@ -57,6 +65,7 @@ def test_dex_event_type_values():
     assert DexEventType.SWAP.value == "swap"
     assert DexEventType.MINT.value == "mint"
     assert DexEventType.BURN.value == "burn"
+
 
 ########################################################################################
 # Test for EthereumToType

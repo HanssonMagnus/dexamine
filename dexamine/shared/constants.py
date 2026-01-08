@@ -28,7 +28,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ########################################################################################
 # Path to general ABIs
 PATH_ERC20_ABI = os.path.join(BASE_DIR, "../resources/abis/erc20/ERC20_abi.json")
-PATH_ERC20_BYTES_ABI = os.path.join(BASE_DIR, "../resources/abis/erc20/ERC20_bytes32_abi.json")
+PATH_ERC20_BYTES_ABI = os.path.join(
+    BASE_DIR, "../resources/abis/erc20/ERC20_bytes32_abi.json"
+)
 
 ########################################################################################
 # General Smart Contract Addresses

@@ -8,7 +8,7 @@ import csv
 import json
 
 # Set the path to the root of the project
-sys.path.append(os.path.abspath('../../../'))
+sys.path.append(os.path.abspath("../../../"))
 
 # Import scirpts
 from shared import general_helpers
@@ -17,15 +17,15 @@ from shared import general_helpers
 # Changeable variables: Blocks and output file.
 ###################################################################################################
 # Blocks
-block_start = 18251965 #2023-10-01
-block_end = 18473542 #2023-10-31
-block_end = 18273436 #2023-10-03
+block_start = 18251965  # 2023-10-01
+block_end = 18473542  # 2023-10-31
+block_end = 18273436  # 2023-10-03
 
 # File pahts
-dir_path = '/media/m2_front/research/data/trueblocks_lists/uniswap_v3/'
-file_in = dir_path + '2023-11-23_eth_usdc_05_positions.json'
-file_out = dir_path + '2023-11-23_eth_usdc_05_positions_october.json'
-file_out = dir_path + '2023-11-23_eth_usdc_05_positions_october_test.json'
+dir_path = "/media/m2_front/research/data/trueblocks_lists/uniswap_v3/"
+file_in = dir_path + "2023-11-23_eth_usdc_05_positions.json"
+file_out = dir_path + "2023-11-23_eth_usdc_05_positions_october.json"
+file_out = dir_path + "2023-11-23_eth_usdc_05_positions_october_test.json"
 
 ###################################################################################################
 # Filter blocks

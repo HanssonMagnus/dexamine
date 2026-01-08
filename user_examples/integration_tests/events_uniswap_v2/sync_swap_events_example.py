@@ -11,15 +11,15 @@ from decimal import Decimal, getcontext
 getcontext().prec = 19
 
 # Data from sync event
-reserve0 = Decimal('34380566947687148691700151')
-reserve1 = Decimal('729414612205345013242')
+reserve0 = Decimal("34380566947687148691700151")
+reserve1 = Decimal("729414612205345013242")
 
 # Data from subsequent swap event
-amount0In = Decimal('456056313444833958558829')
+amount0In = Decimal("456056313444833958558829")
 amount0Out = 0
 
 amount1In = 0
-amount1Out = Decimal('9776299507275846209')
+amount1Out = Decimal("9776299507275846209")
 
 # Change the reserve 0 and reserve 1 such that is was "before" the swap
 reserve0 = reserve0 - amount0In
@@ -29,13 +29,13 @@ print(reserve0)
 print(reserve1)
 
 # Calculate amount1Out from the liquidity pools and the amount of token 0 added to the pool
-fee = Decimal('0.997')
-amount1Out_check = amount0In*fee*reserve1 / (reserve0+amount0In*fee)
+fee = Decimal("0.997")
+amount1Out_check = amount0In * fee * reserve1 / (reserve0 + amount0In * fee)
 
 # Check to see if dyt and dyt_check are the same
 check = [amount1Out, amount1Out_check]
 print(check)
-print("The amounts are the same:", amount1Out==amount1Out_check)
+print("The amounts are the same:", amount1Out == amount1Out_check)
 
 # Output:
 # [Decimal('9776299507275846209'), Decimal('9776299507275846209')]

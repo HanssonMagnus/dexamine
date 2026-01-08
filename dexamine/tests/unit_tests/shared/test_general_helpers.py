@@ -262,25 +262,31 @@ def test_bytes32_to_string():
        string.
     """
     # Test case with a normal string
-    bytes32_data = b'Test String\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-    expected_result = 'Test String'
+    bytes32_data = b"Test String\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    expected_result = "Test String"
     # Should decode and strip null bytes correctly
     assert general_helpers.bytes32_to_string(bytes32_data) == expected_result
 
     # Test case with all null bytes
-    bytes32_data_all_nulls = b'\x00' * 32
-    expected_result_all_nulls = ''
+    bytes32_data_all_nulls = b"\x00" * 32
+    expected_result_all_nulls = ""
     # Should return an empty string for all null bytes
-    assert general_helpers.bytes32_to_string(bytes32_data_all_nulls) == expected_result_all_nulls
+    assert (
+        general_helpers.bytes32_to_string(bytes32_data_all_nulls)
+        == expected_result_all_nulls
+    )
 
     # Test case with no null bytes
-    bytes32_data_no_nulls = b'NoNullBytesInThisStringTesting!'
-    expected_result_no_nulls = 'NoNullBytesInThisStringTesting!'
+    bytes32_data_no_nulls = b"NoNullBytesInThisStringTesting!"
+    expected_result_no_nulls = "NoNullBytesInThisStringTesting!"
     # Should return the original string if there are no null bytes
-    assert general_helpers.bytes32_to_string(bytes32_data_no_nulls) == expected_result_no_nulls
+    assert (
+        general_helpers.bytes32_to_string(bytes32_data_no_nulls)
+        == expected_result_no_nulls
+    )
 
     # Test case with non-UTF-8 bytes (This should raise an exception)
-    bytes32_data_non_utf8 = b'\xff' * 32
+    bytes32_data_non_utf8 = b"\xff" * 32
     try:
         result = general_helpers.bytes32_to_string(bytes32_data_non_utf8)
         assert False, "Expected a UnicodeDecodeError"
@@ -345,6 +351,7 @@ def test_parse_to_type_with_defi_address():
     defi_address = "0x_defi_contract_address"
     assert general_helpers.parse_to_type(defi_address) == "smart_contract"
 
+
 ########################################################################################
 # Test functions that load resources
 ########################################################################################
@@ -363,7 +370,7 @@ def test_get_json_test_data_success():
             )
 
             # Verify the file was opened correctly
-            m.assert_called_once_with('r', encoding='utf-8')
+            m.assert_called_once_with("r", encoding="utf-8")
 
             # Assert that the result matches the expected JSON data
             assert result == sample_json_data
@@ -375,7 +382,9 @@ def test_get_json_test_data_file_not_found():
     with patch("importlib.resources.open_text", side_effect=FileNotFoundError):
         with pytest.raises(FileNotFoundError):
             # Attempt to load a file that does not exist
-            general_helpers.get_json_test_data("uniswap_v2_positions/non_existent_file.json")
+            general_helpers.get_json_test_data(
+                "uniswap_v2_positions/non_existent_file.json"
+            )
 
 
 def test_get_json_abi_success():
@@ -391,7 +400,7 @@ def test_get_json_abi_success():
             result = general_helpers.get_json_abi("uniswap_v2/IUniswapV2Pair.json")
 
             # Verify the file was opened correctly
-            m.assert_called_once_with('r', encoding='utf-8')
+            m.assert_called_once_with("r", encoding="utf-8")
 
             # Assert that the result matches the expected JSON data
             assert result == {"key": "value"}
@@ -413,7 +422,7 @@ def test_get_csv_test_data_as_string():
     m = mock_open(read_data=mock_csv_content)
 
     # Patch the files method from importlib.resources
-    with patch('importlib.resources.files') as mocked_files:
+    with patch("importlib.resources.files") as mocked_files:
         mocked_files.return_value.joinpath.return_value.open = m
         # Call the function with the path to the test data file
         result = general_helpers.get_csv_test_data_as_string("uniswap_v2/myfile.csv")
@@ -422,16 +431,21 @@ def test_get_csv_test_data_as_string():
         mocked_files.assert_called_once()
 
         # Verify that the file was opened correctly
-        m.assert_called_once_with('r', encoding='utf-8')
+        m.assert_called_once_with("r", encoding="utf-8")
 
         # Assert that the result matches the mock CSV content
         assert result == mock_csv_content
+
 
 ########################################################################################
 # Transforming files
 ########################################################################################
 def test_chifra_csv_to_json():
     """Transform a chifra list to json format without duplicates."""
-    expected = general_helpers.get_json_test_data("uniswap_v2_positions/uniswap_v2_by_positions.json")
-    csv_content = general_helpers.get_csv_test_data_as_string("uniswap_v2_positions/uniswap_v2_by_positions.csv")
+    expected = general_helpers.get_json_test_data(
+        "uniswap_v2_positions/uniswap_v2_by_positions.json"
+    )
+    csv_content = general_helpers.get_csv_test_data_as_string(
+        "uniswap_v2_positions/uniswap_v2_by_positions.csv"
+    )
     assert general_helpers.chifra_csv_to_json(csv_content) == expected

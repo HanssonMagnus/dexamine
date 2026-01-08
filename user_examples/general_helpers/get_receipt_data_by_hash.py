@@ -5,7 +5,7 @@ import logging
 from pprint import pprint
 
 # Set the path to the root of the project
-sys.path.append(os.path.abspath('../../../../'))
+sys.path.append(os.path.abspath("../../../../"))
 
 # Import scripts
 from dexamine.shared import general_helpers, constants
