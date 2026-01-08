@@ -1,0 +1,47 @@
+\documentclass[border=5pt]{standalone} % Adds a white border around the entire image
+\usepackage{tikz}
+\usepackage{amsmath}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric}
+
+\begin{document}
+
+    \begin{tikzpicture}[yscale=0.65]%[transform canvas={scale=0.1}]
+    % Draw EOA
+    \draw node[scale=0.25] at (-0.25, 1.225) {Tx Initiation};
+        \draw node[scale=0.25] at (-0.25, 0.725) {\begin{tabular}{c} EOA \\ (Agent) \end{tabular}};
+    \draw[very thin, draw=black] (-0.5,0.95) rectangle (0,0.5);
+
+    \draw [very thin, arrows = {-Latex[width=2pt, length=2pt]}] (0.05,0.725) to [out=0, in=180] (0.45,0.225) node[midway, right, font=\footnotesize, xshift=10pt] {};
+    \draw [very thin, arrows = {-Latex[width=2pt, length=2pt]}] (0.05,0.725) -- (0.45,0.725) node[midway, right, font=\footnotesize, xshift=10pt] {};
+    \draw [very thin, arrows = {-Latex[width=2pt, length=2pt]}] (0.05,0.725) to [out=0, in=-180] (0.45,1.225) node[midway, right, font=\footnotesize, xshift=10pt] {};
+
+    % Draw smart contract boxes
+    \draw node[scale=0.25] at (1, 1.55) {Tx Routing};
+
+    % DEX router
+        \draw node[scale=0.25] at (1, 0.225) {\begin{tabular}{c} MEV Smart Contracts \\ (Arbitrage Bots)
+        \end{tabular}};
+    \draw[very thin, draw=black] (0.5,0.45) rectangle (1.5,0);
+
+    % Smart Contract applications
+            \draw node[scale=0.25] at (1, 0.725) {\begin{tabular}{c} Smart Contracts \\
+            (DeFi DApps) \end{tabular}};
+    \draw[very thin, draw=black] (0.5,0.95) rectangle (1.5,0.5);
+
+    % MEV
+        \draw node[scale=0.25] at (1, 1.225) {\begin{tabular}{c} DEX Router \\ (Direct Trading)
+        \end{tabular}};
+    \draw[very thin, draw=black] (0.5,1.45) rectangle (1.5,1);
+
+    % Draw DEX
+    \draw node[scale=0.25] at (2.25, 1.225) {DEX Execution};
+        \draw node[scale=0.25] at (2.25, 0.725) {\begin{tabular}{c} DEX \\ (Exchange) \end{tabular}};
+    \draw[very thin, draw=black] (2,0.95) rectangle (2.5,0.5);
+
+    % Draw lines into DEX
+    \draw [very thin, -] (1.55,0.225) to [out=0, in=180] (1.92,0.725) node[midway, right, font=\footnotesize, xshift=10pt] {};
+    \draw [very thin, arrows = {-Latex[width=2pt, length=2pt]}] (1.55,0.725) -- (1.95,0.725) node[midway, right, font=\footnotesize, xshift=10pt] {};
+    \draw [very thin, -] (1.55,1.225) to [out=0, in=-180] (1.92,0.725) node[midway, right, font=\footnotesize, xshift=10pt] {};
+\end{tikzpicture}
+
+\end{document}
