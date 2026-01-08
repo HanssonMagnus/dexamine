@@ -1,8 +1,5 @@
 # Miscellaneous docs
 
-## Lists
-This repository does not include MEV contract lists.
-
 ## When You Have Queried Your Data
 Dexamine delivers the data in parquet format. Parquet is becoming the standard for high
 performance data storage, however one disadvantage is that you cannot view the data file
