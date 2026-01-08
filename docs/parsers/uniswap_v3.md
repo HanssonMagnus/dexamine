@@ -1,6 +1,6 @@
 # Parsers Documentation - `dexamine` Project
 
-## Uniswap v3: parse_uni_v3_events.py
+## Uniswap v3: `./dexamine/parsers/uniswap_v3_parser.py`
 This file contains parsers for liquidity taking and liquidity provision events for Uniswap v3.
 
 ##### `parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_address='')`
@@ -9,7 +9,49 @@ Inputs:
 logs: Logs from transaction receipt.
 exchange_pair_address: string of the exchange pair smart contract address.
 
-##### `parse_v2_trade(logs, swap_index, erc20_abi, uniswap_v3_pair_abi)`
+For each Uniswap v3 event (swap, mint, burn), the following variables are parsed:
+
+Meta data from the transaction:
+- timestamp: The Unix timestamp indicating when the transaction occurred.
+- block_number: The number of the block in the Ethereum blockchain in which the
+                transaction was recorded.
+- index: A sequential number indicating the transaction's position within the block.
+- hash: The unique transaction hash, an identifier for the transaction.
+- from_address: The Ethereum address of the transaction initiator.
+- to_address: The Ethereum address of the transaction recipient.
+- value: The amount of Ether transferred in the transaction (is usually 0 for smart
+        contract interactions, e.g., Unsiwap).
+- gas: The total amount of gas used by the transaction.
+- gasPrice: The price of gas (in wei) at the time of the transaction.
+- maxPriorityFeePerGas: The maximum priority fee per unit of gas (in wei) specified for
+                        the transaction.
+- maxFeePerGas: The maximum fee per unit of gas (in wei) the sender is willing to pay.
+
+Variables from the event:
+- 'event_type': Specifies the type of event: "swap", "mint", or "burn".
+- 'dex_symbol': The symbol of the decentralized exchange.
+- 'symbol_0': The symbol of the first token in the exchange pair.
+- 'symbol_1': The symbol of the second token in the exchange pair.
+- 'decimals_0': The number of decimals of the first token in the exchange pair.
+- 'decimals_1': The number of decimals of the second token in the exchange pair.
+- 'sender': The address that minted liquidity or swapped.
+- 'recipient': The address that received the output of a swap.
+- 'owner': The owner of the position and recipient of any minted/burned liquidity.
+- 'amount': The amount of liquidity minted/burned to the position range.
+- 'amount_0': How much token0 was required for the minted/burned liquidity.
+- 'amount_1': How much token0 was required for the minted/burned liquidity.
+- 'virtual_liquidity': The virtual liquidity of the pool after the swap.
+- 'tick': The log base 1.0001 of price of the pool after the swap.
+- 'sqrt_price_x96': The sqrt(mid-price) of the pool after the swap, as a Q64.96.
+- 'price': The mid-price of the pool after the swap.
+- 'tick_lower': The lower tick of the LP position.
+- 'tick_upper': The upper tick of the LP position.
+- 'virtual_reserve_0': The virtual reserve of token0 after the swap in base units.
+- 'virtual_reserve_1': The virtual reserve of token0 after the swap in base units.
+- 'to_type': Type of agent: uni (manual), defi (algorithmic), mev (arbitrage), or
+             contract_creation.
+
+##### `parse_v3_swap(logs, swap_index, erc20_abi, uniswap_v3_pair_abi)`
 The swap event in Uniswap v3 is rather straightforward and contain the following variables:
 
 - amount0: pool change in token0 (negative if the pool sends out the amount).

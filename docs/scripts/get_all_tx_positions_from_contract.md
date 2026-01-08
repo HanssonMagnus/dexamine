@@ -5,7 +5,7 @@
 processing workflow.
 
 ```bash
-./main.sh [optional: path to custom config file]
+poetry run ./main.sh [optional: path to custom config file]
 ```
 If a custom config file path is not provided, default_config.cfg is used.
 

@@ -20,12 +20,13 @@ from dexamine.shared.general_classes import DexEvent, DexEventType, EthereumToTy
 ########################################################################################
 # Test for normal initialization and attribute access
 def test_dex_event_initialization():
-    dex_event = DexEvent("UNI", "ETH", "USDT", 18, 6)
+    dex_event = DexEvent("UNI", "ETH", "USDT", 18, 6, 10)
     assert dex_event.dex_symbol == "UNI"
     assert dex_event.symbol_0 == "ETH"
     assert dex_event.symbol_1 == "USDT"
     assert dex_event.decimals_0 == 18
     assert dex_event.decimals_1 == 6
+    assert dex_event.event_index == 10
 
 # Test for transform_to_base with standard input
 def test_transform_to_base_normal():
@@ -61,7 +62,7 @@ def test_dex_event_type_values():
 # Test for EthereumToType
 ########################################################################################
 def test_ethereum_to_type_values():
-    assert EthereumToType.UNI.value == "uni"
-    assert EthereumToType.DEFI.value == "defi"
+    assert EthereumToType.DEX_ROUTER.value == "dex_router"
+    assert EthereumToType.SMART_CONTRACT.value == "smart_contract"
     assert EthereumToType.MEV.value == "mev"
     assert EthereumToType.CONTRACT_CREATION.value == "contract_creation"

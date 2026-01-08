@@ -172,15 +172,27 @@ def get_erc20_symbol(
 ########################################################################################
 # Parsing transaction logs
 ########################################################################################
+#def get_topics_0(logs: list[dict[str, Any]]) -> list:
+#    """Return list of all "topic 0"s in logs."""
+#    topics_0 = []
+#    for log in logs:
+#        # Check if 'topics' key exists and it has at least one element
+#        if "topics" in log and len(log["topics"]) > 0:
+#            topics_0.append(log["topics"][0])
+#        else:
+#            continue  # continue loop to next log
+#    return topics_0
+
 def get_topics_0(logs: list[dict[str, Any]]) -> list:
-    """Return list of all "topic 0"s in logs."""
+    """Return list of all 'topic 0's in logs, or an empty string if no topics are present."""
     topics_0 = []
     for log in logs:
-        # Check if 'topics' key exists and it has at least one element
+        # If 'topics' key exists and has at least one element, append the first topic
         if "topics" in log and len(log["topics"]) > 0:
             topics_0.append(log["topics"][0])
         else:
-            continue  # continue loop to next log
+            # Append an empty string if 'topics' is missing or empty
+            topics_0.append("")
     return topics_0
 
 
@@ -194,13 +206,13 @@ def get_event_indexes(topics_0: list, events: list) -> list:
 
 
 # THIS FUNCTION SHOULD BE REPLACED BY THE ONE ABOVE FOR ALL OCCURANCES
-def get_event_index(topics_0: list, event: str) -> list:
-    """Returns: list, index of where in topics_0 the "event" occurs."""
-    event_index = []
-    for i, topic in enumerate(topics_0):
-        if topic == event:
-            event_index.append(i)
-    return event_index
+#def get_event_index(topics_0: list, event: str) -> list:
+#    """Returns: list, index of where in topics_0 the "event" occurs."""
+#    event_index = []
+#    for i, topic in enumerate(topics_0):
+#        if topic == event:
+#            event_index.append(i)
+#    return event_index
 
 
 ########################################################################################
@@ -210,6 +222,20 @@ def bytes32_to_string(bytes32: bytes) -> str:
     """Decode using utf-8 and then strip the null characters."""
     return bytes32.decode("utf-8").rstrip("\x00")
 
+########################################################################################
+# Ethereum address parsing
+########################################################################################
+def normalize_eth_address(address: str) -> str:
+    """
+    Normalize Ethereum address by ensuring it's 40 characters long, excluding '0x'.
+    """
+    if address.startswith("0x"):
+        # Strip the '0x', then remove leading zeros
+        stripped_address = address[2:].lstrip("0")
+        # Ensure address has 40 characters, padding with 0s at the start if necessary
+        normalized_address = "0x" + stripped_address.rjust(40, "0")
+        return normalized_address
+    return address  # Return the original address if it doesn't start with '0x'
 
 ########################################################################################
 # Hexadecimal parsing
@@ -262,7 +288,7 @@ def parse_to_type(to_address: str, mev_contracts_list: list) -> str:
     script. Ensure that 'contract_creation' strings will not raise ValueError as it is
     not a HEX string.
     """
-    if to_address == EthereumToType.CONTRACT_CREATION.value:
+    if to_address is None:
         return EthereumToType.CONTRACT_CREATION.value
 
     # Transform HEX address to checksum address
@@ -273,11 +299,11 @@ def parse_to_type(to_address: str, mev_contracts_list: list) -> str:
 
     # Assign which route the transaction took to execution.
     if to_address in constants.uniswap_address_list:
-        to_type = EthereumToType.UNI.value
+        to_type = EthereumToType.DEX_ROUTER.value
     elif to_address in mev_contracts_list:
         to_type = EthereumToType.MEV.value
     else:
-        to_type = EthereumToType.DEFI.value
+        to_type = EthereumToType.SMART_CONTRACT.value
 
     return to_type
 
@@ -365,7 +391,7 @@ def load_abi(path_abi):
 ########################################################################################
 def get_json_test_data(test_data_file: str) -> dict:
     """
-    Load a JSON test data file from dexamine/resources/test_data.
+    Load a JSON test data file from dexamine/tests/test_data.
 
     The `test_data_file` argument should include the subdirectory and filename. For example,
     "uniswap_v2/myfile.json" or "uniswap_v3/anotherfile.json".
@@ -375,7 +401,7 @@ def get_json_test_data(test_data_file: str) -> dict:
                               including subdirectories if applicable.
     """
     # Dynamically construct the package path
-    package_path = "dexamine.resources.test_data"
+    package_path = "dexamine.tests.test_data"
 
     # Split the test_data_file into components (subdirectories + filename)
     path_components = test_data_file.split("/")
@@ -385,7 +411,8 @@ def get_json_test_data(test_data_file: str) -> dict:
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
-    with resources.open_text(resource_path, file_name) as file:
+    with resources.files(resource_path).joinpath(file_name).open('r', encoding='utf-8') as file:
+    #with resources.open_text(resource_path, file_name) as file:
         return json.load(file)
 
 
@@ -412,7 +439,7 @@ def get_json_abi(abi_file: str) -> dict:
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
-    with resources.open_text(resource_path, file_name) as file:
+    with resources.files(resource_path).joinpath(file_name).open('r', encoding='utf-8') as file:
         return json.load(file)["abi"]
 
 
@@ -437,14 +464,14 @@ def get_txt_as_list(txt_file: str) -> list:
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
-    with resources.open_text(resource_path, file_name) as file:
+    with resources.files(resource_path).joinpath(file_name).open('r', encoding='utf-8') as file:
         # Remove newline characters and skip empty lines
         return [line.strip() for line in file if line.strip()]
 
 
 def get_csv_test_data_as_string(test_data_file: str) -> str:
     """
-    Load a CSV test data file as a string from dexamine/resources/test_data.
+    Load a CSV test data file as a string from dexamine/tests/test_data.
 
     The `test_data_file` argument should include the subdirectory and filename. E.g.,
     "uniswap_v2/myfile.csv" or "uniswap_v3/anotherfile.csv".
@@ -454,7 +481,7 @@ def get_csv_test_data_as_string(test_data_file: str) -> str:
                               directory, including subdirectories if applicable.
     """
     # Dynamically construct the package path
-    package_path = "dexamine.resources.test_data"
+    package_path = "dexamine.tests.test_data"
 
     # Split the test_data_file into components (subdirectories + filename)
     path_components = test_data_file.split("/")
@@ -464,7 +491,7 @@ def get_csv_test_data_as_string(test_data_file: str) -> str:
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
-    with resources.open_text(resource_path, file_name) as file:
+    with resources.files(resource_path).joinpath(file_name).open('r', encoding='utf-8') as file:
         return file.read()
 
 

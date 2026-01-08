@@ -15,6 +15,9 @@ from dexamine.shared import constants
 
 ########################################################################################
 # Uniswap v3 general functions
+#
+# This functions is not used any more!!! Since this logic is moved into the
+# UniswapV3Swap class.
 ########################################################################################
 def sqrt_price_x96_to_price(sqrt_price_x96, token0_dec, token1_dec):
     """Convert the sqrt_price_x96 to the regular price and transform it to base units.

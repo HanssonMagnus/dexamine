@@ -104,7 +104,7 @@ class UniswapV2Swap(UniswapV2Event):
         self.amount_1 = self.amount_1_in - self.amount_1_out
 
         # Validate that the amounts have different signs
-        if not (self.amount_0 * self.amount_1) < 0:
+        if not (self.amount_0 * self.amount_1) <= 0:
             raise ValueError(
                 "For Swap events, amount_0 and amount_1 must have opposite signs."
             )
@@ -124,6 +124,7 @@ class UniswapV2Swap(UniswapV2Event):
             'amount_1_out':float,
             'decimals_0': int,
             'decimals_1': int,
+            'event_index': int,
             'dex_symbol': 'UniswapV2',
             'event_type': 'swap',
             'invariant': float,
@@ -187,6 +188,7 @@ class UniswapV2Lp(UniswapV2Event):
             'amount_1_out':None,
             'decimals_0': int,
             'decimals_1': int,
+            'event_index': int,
             'dex_symbol': 'UniswapV2',
             'event_type': 'swap',
             'invariant': float,
@@ -380,6 +382,7 @@ def parse_uniswap_v2_swap(
 
     # Create swap event object
     swap_event = UniswapV2Swap(
+        event_index=swap_index,
         dex_symbol=dex_symbol,
         symbol_0=symbol_0,
         symbol_1=symbol_1,
@@ -486,6 +489,7 @@ def parse_uniswap_v2_lp(
 
     # Create swap event object
     lp_event = UniswapV2Lp(
+        event_index=lp_index,
         dex_symbol=dex_symbol,
         symbol_0=symbol_0,
         symbol_1=symbol_1,

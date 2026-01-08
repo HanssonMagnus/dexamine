@@ -8,10 +8,25 @@ from pprint import pprint
 sys.path.append(os.path.abspath('../../../'))
 
 # Import scripts
-from parsers.uniswap_v3 import parse_uni_v3_events
-from shared import general_helpers
-from shared import uniswap_v3_parsing
-from shared import constants
+from dexamine.parsers import uniswap_v3_parser
+from dexamine.shared import general_helpers
+from dexamine.shared import uniswap_v3_parsing
+from dexamine.shared import constants
+
+########################################################################################
+# Set up logger
+########################################################################################
+logger = logging.getLogger(__name__)
+
+# Example log message
+logger.error("Logging setup complete.")
+
+###################################################################################################
+# Load ABIs
+###################################################################################################
+erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
+erc20_bytes32_abi = general_helpers.load_abi(constants.PATH_ERC20_BYTES_ABI)
+uniswap_v3_pair_abi = general_helpers.load_abi(constants.PATH_UNISWAP_V3_PAIR_ABI)
 
 ###################################################################################################
 # Import test data
@@ -35,7 +50,11 @@ for block in blocks:
             logs = receipt_data['logs']
 
             # Parse all events
-            events = parse_uni_v3_events.parse_all_v3_events(logs, exchange_pair_address='')
+            events = uniswap_v3_parser.parse_all_v3_events(logs,
+                                                         erc20_abi=erc20_abi,
+                                                         erc20_bytes32_abi=erc20_bytes32_abi,
+                                                         uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+                                                         exchange_pair_address='')
             pprint(events)
 
         except Exception as e:

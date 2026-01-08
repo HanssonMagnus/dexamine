@@ -63,6 +63,7 @@ transactions into structured datasets for research and data science.
 - [`paper/`](./paper/): Accompanying paper.
 
 ## Setup
+- (Optional) Set poetry to create local environment: `poetry config virtualenvs.in-project true`
 - Activate the virtual environment: `poetry shell`
 - Install dependencies: `poetry install`
 

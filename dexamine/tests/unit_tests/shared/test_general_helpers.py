@@ -196,7 +196,7 @@ def test_get_topics_0_normal_case():
 def test_get_topics_0_no_topics():
     """Test for when logs are missing topics 0s."""
     logs = [{"data": "Some data"}, {"data": "More data"}]
-    expected = []
+    expected = ["", ""]
     assert general_helpers.get_topics_0(logs) == expected
 
 
@@ -206,7 +206,7 @@ def test_get_topics_0_empty_topics():
         {"topics": [], "data": "Some data"},
         {"topics": ["0xcc"], "data": "More data"},
     ]
-    expected = ["0xcc"]
+    expected = ["", "0xcc"]
     assert general_helpers.get_topics_0(logs) == expected
 
 
@@ -218,7 +218,7 @@ def test_get_topics_0_combination():
         {"topics": [], "data": "Even more data"},
         {"topics": ["0xdd", "0xee"], "data": "Yet more data"},
     ]
-    expected = ["0xcc", "0xdd"]
+    expected = ["", "0xcc", "", "0xdd"]
     assert general_helpers.get_topics_0(logs) == expected
 
 
@@ -236,7 +236,7 @@ def test_get_event_index_normal_case():
     ]
     expected_result = [5]
     assert (
-        general_helpers.get_event_index(topics0, constants.UNISWAP_V3_MINT_EVENT)
+        general_helpers.get_event_indexes(topics0, [constants.UNISWAP_V3_MINT_EVENT])
         == expected_result
     )
 
@@ -326,7 +326,7 @@ def test_parse_signed_int_edge_case():
 ########################################################################################
 def test_parse_to_type_with_contract_creation():
     """Test if to_address is "contract creation"."""
-    assert general_helpers.parse_to_type("contract_creation", []) == "contract_creation"
+    assert general_helpers.parse_to_type(None, []) == "contract_creation"
 
 
 def test_parse_to_type_with_mev_contract():
@@ -338,13 +338,13 @@ def test_parse_to_type_with_mev_contract():
 
 def test_parse_to_type_with_uni_router():
     uni_address = "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a"
-    assert general_helpers.parse_to_type(uni_address, []) == "uni"
+    assert general_helpers.parse_to_type(uni_address, []) == "dex_router"
 
 
 def test_parse_to_type_with_defi_address():
     """Test if to_address is "defi", using a generic non-MEV, non-Uniswap address."""
     defi_address = "0x_defi_contract_address"
-    assert general_helpers.parse_to_type(defi_address, []) == "defi"
+    assert general_helpers.parse_to_type(defi_address, []) == "smart_contract"
 
 
 ########################################################################################
@@ -397,7 +397,9 @@ def test_get_json_test_data_success():
     sample_json_data = {"key": "value"}
     sample_json_content = '{"key": "value"}'
     m = mock_open(read_data=sample_json_content)
-    with patch("importlib.resources.open_text", m) as mocked_open:
+
+    with patch("importlib.resources.files") as mock_files:
+        mock_files.return_value.joinpath.return_value.open = m
         with patch("json.load", return_value=sample_json_data):
             # Call the function with a sample file path
             result = general_helpers.get_json_test_data(
@@ -405,7 +407,7 @@ def test_get_json_test_data_success():
             )
 
             # Verify the file was opened correctly
-            mocked_open.assert_called_once()
+            m.assert_called_once_with('r', encoding='utf-8')
 
             # Assert that the result matches the expected JSON data
             assert result == sample_json_data
@@ -417,7 +419,7 @@ def test_get_json_test_data_file_not_found():
     with patch("importlib.resources.open_text", side_effect=FileNotFoundError):
         with pytest.raises(FileNotFoundError):
             # Attempt to load a file that does not exist
-            general_helpers.get_json_test_data("uniswap_v2/non_existent_file.json")
+            general_helpers.get_json_test_data("uniswap_v2_positions/non_existent_file.json")
 
 
 def test_get_json_abi_success():
@@ -425,13 +427,15 @@ def test_get_json_abi_success():
     sample_json_data = {"abi": {"key": "value"}}
     sample_json_content = '{"abi": {"key": "value"}}'
     m = mock_open(read_data=sample_json_content)
-    with patch("importlib.resources.open_text", m) as mocked_open:
+
+    with patch("importlib.resources.files") as mock_files:
+        mock_files.return_value.joinpath.return_value.open = m
         with patch("json.load", return_value=sample_json_data):
             # Call the function with a sample file path
             result = general_helpers.get_json_abi("uniswap_v2/IUniswapV2Pair.json")
 
             # Verify the file was opened correctly
-            mocked_open.assert_called_once()
+            m.assert_called_once_with('r', encoding='utf-8')
 
             # Assert that the result matches the expected JSON data
             assert result == {"key": "value"}
@@ -452,12 +456,16 @@ def test_get_txt_as_list_success():
     expected_list = ["line1", "line2", "line4"]
     m = mock_open(read_data=sample_text_content)
 
-    with patch("importlib.resources.open_text", m) as mocked_open:
+    with patch("importlib.resources.files") as mock_files:
+        mock_files.return_value.joinpath.return_value.open = m
         # Call the function with a sample file path
         result = general_helpers.get_txt_as_list("lists/mev_contracts.txt")
 
+        # Verify the files() method was called correctly
+        mock_files.assert_called_once()
+
         # Verify the file was opened correctly
-        mocked_open.assert_called_once()
+        m.assert_called_once_with('r', encoding='utf-8')
 
         # Assert that the result matches the expected list
         assert result == expected_list, "The function did not return the expected list"
@@ -466,7 +474,7 @@ def test_get_txt_as_list_success():
 def test_get_txt_as_list_file_not_found():
     """Test for when a wrong path to a text file has been specified."""
     # Simulate a FileNotFoundError when attempting to open a non-existent file
-    with patch("importlib.resources.open_text", side_effect=FileNotFoundError):
+    with patch("importlib.resources.files", side_effect=FileNotFoundError):
         with pytest.raises(FileNotFoundError):
             # Attempt to load a file that does not exist
             general_helpers.get_txt_as_list("lists/non_existent_file.txt")
@@ -476,27 +484,28 @@ def test_get_csv_test_data_as_string():
     """Test for loading csv data as a string."""
     # Mock CSV content that you expect to read from the file
     mock_csv_content = "column1,column2\nvalue1,value2\nvalue3,value4"
-    # The expected path components for the resource
-    resource_package = "dexamine.resources.test_data.uniswap_v2"
-    resource_name = "myfile.csv"
+    m = mock_open(read_data=mock_csv_content)
 
-    # Patch the open_text method from importlib.resources
-    with patch.object(pkg_resources, 'open_text', mock_open(read_data=mock_csv_content)) as mocked_open:
+    # Patch the files method from importlib.resources
+    with patch('importlib.resources.files') as mocked_files:
+        mocked_files.return_value.joinpath.return_value.open = m
         # Call the function with the path to the test data file
         result = general_helpers.get_csv_test_data_as_string("uniswap_v2/myfile.csv")
 
-        # Verify that the open_text method was called correctly
-        mocked_open.assert_called_once_with(resource_package, resource_name)
+        # Verify that the files method was called correctly
+        mocked_files.assert_called_once()
+
+        # Verify that the file was opened correctly
+        m.assert_called_once_with('r', encoding='utf-8')
 
         # Assert that the result matches the mock CSV content
         assert result == mock_csv_content
-
 
 ########################################################################################
 # Transforming files
 ########################################################################################
 def test_chifra_csv_to_json():
     """Transform a chifra list to json format without duplicates."""
-    expected = general_helpers.get_json_test_data("uniswap_v2/uniswap_v2_by_positions.json")
-    csv_content = general_helpers.get_csv_test_data_as_string("uniswap_v2/uniswap_v2_by_positions.csv")
+    expected = general_helpers.get_json_test_data("uniswap_v2_positions/uniswap_v2_by_positions.json")
+    csv_content = general_helpers.get_csv_test_data_as_string("uniswap_v2_positions/uniswap_v2_by_positions.csv")
     assert general_helpers.chifra_csv_to_json(csv_content) == expected

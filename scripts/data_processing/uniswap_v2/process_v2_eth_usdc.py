@@ -1,6 +1,6 @@
 # Output run 2024-02-16:
 # [5088482 rows x 28 columns]
-# 'Elapsed time: 0 days, 05:46:43'
+# 'Elapsed time: 0 days, 06:00:44'
 #
 # Import packages
 import time
@@ -36,7 +36,7 @@ logger.error("Logging setup complete.")
 #file_out = os.path.join(constants.PATH_UNISWAP_V2_TEST_DATA_DIR, 'parsed_events_usdc_weth.csv')
 
 # Full data set
-PATH_UNISWAP_V2_BY_POSITIONS = "/media/m2_front/research/data/trueblocks_lists/uniswap_v2/usdc_weth/2024-02-13_usdc_weth_positions.json"
+PATH_UNISWAP_V2_BY_POSITIONS = "/media/m2_front/research/data/dexamine/trueblocks_lists/uniswap_v2/usdc_weth/2024-02-13_usdc_weth_positions.json"
 file_out = "/media/m2_front/research/data/projects/dex_price_discovery/uniswap_v2/1_parsed/events_usdc_weth.csv"
 
 # Check that the output path exists
@@ -151,6 +151,7 @@ def parse_transaction(block_number, index, erc20_abi, erc20_bytes32_abi, uniswap
             amount_1_out = event['amount_1_out']
             decimals_0 = event['decimals_0']
             decimals_1 = event['decimals_1']
+            event_index = event['event_index']
             dex_symbol = event['dex_symbol']
             event_type = event['event_type']
             invariant = event['invariant']
@@ -160,7 +161,7 @@ def parse_transaction(block_number, index, erc20_abi, erc20_bytes32_abi, uniswap
             symbol_0 = event['symbol_0']
             symbol_1 = event['symbol_1']
 
-            data = [timestamp, block_number, index, hash, from_address, to_address, value, gas, gasPrice,
+            data = [timestamp, block_number, index, event_index, hash, from_address, to_address, value, gas, gasPrice,
                          maxPriorityFeePerGas, maxFeePerGas, event_type, dex_symbol, symbol_0,
                         symbol_1, decimals_0, decimals_1, amount_0, amount_1,
                     amount_0_in, amount_0_out, amount_1_in, amount_1_out, reserve_0,
@@ -198,8 +199,8 @@ with multiprocessing.Manager() as manager:
 # Transform to dataframe
 #col_names = ['block', 'tx_index', 'hash', 'from', 'to', 'value', 'gas', 'gas_price', 'gas_tip_cap',
 #             'gas_fee_cap']
-col_names= ['timestamp', 'block_number', 'index', 'hash', 'from_address', 'to_address', 'value',
-            'gas', 'gasPrice', 'maxPriorityFeePerGas', 'maxFeePerGas', 'type_of_event', 'dex_symbol',
+col_names= ['timestamp', 'block_number', 'index', 'event_index', 'hash', 'from_address', 'to_address', 'value',
+            'gas', 'gasPrice', 'maxPriorityFeePerGas', 'maxFeePerGas', 'event_type', 'dex_symbol',
             'symbol_0', 'symbol_1', 'decimals_0', 'decimals_1', 'amount_0', 'amount_1',
             'amount_0_in', 'amount_0_out', 'amount_1_in', 'amount_1_out', 'reserve_0',
             'reserve_1', 'mid_price', 'invariant', 'to_type']
