@@ -33,12 +33,6 @@ PATH_MEV_CONTRACTS = os.path.join(BASE_DIR, "../resources/lists/mev_contracts.tx
 PATH_ERC20_ABI = os.path.join(BASE_DIR, "../resources/abis/erc20/ERC20_abi.json")
 PATH_ERC20_BYTES_ABI = os.path.join(BASE_DIR, "../resources/abis/erc20/ERC20_bytes32_abi.json")
 
-# Path to mempool test data
-PATH_MEMPOOL_TEST_DATA_DIR = os.path.join(BASE_DIR, "../resources/test_data/mempool/")
-PATH_MEMPOOL_TEST_DATA = os.path.join(
-    BASE_DIR, "../resources/test_data/mempool/2023-10-01_test.parquet"
-)
-
 ########################################################################################
 # General Smart Contract Addresses
 ########################################################################################

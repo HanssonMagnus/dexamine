@@ -13,7 +13,6 @@ authors = [{ name = "Magnus Hansson", email = "hansson.carl.magnus@gmail.com" }]
 dependencies = [
   "web3>=6.15.0",
   "pandas>=2.2.0",
-  "py-evm>=0.8.0b1",
   "eth-abi>=5.0.0",
   "pyarrow>=15.0.0",
   "polars>=1.11.0",
