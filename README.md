@@ -63,9 +63,19 @@ transactions into structured datasets for research and data science.
 - [`paper/`](./paper/): Accompanying paper.
 
 ## Setup
-- (Optional) Set poetry to create local environment: `poetry config virtualenvs.in-project true`
-- Activate the virtual environment: `poetry shell`
-- Install dependencies: `poetry install`
+- Create a local virtual environment:
+  - `python3 -m venv .venv`
+- Activate it:
+  - `source .venv/bin/activate`
+- Upgrade pip and install:
+  - `python -m pip install --upgrade pip`
+  - `python -m pip install -e ".[dev]"`
+
+## Development
+- Install pre-commit hooks:
+  - `pre-commit install`
+- Run the same checks as CI:
+  - `pre-commit run --all-files`
 
 ## Usage
 Refer to individual READMEs in [`docs/`](./docs/) for detailed usage instructions for each script

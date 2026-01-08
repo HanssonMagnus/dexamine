@@ -25,8 +25,7 @@ jobs:
           paper-path: paper/paper.md
 
       - name: Upload
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: paper
           path: paper/paper.pdf
-
