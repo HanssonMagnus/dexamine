@@ -55,5 +55,4 @@ class EthereumToType(Enum):
 
     DEX_ROUTER = "dex_router"  # Transaction is sent directly to any DEX router addresses.
     SMART_CONTRACT = "smart_contract"  # Transaction is sent to a DeFi smart contract.
-    MEV = "mev"  # Transaction is sent to MEV bot.
     CONTRACT_CREATION = "contract_creation"  # If to_address is empty (None).

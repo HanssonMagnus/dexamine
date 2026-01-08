@@ -266,16 +266,15 @@ def parse_signed_int(hex_str: str) -> int:
 ########################################################################################
 # Parse transaction type from to address
 ########################################################################################
-def parse_to_type(to_address: str, mev_contracts_list: list) -> str:
+def parse_to_type(to_address: str | None) -> str:
     """
     Parse the transaction to_address.
 
     Parameters:
     to_address (str): Ethereum transaction to address.
-    mev_constracts_list (list): List of Ethereum address associated with MEV.
 
     Returns:
-    str: 'uni', 'defi', or 'mev'
+    str: 'dex_router', 'smart_contract', or 'contract_creation'
 
     Note:
     If to_address is None I set it to 'contract_creation' in the multiprocessing parse
@@ -294,8 +293,6 @@ def parse_to_type(to_address: str, mev_contracts_list: list) -> str:
     # Assign which route the transaction took to execution.
     if to_address in constants.uniswap_address_list:
         to_type = EthereumToType.DEX_ROUTER.value
-    elif to_address in mev_contracts_list:
-        to_type = EthereumToType.MEV.value
     else:
         to_type = EthereumToType.SMART_CONTRACT.value
 
@@ -315,14 +312,14 @@ def load_json(path_json: str) -> dict:
 
 
 def load_txt(file_path):
-    """Yields generator object of, e.g., mev_contracts.txt."""
+    """Yields generator object of a `.txt` file, one stripped line at a time."""
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
             yield line.strip()
 
 
 def load_list(file_path):
-    """Load a txt as a list."""
+    """Load a `.txt` file as a list."""
     gen_obj = load_txt(file_path)
     return list(gen_obj)
 
@@ -389,32 +386,6 @@ def get_json_abi(abi_file: str) -> dict:
     # Use resources.open_text to access the file
     with resources.files(resource_path).joinpath(file_name).open('r', encoding='utf-8') as file:
         return json.load(file)["abi"]
-
-
-def get_txt_as_list(txt_file: str) -> list:
-    """
-    Load a .txt file as a list from dexamine/resources/lists.
-
-    The `txt_file` argument should include the subdirectory and filename. For example,
-    "mev_contracts.txt".
-
-    Args:
-        txt_file (str): Relative path of the .txt file within the lists directory.
-    """
-    # Dynamically construct the package path
-    package_path = "dexamine.resources.lists"
-
-    # Split the txt_file into components (subdirectories + filename)
-    path_components = txt_file.split("/")
-
-    # Construct resource path by joining the package path with the relative file path
-    resource_path = ".".join([package_path] + path_components[:-1])
-    file_name = path_components[-1]
-
-    # Use resources.open_text to access the file
-    with resources.files(resource_path).joinpath(file_name).open('r', encoding='utf-8') as file:
-        # Remove newline characters and skip empty lines
-        return [line.strip() for line in file if line.strip()]
 
 
 def get_csv_test_data_as_string(test_data_file: str) -> str:

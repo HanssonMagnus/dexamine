@@ -64,5 +64,4 @@ def test_dex_event_type_values():
 def test_ethereum_to_type_values():
     assert EthereumToType.DEX_ROUTER.value == "dex_router"
     assert EthereumToType.SMART_CONTRACT.value == "smart_contract"
-    assert EthereumToType.MEV.value == "mev"
     assert EthereumToType.CONTRACT_CREATION.value == "contract_creation"

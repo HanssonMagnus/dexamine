@@ -42,7 +42,6 @@ include = ["dexamine*"]
 [tool.setuptools.package-data]
 dexamine = [
   "resources/abis/**/*.json",
-  "resources/lists/*.txt",
   "tests/test_data/**/*",
 ]
 

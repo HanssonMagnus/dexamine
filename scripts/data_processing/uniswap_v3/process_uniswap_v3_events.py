@@ -73,15 +73,12 @@ erc20_bytes32_abi = general_helpers.load_abi(constants.PATH_ERC20_BYTES_ABI)
 uniswap_v3_pair_abi = general_helpers.load_abi(constants.PATH_UNISWAP_V3_PAIR_ABI)
 
 ###################################################################################################
-# Load MEV contracts
-###################################################################################################
-mev_contracts = general_helpers.load_txt(constants.PATH_MEV_CONTRACTS) # Generator object
-mev_contracts_list = list(mev_contracts)
-
-###################################################################################################
 # Prepare arguments for multiprocessing
 ###################################################################################################
-args_for_multiprocessing = [(block, index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi, mev_contracts_list) for block, index in block_index_pairs]
+args_for_multiprocessing = [
+    (block, index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi)
+    for block, index in block_index_pairs
+]
 ###################################################################################################
 # Def multiprocess function
 #
@@ -90,8 +87,7 @@ args_for_multiprocessing = [(block, index, erc20_abi, erc20_bytes32_abi, uniswap
 # 'maxFeePerGas', 'hash', 'input', 'nonce', 'to', 'transactionIndex', 'value', 'type',
 # 'accessList', 'chainId', 'v', 'r', 's'])
 ###################################################################################################
-def parse_transaction(block_number, index, erc20_abi, erc20_bytes32_abi,
-                      uniswap_v3_pair_abi, mev_contracts_list):
+def parse_transaction(block_number, index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi):
     events = None # Initialize events to None
 
     try:
@@ -144,9 +140,9 @@ def parse_transaction(block_number, index, erc20_abi, erc20_bytes32_abi,
     except Exception as e:
         logger.error(e, exc_info=True)
 
-    # Identify type of transaction (MEV, DeFi, UNI)
+    # Identify type of transaction (direct to Uniswap router vs other)
     try:
-        to_type = general_helpers.parse_to_type(to_address, mev_contracts_list)
+        to_type = general_helpers.parse_to_type(to_address)
     except Exception as e:
         logger.error(e, exc_info=True)
 

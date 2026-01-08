@@ -26,9 +26,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ########################################################################################
 # General Paths (ABIs, lists, data)
 ########################################################################################
-# Path to MEV contract list
-PATH_MEV_CONTRACTS = os.path.join(BASE_DIR, "../resources/lists/mev_contracts.txt")
-
 # Path to general ABIs
 PATH_ERC20_ABI = os.path.join(BASE_DIR, "../resources/abis/erc20/ERC20_abi.json")
 PATH_ERC20_BYTES_ABI = os.path.join(BASE_DIR, "../resources/abis/erc20/ERC20_bytes32_abi.json")

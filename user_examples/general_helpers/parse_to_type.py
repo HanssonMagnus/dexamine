@@ -20,10 +20,6 @@ logger = logging.getLogger(__name__)
 # Example log message
 logger.error("Logging setup complete.")
 
-# Import mev contracts list
-mev_contracts = general_helpers.load_txt(constants.PATH_MEV_CONTRACTS) # Generator object
-mev_contracts_list = list(mev_contracts)
-
 # Construct to_addresses
 to_addresses = [constants.UNISWAP_V3_ROUTER_ADDRESS, constants.UNISWAP_V3_POSITIONS_NFT_ADDRESS,
                 constants.UNISWAP_V3_MIGRATOR_ADDRESS, constants.UNISWAP_UNIVERSAL_ROUTER_ADDRESS,
@@ -31,5 +27,5 @@ to_addresses = [constants.UNISWAP_V3_ROUTER_ADDRESS, constants.UNISWAP_V3_POSITI
 
 
 for to_address in to_addresses:
-    to_type = general_helpers.parse_to_type(to_address, mev_contracts_list)
+    to_type = general_helpers.parse_to_type(to_address)
     pprint(to_type)

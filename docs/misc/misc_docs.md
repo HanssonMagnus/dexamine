@@ -1,8 +1,7 @@
 # Miscellaneous docs
 
 ## Lists
-- `mev_contracts.txt`: Contracts detected by Etherscan as being heavily involved with Maximal
-Extractable Value (MEV). The list can be found [here](https://etherscan.io/accounts/label/mev-bot).
+This repository does not include MEV contract lists.
 
 ## When You Have Queried Your Data
 Dexamine delivers the data in parquet format. Parquet is becoming the standard for high
