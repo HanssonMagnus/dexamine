@@ -326,25 +326,24 @@ def test_parse_signed_int_edge_case():
 ########################################################################################
 def test_parse_to_type_with_contract_creation():
     """Test if to_address is "contract creation"."""
-    assert general_helpers.parse_to_type(None, []) == "contract_creation"
+    assert general_helpers.parse_to_type(None) == "contract_creation"
 
 
 def test_parse_to_type_with_mev_contract():
-    """Test if to_address is mev contract in list."""
+    """Test if a non-Uniswap address is classified as a smart contract."""
     mev_address = "0x_mev_contract_address"
-    mev_contracts_list = [mev_address]
-    assert general_helpers.parse_to_type(mev_address, mev_contracts_list) == "mev"
+    assert general_helpers.parse_to_type(mev_address) == "smart_contract"
 
 
 def test_parse_to_type_with_uni_router():
     uni_address = "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a"
-    assert general_helpers.parse_to_type(uni_address, []) == "dex_router"
+    assert general_helpers.parse_to_type(uni_address) == "dex_router"
 
 
 def test_parse_to_type_with_defi_address():
     """Test if to_address is "defi", using a generic non-MEV, non-Uniswap address."""
     defi_address = "0x_defi_contract_address"
-    assert general_helpers.parse_to_type(defi_address, []) == "smart_contract"
+    assert general_helpers.parse_to_type(defi_address) == "smart_contract"
 
 ########################################################################################
 # Test functions that load resources
@@ -405,36 +404,6 @@ def test_get_json_test_abi_not_found():
         with pytest.raises(FileNotFoundError):
             # Attempt to load a file that does not exist
             general_helpers.get_json_abi("uniswap_v2/non_existent_file.json")
-
-
-def test_get_txt_as_list_success():
-    """Test for when a correct text file has been specified."""
-    sample_text_content = "line1\nline2\n\nline4"
-    expected_list = ["line1", "line2", "line4"]
-    m = mock_open(read_data=sample_text_content)
-
-    with patch("importlib.resources.files") as mock_files:
-        mock_files.return_value.joinpath.return_value.open = m
-        # Call the function with a sample file path
-        result = general_helpers.get_txt_as_list("lists/mev_contracts.txt")
-
-        # Verify the files() method was called correctly
-        mock_files.assert_called_once()
-
-        # Verify the file was opened correctly
-        m.assert_called_once_with('r', encoding='utf-8')
-
-        # Assert that the result matches the expected list
-        assert result == expected_list, "The function did not return the expected list"
-
-
-def test_get_txt_as_list_file_not_found():
-    """Test for when a wrong path to a text file has been specified."""
-    # Simulate a FileNotFoundError when attempting to open a non-existent file
-    with patch("importlib.resources.files", side_effect=FileNotFoundError):
-        with pytest.raises(FileNotFoundError):
-            # Attempt to load a file that does not exist
-            general_helpers.get_txt_as_list("lists/non_existent_file.txt")
 
 
 def test_get_csv_test_data_as_string():
