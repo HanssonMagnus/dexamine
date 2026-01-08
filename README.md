@@ -6,6 +6,8 @@ digital depths.
 of an Ethereum archive node, it provides a robust toolset for transforming complex DEX
 transactions into structured datasets for research and data science.
 
+This repository focuses on **Uniswap v2/v3 parsing from transaction receipt logs**.
+
 *Data divers and blockchain biologists, ready your nets -- a new exploration awaits!*
 
 ### Project Information
