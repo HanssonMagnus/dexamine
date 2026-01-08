@@ -30,8 +30,12 @@ class UniswapV2Event(DexEvent):
     Data class for Uniswap v2 events that includes the sync event.
     """
 
-    reserve_0: int | float # Inventory of token 0 in the liquidity pool after the event.
-    reserve_1: int | float # Inventory of token 1 in the liquidity pool after the event.
+    reserve_0: (
+        int | float
+    )  # Inventory of token 0 in the liquidity pool after the event.
+    reserve_1: (
+        int | float
+    )  # Inventory of token 1 in the liquidity pool after the event.
     mid_price: float = field(init=False)  # Mid-price after the event.
     invariant: float = field(init=False)  # Invariant after the event.
 
@@ -67,10 +71,10 @@ class UniswapV2Swap(UniswapV2Event):
     Data class for Uniswap v2 swap event.
     """
 
-    amount_0_in: int | float # Token 0 into pool (only in swap events).
-    amount_0_out: int | float # Token 0 out of pool (only in swap events).
-    amount_1_in: int | float # Token 1 into pool (only in swap events).
-    amount_1_out: int | float # Token 1 out of pool (only in swap events).
+    amount_0_in: int | float  # Token 0 into pool (only in swap events).
+    amount_0_out: int | float  # Token 0 out of pool (only in swap events).
+    amount_1_in: int | float  # Token 1 into pool (only in swap events).
+    amount_1_out: int | float  # Token 1 out of pool (only in swap events).
     amount_0: float = field(init=False)  # Net flow of token 0 from liquidity pool
     amount_1: float = field(init=False)  # Net flow of token 1 from liquidity pool
     event_type: str = DexEventType.SWAP.value
@@ -145,8 +149,8 @@ class UniswapV2Lp(UniswapV2Event):
     """
 
     event_type: str = field(init=False)  # "mint" or "burn"
-    amount_0: int | float # Net flow of token 0 from the liquidity pool.
-    amount_1: int | float # Net flow of token 1 from the liquidity pool.
+    amount_0: int | float  # Net flow of token 0 from the liquidity pool.
+    amount_1: int | float  # Net flow of token 1 from the liquidity pool.
 
     def __post_init__(self) -> None:
         super().__post_init__()  # Call the parent class __post_init__

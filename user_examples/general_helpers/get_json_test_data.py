@@ -5,7 +5,7 @@ import logging
 from pprint import pprint
 
 # Set the path to the root of the project
-#sys.path.append(os.path.abspath('../../../../'))
+# sys.path.append(os.path.abspath('../../../../'))
 
 # Import scripts
 from dexamine.shared import general_helpers
@@ -21,4 +21,3 @@ pprint(abi)
 tx = general_helpers.get_json_test_data("node_responses/tx_data.json")
 
 pprint(tx)
-

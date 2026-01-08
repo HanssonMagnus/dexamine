@@ -17,10 +17,13 @@ from dexamine.shared import constants
 # Get a logger
 logger = logging.getLogger(__name__)
 
+
 ########################################################################################
 # Uniswap v2 ABI call node functions
 ########################################################################################
-def get_v2_pair(v2_pair_address: str, uniswap_v2_pair_abi: dict[str, Any],
+def get_v2_pair(
+    v2_pair_address: str,
+    uniswap_v2_pair_abi: dict[str, Any],
 ) -> tuple[str, str]:
     """Get meta data for an v2 pair from node."""
     url = constants.NODE_URL
@@ -85,6 +88,7 @@ def has_uniswap_v2_mint_event(topics_0):
     """
     uniswap_v2_mint_event = constants.UNISWAP_V2_MINT_EVENT
     return uniswap_v2_mint_event in topics_0
+
 
 def sync_event_is_before_event(logs: list[dict[str, Any]], event_index: int) -> bool:
     """

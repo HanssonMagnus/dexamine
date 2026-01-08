@@ -8,6 +8,12 @@ repos:
 
   - repo: local
     hooks:
+      - id: black-check
+        name: black (check)
+        entry: python -m black --check dexamine scripts user_examples
+        language: system
+        pass_filenames: false
+
       - id: pylint-errors-only
         name: pylint (errors-only)
         entry: python -m pylint --errors-only dexamine

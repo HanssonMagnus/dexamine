@@ -21,10 +21,10 @@ from importlib import resources
 from dexamine.shared import general_helpers
 
 # Initialize argument parser
-parser = argparse.ArgumentParser(description='Process chifra transaction data.')
-parser.add_argument('input_path', help='Path to the input CSV file')
-parser.add_argument('output_path', help='Path to the output JSON file')
-parser.add_argument('log_path', help='Path to the log directory (same as files)')
+parser = argparse.ArgumentParser(description="Process chifra transaction data.")
+parser.add_argument("input_path", help="Path to the input CSV file")
+parser.add_argument("output_path", help="Path to the output JSON file")
+parser.add_argument("log_path", help="Path to the log directory (same as files)")
 
 # Parse arguments
 args = parser.parse_args()
@@ -35,16 +35,20 @@ path_output = args.output_path
 path_log = args.log_path
 
 # Set up logger
-log_name = 'trueblocks_usdc_weth.log'
-logging.basicConfig(filename=path_log + log_name, level=logging.ERROR,
-    format='%(asctime)s %(levelname)s %(name)s %(message)s', filemode='w+')
+log_name = "trueblocks_usdc_weth.log"
+logging.basicConfig(
+    filename=path_log + log_name,
+    level=logging.ERROR,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    filemode="w+",
+)
 logger = logging.getLogger(__name__)
 # Example log message
 logger.error("Logging setup complete.")
 
 # Create json/dict of transactions
 try:
-    with open(path_input, mode='r', encoding='utf-8') as file:
+    with open(path_input, mode="r", encoding="utf-8") as file:
         csv_content = file.read()
     tx_dict = general_helpers.chifra_csv_to_json(csv_content)
 
@@ -52,6 +56,6 @@ except Exception as e:
     logger.error(e, exc_info=True)
 
 # Save dictionary as JSON
-with open(path_output, 'w+') as fjson:
+with open(path_output, "w+") as fjson:
     json.dump(tx_dict, fjson, indent=4)
 fjson.close()

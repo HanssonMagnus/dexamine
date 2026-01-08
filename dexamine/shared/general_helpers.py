@@ -166,7 +166,7 @@ def get_erc20_symbol(
 ########################################################################################
 # Parsing transaction logs
 ########################################################################################
-#def get_topics_0(logs: list[dict[str, Any]]) -> list:
+# def get_topics_0(logs: list[dict[str, Any]]) -> list:
 #    """Return list of all "topic 0"s in logs."""
 #    topics_0 = []
 #    for log in logs:
@@ -176,6 +176,7 @@ def get_erc20_symbol(
 #        else:
 #            continue  # continue loop to next log
 #    return topics_0
+
 
 def get_topics_0(logs: list[dict[str, Any]]) -> list:
     """Return list of all 'topic 0's in logs, or an empty string if no topics are present."""
@@ -200,7 +201,7 @@ def get_event_indexes(topics_0: list, events: list) -> list:
 
 
 # THIS FUNCTION SHOULD BE REPLACED BY THE ONE ABOVE FOR ALL OCCURANCES
-#def get_event_index(topics_0: list, event: str) -> list:
+# def get_event_index(topics_0: list, event: str) -> list:
 #    """Returns: list, index of where in topics_0 the "event" occurs."""
 #    event_index = []
 #    for i, topic in enumerate(topics_0):
@@ -216,6 +217,7 @@ def bytes32_to_string(bytes32: bytes) -> str:
     """Decode using utf-8 and then strip the null characters."""
     return bytes32.decode("utf-8").rstrip("\x00")
 
+
 ########################################################################################
 # Ethereum address parsing
 ########################################################################################
@@ -230,6 +232,7 @@ def normalize_eth_address(address: str) -> str:
         normalized_address = "0x" + stripped_address.rjust(40, "0")
         return normalized_address
     return address  # Return the original address if it doesn't start with '0x'
+
 
 ########################################################################################
 # Hexadecimal parsing
@@ -356,8 +359,12 @@ def get_json_test_data(test_data_file: str) -> dict:
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
-    with resources.files(resource_path).joinpath(file_name).open('r', encoding='utf-8') as file:
-    #with resources.open_text(resource_path, file_name) as file:
+    with (
+        resources.files(resource_path)
+        .joinpath(file_name)
+        .open("r", encoding="utf-8") as file
+    ):
+        # with resources.open_text(resource_path, file_name) as file:
         return json.load(file)
 
 
@@ -384,7 +391,11 @@ def get_json_abi(abi_file: str) -> dict:
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
-    with resources.files(resource_path).joinpath(file_name).open('r', encoding='utf-8') as file:
+    with (
+        resources.files(resource_path)
+        .joinpath(file_name)
+        .open("r", encoding="utf-8") as file
+    ):
         return json.load(file)["abi"]
 
 
@@ -410,7 +421,11 @@ def get_csv_test_data_as_string(test_data_file: str) -> str:
     file_name = path_components[-1]
 
     # Use resources.open_text to access the file
-    with resources.files(resource_path).joinpath(file_name).open('r', encoding='utf-8') as file:
+    with (
+        resources.files(resource_path)
+        .joinpath(file_name)
+        .open("r", encoding="utf-8") as file
+    ):
         return file.read()
 
 

@@ -149,7 +149,7 @@ def parse_transaction(
 
         # THIS IS NOW IN general_helpers.parse_to_type
         # to_address is None if it's a contract creating transactions
-        #if to_address is None:
+        # if to_address is None:
         #    to_address = "contract_creation"
 
         timestamp = block_data["timestamp"]
@@ -355,10 +355,6 @@ days, rem = divmod(elapsed_seconds, 86400)
 hours, rem = divmod(rem, 3600)
 minutes, seconds = divmod(rem, 60)
 
-logger.error(
-    "Elapsed time: %d days, %02d:%02d:%02d", days, hours, minutes, seconds
-)
+logger.error("Elapsed time: %d days, %02d:%02d:%02d", days, hours, minutes, seconds)
 
-pprint(
-    f"Elapsed time: {days} days, {hours:02}:{minutes:02}:{seconds:02}"
-)
+pprint(f"Elapsed time: {days} days, {hours:02}:{minutes:02}:{seconds:02}")

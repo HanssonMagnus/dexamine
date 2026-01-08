@@ -5,7 +5,7 @@ import logging
 from pprint import pprint
 
 # Set the path to the root of the project
-sys.path.append(os.path.abspath('../../../'))
+sys.path.append(os.path.abspath("../../../"))
 
 # Import scripts
 from parsers.uniswap_v3 import parse_uni_v3_events
@@ -25,7 +25,7 @@ tx_data = general_helpers.get_tx_data_by_hash(tx_hash)
 receipt_data = general_helpers.get_receipt_data_by_hash(tx_hash)
 
 # Parse swap event
-logs = receipt_data['logs']
+logs = receipt_data["logs"]
 topics_0 = general_helpers.get_topics_0(logs)
 swap_indexes = general_helpers.get_event_index(topics_0, UNISWAP_V3_SWAP_EVENT)
 
@@ -38,10 +38,14 @@ uniswap_v3_pair_abi = general_helpers.load_abi(constants.PATH_UNISWAP_V3_PAIR_AB
 
 erc20_abi = general_helpers.load_abi(constants.PATH_ERC20_ABI)
 
-trades = parse_uni_v3_events.parse_v3_trades(logs, swap_indexes, erc20_abi, uniswap_v3_pair_abi)
+trades = parse_uni_v3_events.parse_v3_trades(
+    logs, swap_indexes, erc20_abi, uniswap_v3_pair_abi
+)
 for trade in trades:
-    pprint("--------------------------------------------------------------------------------------")
-    #pprint(swap_log)
+    pprint(
+        "--------------------------------------------------------------------------------------"
+    )
+    # pprint(swap_log)
     pprint("Swap meta data:")
     pprint("DEX: {}".format(trade[0]))
     pprint("symbol0: {}".format(trade[1]))
@@ -54,4 +58,6 @@ for trade in trades:
     pprint("tick: {}".format(trade[8]))
     pprint("sqrt_price_x96: {}".format(trade[9]))
     pprint("price: {}".format(trade[10]))
-    pprint("--------------------------------------------------------------------------------------")
+    pprint(
+        "--------------------------------------------------------------------------------------"
+    )

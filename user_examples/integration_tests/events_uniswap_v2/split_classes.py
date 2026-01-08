@@ -1,6 +1,7 @@
 """
 Test dataclasses for Uniswap v2 events.
 """
+
 # Import packages
 from dataclasses import dataclass, field, asdict
 from pprint import pprint
@@ -19,10 +20,10 @@ class UniswapV2Event(DexEvent):
     Data class for Uniswap v2 events that includes the sync event.
     """
 
-    reserve_0: int # Inventory of token 0 in the liquidity pool after the event.
-    reserve_1: int # Inventory of token 1 in the liquidity pool after the event.
-    mid_price: float = field(init=False) # Mid-price after the event.
-    invariant: float = field(init=False) # Invariant after the event.
+    reserve_0: int  # Inventory of token 0 in the liquidity pool after the event.
+    reserve_1: int  # Inventory of token 1 in the liquidity pool after the event.
+    mid_price: float = field(init=False)  # Mid-price after the event.
+    invariant: float = field(init=False)  # Invariant after the event.
 
     def __post_init__(self):
 
@@ -49,27 +50,38 @@ class UniswapV2Event(DexEvent):
         """Calculates product of reserves (invariant) after the event."""
         return self.reserve_0 * self.reserve_1
 
+
 @dataclass
 class UniswapV2Swap(UniswapV2Event):
     """
     Data class for Uniswap v2 swap event.
     """
-    amount_0_in: int # Token 0 into pool (only in swap events).
-    amount_0_out: int # Token 0 out of pool (only in swap events).
-    amount_1_in: int # Token 1 into pool (only in swap events).
-    amount_1_out: int # Token 1 out of pool (only in swap events).
-    amount_0: float = field(init=False) # Net flow of token 0 from liquidity pool
-    amount_1: float = field(init=False) # Net flow of token 1 from liquidity pool
+
+    amount_0_in: int  # Token 0 into pool (only in swap events).
+    amount_0_out: int  # Token 0 out of pool (only in swap events).
+    amount_1_in: int  # Token 1 into pool (only in swap events).
+    amount_1_out: int  # Token 1 out of pool (only in swap events).
+    amount_0: float = field(init=False)  # Net flow of token 0 from liquidity pool
+    amount_1: float = field(init=False)  # Net flow of token 1 from liquidity pool
     event_type: str = DexEventType.SWAP.value
 
     def __post_init__(self):
         super().__post_init__()  # Call the parent class __post_init__
 
         # Validate that all swap amounts are provided
-        if any(v is None for v in [self.amount_0_in, self.amount_0_out,
-                                   self.amount_1_in, self.amount_1_out]):
-            raise ValueError("For swap events, all of amount_0_in, amount_0_out, "
-                             "amount_1_in, and amount_1_out must be provided.")
+        if any(
+            v is None
+            for v in [
+                self.amount_0_in,
+                self.amount_0_out,
+                self.amount_1_in,
+                self.amount_1_out,
+            ]
+        ):
+            raise ValueError(
+                "For swap events, all of amount_0_in, amount_0_out, "
+                "amount_1_in, and amount_1_out must be provided."
+            )
 
         # Transform amounts to base units
         self.amount_0_in = self.transform_to_base(self.amount_0_in, self.decimals_0)
@@ -83,7 +95,9 @@ class UniswapV2Swap(UniswapV2Event):
 
         # Validate that the amounts have different signs
         if not (self.amount_0 * self.amount_1) < 0:
-            raise ValueError("For Swap events, amount_0 and amount_1 must have opposite signs.")
+            raise ValueError(
+                "For Swap events, amount_0 and amount_1 must have opposite signs."
+            )
 
     # Class methods
     def get_event_data(self) -> dict:
@@ -112,25 +126,31 @@ class UniswapV2Swap(UniswapV2Event):
         """
         return asdict(self)
 
+
 @dataclass
 class UniswapV2Lp(UniswapV2Event):
     """
     Data class for Uniswap v2 mint and burn events.
     """
-    event_type: str = field(init=False) # "mint" or "burn"
-    amount_0: int # Net flow of token 0 from the liquidity pool.
-    amount_1: int # Net flow of token 1 from the liquidity pool.
+
+    event_type: str = field(init=False)  # "mint" or "burn"
+    amount_0: int  # Net flow of token 0 from the liquidity pool.
+    amount_1: int  # Net flow of token 1 from the liquidity pool.
 
     def __post_init__(self):
         super().__post_init__()  # Call the parent class __post_init__
 
         # Validate that both amounts are provided
         if self.amount_0 is None or self.amount_1 is None:
-            raise ValueError("For LP events, both amount_0 and amount_1 must be provided.")
+            raise ValueError(
+                "For LP events, both amount_0 and amount_1 must be provided."
+            )
 
         # Validate that both amounts have the same sign
         if (self.amount_0 * self.amount_1) < 0:
-            raise ValueError("For LP events, amount_0 and amount_1 must be of the same sign.")
+            raise ValueError(
+                "For LP events, amount_0 and amount_1 must be of the same sign."
+            )
 
         # Transform LP amounts to base units
         self.amount_0 = self.transform_to_base(self.amount_0, self.decimals_0)
@@ -169,10 +189,10 @@ class UniswapV2Lp(UniswapV2Event):
         """
         event_data = asdict(self)
         # Add swap-specific amounts as None
-        event_data['amount_0_in'] = None
-        event_data['amount_0_out'] = None
-        event_data['amount_1_in'] = None
-        event_data['amount_1_out'] = None
+        event_data["amount_0_in"] = None
+        event_data["amount_0_out"] = None
+        event_data["amount_1_in"] = None
+        event_data["amount_1_out"] = None
         return event_data
 
 
@@ -181,7 +201,7 @@ dex_event = DexEvent(
     symbol_0="USDC",
     symbol_1="WETH",
     decimals_0=6,
-    decimals_1=18
+    decimals_1=18,
 )
 
 uniswap_v2_event = UniswapV2Event(
@@ -191,7 +211,7 @@ uniswap_v2_event = UniswapV2Event(
     decimals_0=6,
     decimals_1=18,
     reserve_0=150000000000000000000000,
-    reserve_1=100000000000000000000
+    reserve_1=100000000000000000000,
 )
 
 
@@ -201,13 +221,13 @@ swap_event = UniswapV2Swap(
     symbol_1="WETH",
     decimals_0=6,
     decimals_1=18,
-    #event_type="swap",
+    # event_type="swap",
     reserve_0=150000000000000000000000,
     reserve_1=100000000000000000000,
     amount_0_in=1000000000,
     amount_0_out=0,
     amount_1_in=0,
-    amount_1_out=50000000000000000000
+    amount_1_out=50000000000000000000,
 )
 
 lp_event = UniswapV2Lp(
@@ -216,7 +236,7 @@ lp_event = UniswapV2Lp(
     symbol_1="DAI",
     decimals_0=18,
     decimals_1=18,
-    #event_type="mint",
+    # event_type="mint",
     reserve_0=1000000,
     reserve_1=2000000,
     amount_0=500,
