@@ -79,6 +79,91 @@ class JsonRpcClient:
             )
         return data  # type: ignore[return-value]
 
+    def _post_batch(self, payload: list[JsonObject]) -> list[JsonObject]:
+        headers: dict[str, str] = {"Content-Type": "application/json"}
+        timeout_seconds = 30
+        try:
+            response = requests.post(
+                self.node_url, headers=headers, json=payload, timeout=timeout_seconds
+            )
+        except requests.RequestException as exc:
+            logger.error(
+                "JSON-RPC batch request failed",
+                extra={"payload_len": len(payload)},
+                exc_info=True,
+            )
+            raise ConnectionError(f"JSON-RPC batch request failed: {exc}") from exc
+
+        try:
+            data = response.json()
+        except ValueError as exc:
+            logger.error(
+                "JSON-RPC batch response is not valid JSON",
+                extra={"payload_len": len(payload), "status_code": response.status_code},
+                exc_info=True,
+            )
+            raise JsonRpcResponseFormatError(
+                "JSON-RPC batch response is not valid JSON"
+            ) from exc
+
+        if not isinstance(data, list):
+            raise JsonRpcResponseFormatError(
+                f"JSON-RPC batch response must be a list, got {type(data)}"
+            )
+
+        out: list[JsonObject] = []
+        for item in data:
+            if not isinstance(item, dict):
+                raise JsonRpcResponseFormatError(
+                    f"JSON-RPC batch response items must be objects, got {type(item)}"
+                )
+            out.append(item)  # type: ignore[arg-type]
+
+        return out
+
+    def batch_call(self, calls: list[tuple[str, JsonArray, int]]) -> dict[int, JsonValue]:
+        """
+        Execute a JSON-RPC batch request.
+
+        Args:
+            calls: List of (method, params, request_id).
+
+        Returns:
+            Dict mapping request_id -> result.
+        """
+        payload: list[JsonObject] = []
+        for method, params, request_id in calls:
+            payload.append(
+                {
+                    "jsonrpc": "2.0",
+                    "method": method,
+                    "params": params,
+                    "id": request_id,
+                }
+            )
+
+        responses = self._post_batch(payload)
+        by_id: dict[int, JsonValue] = {}
+
+        for resp in responses:
+            response_id = resp.get("id")
+            if not isinstance(response_id, int):
+                raise JsonRpcResponseFormatError(
+                    f"JSON-RPC batch response missing int 'id', got {response_id}"
+                )
+
+            if "error" in resp and resp["error"] is not None:
+                raise JsonRpcError(f"JSON-RPC error (id={response_id}): {resp['error']}")
+
+            if "result" not in resp:
+                raise JsonRpcResponseFormatError(
+                    f"JSON-RPC batch response missing 'result' (id={response_id})"
+                )
+
+            by_id[response_id] = resp["result"]
+
+        return by_id
+
     def call(self, method: str, params: JsonArray, request_id: int) -> JsonValue:
         payload: JsonObject = {
             "jsonrpc": "2.0",
