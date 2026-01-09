@@ -102,7 +102,7 @@ class DexamineSession:
         if protocol == "uniswap_v3":
             parsed = uniswap_v3_parser.parse_all_v3_events(
                 node_url=self.node_url,
-                metadata_resolver=None,
+                metadata_resolver=self.metadata,
                 logs=logs_value,  # type: ignore[arg-type]
                 erc20_abi=self.erc20_abi,
                 erc20_bytes32_abi=self.erc20_bytes32_abi,
