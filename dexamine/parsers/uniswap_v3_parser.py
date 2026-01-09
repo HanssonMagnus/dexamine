@@ -15,6 +15,7 @@ from web3 import Web3
 # Import modules
 from dexamine.shared import constants, general_helpers, uniswap_v3_parsing
 from dexamine.shared.general_classes import DexEvent, DexEventType
+from dexamine.metadata.resolver import MetadataResolver
 
 # Get a logger
 logger = logging.getLogger(__name__)
@@ -271,6 +272,7 @@ class UniswapV3Burn(DexEvent):
 def parse_all_v3_events(
     *,
     node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     erc20_abi: dict[str, Any],
     erc20_bytes32_abi: dict[str, Any],

@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from dexamine.parsers import uniswap_v2_parser, uniswap_v3_parser
+from dexamine.metadata.resolver import MetadataResolver
 from dexamine.rpc.json_rpc_client import JsonObject, JsonRpcClient
 from dexamine.shared import general_helpers
 
@@ -26,6 +27,7 @@ class DexamineSession:
     erc20_bytes32_abi: dict
     uniswap_v2_pair_abi: dict
     uniswap_v3_pair_abi: dict
+    metadata: MetadataResolver
 
     @classmethod
     def from_node_url(cls, node_url: str) -> "DexamineSession":
@@ -36,6 +38,13 @@ class DexamineSession:
         uniswap_v3_pair_abi = general_helpers.get_json_abi(
             "uniswap_v3/UniswapV3PoolABI.json"
         )
+        metadata = MetadataResolver(
+            node_url=node_url,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+            uniswap_v2_pair_abi=uniswap_v2_pair_abi,
+            uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+        )
         return cls(
             node_url=node_url,
             rpc=rpc,
@@ -43,6 +52,7 @@ class DexamineSession:
             erc20_bytes32_abi=erc20_bytes32_abi,
             uniswap_v2_pair_abi=uniswap_v2_pair_abi,
             uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+            metadata=metadata,
         )
 
     def parse_position_raw(self, *, block_number: int, tx_index: int) -> dict[str, JsonObject]:
@@ -80,6 +90,7 @@ class DexamineSession:
         if protocol == "uniswap_v2":
             events = uniswap_v2_parser.parse_all_uniswap_v2_events(
                 node_url=self.node_url,
+                metadata_resolver=self.metadata,
                 logs=logs_value,  # type: ignore[arg-type]
                 erc20_abi=self.erc20_abi,
                 erc20_bytes32_abi=self.erc20_bytes32_abi,
@@ -91,6 +102,7 @@ class DexamineSession:
         if protocol == "uniswap_v3":
             parsed = uniswap_v3_parser.parse_all_v3_events(
                 node_url=self.node_url,
+                metadata_resolver=None,
                 logs=logs_value,  # type: ignore[arg-type]
                 erc20_abi=self.erc20_abi,
                 erc20_bytes32_abi=self.erc20_bytes32_abi,
