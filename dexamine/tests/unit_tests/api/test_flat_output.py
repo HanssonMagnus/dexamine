@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from typing import cast
+
 from dexamine.api.flat_output import iter_flat_rows
+from dexamine.api.flat_output import FlatUniswapV2Row, FlatUniswapV3Row
+from dexamine.rpc.json_rpc_client import JsonObject
 
 
 def test_iter_flat_rows_uniswap_v2_emits_one_row_per_event_and_none_for_missing_fees() -> (
     None
 ):
-    tx = {
+    tx: JsonObject = {
         "hash": "0xabc",
         "from": "0x0000000000000000000000000000000000000001",
         "to": "0x0000000000000000000000000000000000000002",
@@ -14,10 +18,14 @@ def test_iter_flat_rows_uniswap_v2_emits_one_row_per_event_and_none_for_missing_
         "gas": "0x5208",
         "gasPrice": "0x3b9aca00",
     }
-    receipt = {}
-    block = {"timestamp": "0x1"}
+    receipt: JsonObject = {}
+    block: JsonObject = {
+        "timestamp": "0x1",
+        "gasUsed": "0xa",
+        "transactions": ["0x1", "0x2", "0x3"],
+    }
 
-    events = [
+    events: list[dict[str, float | int | str | None]] = [
         {
             "event_index": 10,
             "event_type": "swap",
@@ -58,31 +66,36 @@ def test_iter_flat_rows_uniswap_v2_emits_one_row_per_event_and_none_for_missing_
         },
     ]
 
-    rows = list(
-        iter_flat_rows(
-            protocol="uniswap_v2",
-            tx=tx,  # type: ignore[arg-type]
-            receipt=receipt,  # type: ignore[arg-type]
-            block=block,  # type: ignore[arg-type]
-            block_number=100,
-            tx_index=5,
-            events=events,
-        )
+    rows = cast(
+        list[FlatUniswapV2Row],
+        list(
+            iter_flat_rows(
+                protocol="uniswap_v2",
+                tx=tx,
+                receipt=receipt,
+                block=block,
+                block_number=100,
+                tx_index=5,
+                events=events,
+            )
+        ),
     )
 
     assert len(rows) == 2
-    assert rows[0]["index"] == 5
-    assert rows[0]["event_index"] == 10
-    assert rows[0]["gasPrice"] == int("3b9aca00", 16)
-    assert rows[0]["maxPriorityFeePerGas"] is None
-    assert rows[0]["maxFeePerGas"] is None
+    assert rows[0]["tx_index"] == 5
+    assert rows[0]["log_index"] == 10
+    assert rows[0]["block_gas"] == 10
+    assert rows[0]["block_txes"] == 3
+    assert rows[0]["tx_gas_price"] == int("3b9aca00", 16)
+    assert rows[0]["tx_max_priority_fee_per_gas"] is None
+    assert rows[0]["tx_max_fee_per_gas"] is None
 
-    assert rows[1]["event_index"] == 11
-    assert rows[1]["amount_0_in"] is None
+    assert rows[1]["log_index"] == 11
+    assert rows[1]["event_amount_0_in"] is None
 
 
 def test_iter_flat_rows_uniswap_v3_keeps_optional_fields_as_none() -> None:
-    tx = {
+    tx: JsonObject = {
         "hash": "0xdef",
         "from": "0x0000000000000000000000000000000000000001",
         "to": "0x0000000000000000000000000000000000000002",
@@ -90,10 +103,10 @@ def test_iter_flat_rows_uniswap_v3_keeps_optional_fields_as_none() -> None:
         "gas": "0x5208",
         "gasPrice": "0x1",
     }
-    receipt = {"effectiveGasPrice": "0x2"}
-    block = {"timestamp": "0x2"}
+    receipt: JsonObject = {"effectiveGasPrice": "0x2"}
+    block: JsonObject = {"timestamp": "0x2", "gasUsed": "0xb", "transactions": []}
 
-    events = [
+    events: list[dict[str, float | int | str | None]] = [
         {
             "event_index": 7,
             "event_type": "swap",
@@ -119,21 +132,26 @@ def test_iter_flat_rows_uniswap_v3_keeps_optional_fields_as_none() -> None:
         }
     ]
 
-    rows = list(
-        iter_flat_rows(
-            protocol="uniswap_v3",
-            tx=tx,  # type: ignore[arg-type]
-            receipt=receipt,  # type: ignore[arg-type]
-            block=block,  # type: ignore[arg-type]
-            block_number=101,
-            tx_index=0,
-            events=events,
-        )
+    rows = cast(
+        list[FlatUniswapV3Row],
+        list(
+            iter_flat_rows(
+                protocol="uniswap_v3",
+                tx=tx,
+                receipt=receipt,
+                block=block,
+                block_number=101,
+                tx_index=0,
+                events=events,
+            )
+        ),
     )
 
     assert len(rows) == 1
     row = rows[0]
-    assert row["gasPrice"] == 2
-    assert row["tick_lower"] is None
-    assert row["tick_upper"] is None
-    assert row["amount"] is None
+    assert row["tx_gas_price"] == 2
+    assert row["block_gas"] == 11
+    assert row["block_txes"] == 0
+    assert row["event_tick_lower"] is None
+    assert row["event_tick_upper"] is None
+    assert row["event_amount"] is None

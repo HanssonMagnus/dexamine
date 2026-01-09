@@ -51,7 +51,7 @@ can materialize it with `rows = list(...)`, but do not do this for large workloa
 Flat columns (Uniswap v3):
 
 ```text
-timestamp,block_number,index,event_index,hash,from_address,to_address,value,gas,gasPrice,maxPriorityFeePerGas,maxFeePerGas,event_type,dex_symbol,symbol_0,symbol_1,decimals_0,decimals_1,sender,recipient,owner,amount,amount_0,amount_1,virtual_liquidity,tick,sqrt_price_x96,price,tick_lower,tick_upper,virtual_reserve_0,virtual_reserve_1,to_type
+block_timestamp,block_number,block_gas,block_txes,tx_index,log_index,tx_hash,tx_from,tx_to,tx_value,tx_gas,tx_gas_price,tx_max_priority_fee_per_gas,tx_max_fee_per_gas,tx_to_type,event_type,event_dex_symbol,event_symbol_0,event_symbol_1,event_decimals_0,event_decimals_1,event_sender,event_recipient,event_owner,event_amount,event_amount_0,event_amount_1,event_virtual_liquidity,event_tick,event_sqrt_price_x96,event_price,event_tick_lower,event_tick_upper,event_virtual_reserve_0,event_virtual_reserve_1
 ```
 
 For high throughput, use batching:
@@ -86,45 +86,48 @@ For each Uniswap v3 event (swap, mint, burn), the following variables are parsed
 
 Meta data from the transaction:
 
-- timestamp: The Unix timestamp indicating when the transaction occurred.
+- block_timestamp: The Unix timestamp indicating when the transaction occurred.
 - block_number: The number of the block in the Ethereum blockchain in which the
                 transaction was recorded.
-- index: A sequential number indicating the transaction's position within the block.
-- hash: The unique transaction hash, an identifier for the transaction.
-- from_address: The Ethereum address of the transaction initiator.
-- to_address: The Ethereum address of the transaction recipient.
-- value: The amount of Ether transferred in the transaction (is usually 0 for smart
+- block_gas: Total gas used in the block.
+- block_txes: Total number of transactions in the block.
+- tx_index: A sequential number indicating the transaction's position within the block.
+- log_index: Index of the log entry within the receipt logs.
+- tx_hash: The unique transaction hash, an identifier for the transaction.
+- tx_from: The Ethereum address of the transaction initiator.
+- tx_to: The Ethereum address of the transaction recipient.
+- tx_value: The amount of Ether transferred in the transaction (is usually 0 for smart
         contract interactions, e.g., Unsiwap).
-- gas: The total amount of gas used by the transaction.
-- gasPrice: The price of gas (in wei) at the time of the transaction.
-- maxPriorityFeePerGas: The maximum priority fee per unit of gas (in wei) specified for
+- tx_gas: The total amount of gas used by the transaction.
+- tx_gas_price: The price of gas (in wei) at the time of the transaction.
+- tx_max_priority_fee_per_gas: The maximum priority fee per unit of gas (in wei) specified for
                         the transaction.
-- maxFeePerGas: The maximum fee per unit of gas (in wei) the sender is willing to pay.
+- tx_max_fee_per_gas: The maximum fee per unit of gas (in wei) the sender is willing to pay.
+- tx_to_type: Type of agent: uni (manual), defi (algorithmic), mev (arbitrage), or
+             contract_creation.
 
 Variables from the event:
 
 - 'event_type': Specifies the type of event: "swap", "mint", or "burn".
-- 'dex_symbol': The symbol of the decentralized exchange.
-- 'symbol_0': The symbol of the first token in the exchange pair.
-- 'symbol_1': The symbol of the second token in the exchange pair.
-- 'decimals_0': The number of decimals of the first token in the exchange pair.
-- 'decimals_1': The number of decimals of the second token in the exchange pair.
-- 'sender': The address that minted liquidity or swapped.
-- 'recipient': The address that received the output of a swap.
-- 'owner': The owner of the position and recipient of any minted/burned liquidity.
-- 'amount': The amount of liquidity minted/burned to the position range.
-- 'amount_0': How much token0 was required for the minted/burned liquidity.
-- 'amount_1': How much token0 was required for the minted/burned liquidity.
-- 'virtual_liquidity': The virtual liquidity of the pool after the swap.
-- 'tick': The log base 1.0001 of price of the pool after the swap.
-- 'sqrt_price_x96': The sqrt(mid-price) of the pool after the swap, as a Q64.96.
-- 'price': The mid-price of the pool after the swap.
-- 'tick_lower': The lower tick of the LP position.
-- 'tick_upper': The upper tick of the LP position.
-- 'virtual_reserve_0': The virtual reserve of token0 after the swap in base units.
-- 'virtual_reserve_1': The virtual reserve of token0 after the swap in base units.
-- 'to_type': Type of agent: uni (manual), defi (algorithmic), mev (arbitrage), or
-             contract_creation.
+- 'event_dex_symbol': The symbol of the decentralized exchange.
+- 'event_symbol_0': The symbol of the first token in the exchange pair.
+- 'event_symbol_1': The symbol of the second token in the exchange pair.
+- 'event_decimals_0': The number of decimals of the first token in the exchange pair.
+- 'event_decimals_1': The number of decimals of the second token in the exchange pair.
+- 'event_sender': The address that minted liquidity or swapped.
+- 'event_recipient': The address that received the output of a swap.
+- 'event_owner': The owner of the position and recipient of any minted/burned liquidity.
+- 'event_amount': The amount of liquidity minted/burned to the position range.
+- 'event_amount_0': How much token0 was required for the minted/burned liquidity.
+- 'event_amount_1': How much token0 was required for the minted/burned liquidity.
+- 'event_virtual_liquidity': The virtual liquidity of the pool after the swap.
+- 'event_tick': The log base 1.0001 of price of the pool after the swap.
+- 'event_sqrt_price_x96': The sqrt(mid-price) of the pool after the swap, as a Q64.96.
+- 'event_price': The mid-price of the pool after the swap.
+- 'event_tick_lower': The lower tick of the LP position.
+- 'event_tick_upper': The upper tick of the LP position.
+- 'event_virtual_reserve_0': The virtual reserve of token0 after the swap in base units.
+- 'event_virtual_reserve_1': The virtual reserve of token0 after the swap in base units.
 
 #### `parse_v3_swap(...)`
 

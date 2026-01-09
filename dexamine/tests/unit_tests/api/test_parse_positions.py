@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+from typing import Dict, List
 from unittest.mock import patch
 
 from dexamine.api.parse import parse_positions
 
 
 def test_parse_positions_wraps_session_generator() -> None:
-    expected = [{"events": []}]
+    expected: List[Dict[str, object]] = [{"events": []}]
 
     with patch(
         "dexamine.api.parse.DexamineSession.from_node_url"
@@ -24,37 +25,39 @@ def test_parse_positions_wraps_session_generator() -> None:
 
 
 def test_parse_positions_flat_wraps_session_generator() -> None:
-    expected = [
+    expected: List[Dict[str, object]] = [
         {
-            "timestamp": 1,
+            "block_timestamp": 1,
             "block_number": 1,
-            "index": 0,
-            "event_index": 7,
-            "hash": "0xabc",
-            "from_address": "0x0000000000000000000000000000000000000001",
-            "to_address": "0x0000000000000000000000000000000000000002",
-            "value": 0,
-            "gas": 1,
-            "gasPrice": None,
-            "maxPriorityFeePerGas": None,
-            "maxFeePerGas": None,
+            "block_gas": 0,
+            "block_txes": 0,
+            "tx_index": 0,
+            "log_index": 7,
+            "tx_hash": "0xabc",
+            "tx_from": "0x0000000000000000000000000000000000000001",
+            "tx_to": "0x0000000000000000000000000000000000000002",
+            "tx_value": 0,
+            "tx_gas": 1,
+            "tx_gas_price": None,
+            "tx_max_priority_fee_per_gas": None,
+            "tx_max_fee_per_gas": None,
+            "tx_to_type": "smart_contract",
             "event_type": "swap",
-            "dex_symbol": "UniswapV2",
-            "symbol_0": "A",
-            "symbol_1": "B",
-            "decimals_0": 18,
-            "decimals_1": 18,
-            "amount_0": 1.0,
-            "amount_1": -1.0,
-            "amount_0_in": 1.0,
-            "amount_0_out": 0.0,
-            "amount_1_in": 0.0,
-            "amount_1_out": 1.0,
-            "reserve_0": 1.0,
-            "reserve_1": 1.0,
-            "mid_price": 1.0,
-            "invariant": 1.0,
-            "to_type": "smart_contract",
+            "event_dex_symbol": "UniswapV2",
+            "event_symbol_0": "A",
+            "event_symbol_1": "B",
+            "event_decimals_0": 18,
+            "event_decimals_1": 18,
+            "event_amount_0": 1.0,
+            "event_amount_1": -1.0,
+            "event_amount_0_in": 1.0,
+            "event_amount_0_out": 0.0,
+            "event_amount_1_in": 0.0,
+            "event_amount_1_out": 1.0,
+            "event_reserve_0": 1.0,
+            "event_reserve_1": 1.0,
+            "event_mid_price": 1.0,
+            "event_invariant": 1.0,
         }
     ]
 

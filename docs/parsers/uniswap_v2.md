@@ -51,7 +51,7 @@ can materialize it with `rows = list(...)`, but do not do this for large workloa
 Flat columns (Uniswap v2):
 
 ```text
-timestamp,block_number,index,event_index,hash,from_address,to_address,value,gas,gasPrice,maxPriorityFeePerGas,maxFeePerGas,event_type,dex_symbol,symbol_0,symbol_1,decimals_0,decimals_1,amount_0,amount_1,amount_0_in,amount_0_out,amount_1_in,amount_1_out,reserve_0,reserve_1,mid_price,invariant,to_type
+block_timestamp,block_number,block_gas,block_txes,tx_index,log_index,tx_hash,tx_from,tx_to,tx_value,tx_gas,tx_gas_price,tx_max_priority_fee_per_gas,tx_max_fee_per_gas,tx_to_type,event_type,event_dex_symbol,event_symbol_0,event_symbol_1,event_decimals_0,event_decimals_1,event_amount_0,event_amount_1,event_amount_0_in,event_amount_0_out,event_amount_1_in,event_amount_1_out,event_reserve_0,event_reserve_1,event_mid_price,event_invariant
 ```
 
 For high throughput, use batching:

@@ -6,7 +6,7 @@ Flat output is designed to be streaming-friendly for very large workloads.
 
 from __future__ import annotations
 
-from typing import Iterable, Iterator, Literal, TypedDict
+from typing import Iterable, Iterator, Literal, Mapping, TypedDict
 
 from dexamine.rpc.json_rpc_client import JsonObject
 from dexamine.shared.general_helpers import parse_to_type
@@ -15,127 +15,139 @@ Protocol = Literal["uniswap_v2", "uniswap_v3"]
 
 
 class _BaseFlatRow(TypedDict):
-    timestamp: int
+    block_timestamp: int
     block_number: int
-    index: int
-    event_index: int
-    hash: str
-    from_address: str
-    to_address: str | None
-    value: int
-    gas: int
-    gasPrice: int | None
-    maxPriorityFeePerGas: int | None
-    maxFeePerGas: int | None
-    event_type: str
-    dex_symbol: str
-    symbol_0: str
-    symbol_1: str
-    decimals_0: int
-    decimals_1: int
-    to_type: str
+    block_gas: int
+    block_txes: int
+    tx_index: int
+    log_index: int
+    tx_hash: str
+    tx_from: str
+    tx_to: str | None
+    tx_value: int
+    tx_gas: int
+    tx_gas_price: int | None
+    tx_max_priority_fee_per_gas: int | None
+    tx_max_fee_per_gas: int | None
+    tx_to_type: str
 
 
 class FlatUniswapV2Row(_BaseFlatRow):
-    amount_0: float
-    amount_1: float
-    amount_0_in: float | None
-    amount_0_out: float | None
-    amount_1_in: float | None
-    amount_1_out: float | None
-    reserve_0: float
-    reserve_1: float
-    mid_price: float
-    invariant: float
+    event_type: str
+    event_dex_symbol: str
+    event_symbol_0: str
+    event_symbol_1: str
+    event_decimals_0: int
+    event_decimals_1: int
+    event_amount_0: float
+    event_amount_1: float
+    event_amount_0_in: float | None
+    event_amount_0_out: float | None
+    event_amount_1_in: float | None
+    event_amount_1_out: float | None
+    event_reserve_0: float
+    event_reserve_1: float
+    event_mid_price: float
+    event_invariant: float
 
 
 class FlatUniswapV3Row(_BaseFlatRow):
-    sender: str | None
-    recipient: str | None
-    owner: str | None
-    amount: float | None
-    amount_0: float
-    amount_1: float
-    virtual_liquidity: float | None
-    tick: int | None
-    sqrt_price_x96: float | None
-    price: float | None
-    tick_lower: int | None
-    tick_upper: int | None
-    virtual_reserve_0: float | None
-    virtual_reserve_1: float | None
+    event_type: str
+    event_dex_symbol: str
+    event_symbol_0: str
+    event_symbol_1: str
+    event_decimals_0: int
+    event_decimals_1: int
+    event_sender: str | None
+    event_recipient: str | None
+    event_owner: str | None
+    event_amount: float | None
+    event_amount_0: float
+    event_amount_1: float
+    event_virtual_liquidity: float | None
+    event_tick: int | None
+    event_sqrt_price_x96: float | None
+    event_price: float | None
+    event_tick_lower: int | None
+    event_tick_upper: int | None
+    event_virtual_reserve_0: float | None
+    event_virtual_reserve_1: float | None
 
 
 FlatRow = FlatUniswapV2Row | FlatUniswapV3Row
 
 
 FLAT_UNISWAP_V2_COLUMNS: tuple[str, ...] = (
-    "timestamp",
+    "block_timestamp",
     "block_number",
-    "index",
-    "event_index",
-    "hash",
-    "from_address",
-    "to_address",
-    "value",
-    "gas",
-    "gasPrice",
-    "maxPriorityFeePerGas",
-    "maxFeePerGas",
+    "block_gas",
+    "block_txes",
+    "tx_index",
+    "log_index",
+    "tx_hash",
+    "tx_from",
+    "tx_to",
+    "tx_value",
+    "tx_gas",
+    "tx_gas_price",
+    "tx_max_priority_fee_per_gas",
+    "tx_max_fee_per_gas",
+    "tx_to_type",
     "event_type",
-    "dex_symbol",
-    "symbol_0",
-    "symbol_1",
-    "decimals_0",
-    "decimals_1",
-    "amount_0",
-    "amount_1",
-    "amount_0_in",
-    "amount_0_out",
-    "amount_1_in",
-    "amount_1_out",
-    "reserve_0",
-    "reserve_1",
-    "mid_price",
-    "invariant",
-    "to_type",
+    "event_dex_symbol",
+    "event_symbol_0",
+    "event_symbol_1",
+    "event_decimals_0",
+    "event_decimals_1",
+    "event_amount_0",
+    "event_amount_1",
+    "event_amount_0_in",
+    "event_amount_0_out",
+    "event_amount_1_in",
+    "event_amount_1_out",
+    "event_reserve_0",
+    "event_reserve_1",
+    "event_mid_price",
+    "event_invariant",
 )
 
 
 FLAT_UNISWAP_V3_COLUMNS: tuple[str, ...] = (
-    "timestamp",
+    "block_timestamp",
     "block_number",
-    "index",
-    "event_index",
-    "hash",
-    "from_address",
-    "to_address",
-    "value",
-    "gas",
-    "gasPrice",
-    "maxPriorityFeePerGas",
-    "maxFeePerGas",
+    "block_gas",
+    "block_txes",
+    "tx_index",
+    "log_index",
+    "tx_hash",
+    "tx_from",
+    "tx_to",
+    "tx_value",
+    "tx_gas",
+    "tx_gas_price",
+    "tx_max_priority_fee_per_gas",
+    "tx_max_fee_per_gas",
+    "tx_to_type",
     "event_type",
-    "dex_symbol",
-    "symbol_0",
-    "symbol_1",
-    "decimals_0",
-    "decimals_1",
-    "sender",
-    "recipient",
-    "owner",
-    "amount",
-    "amount_0",
-    "amount_1",
-    "virtual_liquidity",
-    "tick",
-    "sqrt_price_x96",
-    "price",
-    "tick_lower",
-    "tick_upper",
-    "virtual_reserve_0",
-    "virtual_reserve_1",
-    "to_type",
+    "event_dex_symbol",
+    "event_symbol_0",
+    "event_symbol_1",
+    "event_decimals_0",
+    "event_decimals_1",
+    "event_sender",
+    "event_recipient",
+    "event_owner",
+    "event_amount",
+    "event_amount_0",
+    "event_amount_1",
+    "event_virtual_liquidity",
+    "event_tick",
+    "event_sqrt_price_x96",
+    "event_price",
+    "event_tick_lower",
+    "event_tick_upper",
+    "event_virtual_reserve_0",
+    "event_virtual_reserve_1",
 )
 
 
@@ -153,8 +165,19 @@ def _parse_hex_int_optional(*, value: object) -> int | None:
     return int(value, 16)
 
 
-def _parse_timestamp(*, block: JsonObject) -> int:
+def _parse_block_timestamp(*, block: JsonObject) -> int:
     return _parse_hex_int(value=block.get("timestamp"), field_name="block.timestamp")
+
+
+def _parse_block_gas_used(*, block: JsonObject) -> int:
+    return _parse_hex_int(value=block.get("gasUsed"), field_name="block.gasUsed")
+
+
+def _parse_block_txes(*, block: JsonObject) -> int:
+    txes_value = block.get("transactions")
+    if not isinstance(txes_value, list):
+        raise TypeError("block.transactions must be a list")
+    return len(txes_value)
 
 
 def _tx_hash(*, tx: JsonObject) -> str:
@@ -210,21 +233,24 @@ def _base_row(
     block: JsonObject,
     block_number: int,
     tx_index: int,
-) -> dict[str, object]:
+) -> _BaseFlatRow:
     to_address = _tx_to(tx=tx)
     return {
-        "timestamp": _parse_timestamp(block=block),
+        "block_timestamp": _parse_block_timestamp(block=block),
         "block_number": block_number,
-        "index": tx_index,
-        "hash": _tx_hash(tx=tx),
-        "from_address": _tx_from(tx=tx),
-        "to_address": to_address,
-        "value": _tx_value(tx=tx),
-        "gas": _tx_gas(tx=tx),
-        "gasPrice": _tx_gas_price(tx=tx, receipt=receipt),
-        "maxPriorityFeePerGas": _tx_max_priority_fee(tx=tx),
-        "maxFeePerGas": _tx_max_fee(tx=tx),
-        "to_type": parse_to_type(to_address),
+        "block_gas": _parse_block_gas_used(block=block),
+        "block_txes": _parse_block_txes(block=block),
+        "tx_index": tx_index,
+        "log_index": -1,  # populated per event (aka log index)
+        "tx_hash": _tx_hash(tx=tx),
+        "tx_from": _tx_from(tx=tx),
+        "tx_to": to_address,
+        "tx_value": _tx_value(tx=tx),
+        "tx_gas": _tx_gas(tx=tx),
+        "tx_gas_price": _tx_gas_price(tx=tx, receipt=receipt),
+        "tx_max_priority_fee_per_gas": _tx_max_priority_fee(tx=tx),
+        "tx_max_fee_per_gas": _tx_max_fee(tx=tx),
+        "tx_to_type": parse_to_type(to_address),
     }
 
 
@@ -261,23 +287,27 @@ def iter_flat_rows(
 
             row: FlatUniswapV2Row = {
                 **base,
-                "event_index": event_index_value,
+                "log_index": event_index_value,
                 "event_type": _required_str(event=event, field="event_type"),
-                "dex_symbol": _required_str(event=event, field="dex_symbol"),
-                "symbol_0": _required_str(event=event, field="symbol_0"),
-                "symbol_1": _required_str(event=event, field="symbol_1"),
-                "decimals_0": _required_int(event=event, field="decimals_0"),
-                "decimals_1": _required_int(event=event, field="decimals_1"),
-                "amount_0": _required_float(event=event, field="amount_0"),
-                "amount_1": _required_float(event=event, field="amount_1"),
-                "amount_0_in": _optional_float(event=event, field="amount_0_in"),
-                "amount_0_out": _optional_float(event=event, field="amount_0_out"),
-                "amount_1_in": _optional_float(event=event, field="amount_1_in"),
-                "amount_1_out": _optional_float(event=event, field="amount_1_out"),
-                "reserve_0": _required_float(event=event, field="reserve_0"),
-                "reserve_1": _required_float(event=event, field="reserve_1"),
-                "mid_price": _required_float(event=event, field="mid_price"),
-                "invariant": _required_float(event=event, field="invariant"),
+                "event_dex_symbol": _required_str(event=event, field="dex_symbol"),
+                "event_symbol_0": _required_str(event=event, field="symbol_0"),
+                "event_symbol_1": _required_str(event=event, field="symbol_1"),
+                "event_decimals_0": _required_int(event=event, field="decimals_0"),
+                "event_decimals_1": _required_int(event=event, field="decimals_1"),
+                "event_amount_0": _required_float(event=event, field="amount_0"),
+                "event_amount_1": _required_float(event=event, field="amount_1"),
+                "event_amount_0_in": _optional_float(event=event, field="amount_0_in"),
+                "event_amount_0_out": _optional_float(
+                    event=event, field="amount_0_out"
+                ),
+                "event_amount_1_in": _optional_float(event=event, field="amount_1_in"),
+                "event_amount_1_out": _optional_float(
+                    event=event, field="amount_1_out"
+                ),
+                "event_reserve_0": _required_float(event=event, field="reserve_0"),
+                "event_reserve_1": _required_float(event=event, field="reserve_1"),
+                "event_mid_price": _required_float(event=event, field="mid_price"),
+                "event_invariant": _required_float(event=event, field="invariant"),
             }
             yield row
         return
@@ -288,50 +318,52 @@ def iter_flat_rows(
             if not isinstance(event_index_value, int):
                 raise TypeError("Uniswap v3 event is missing 'event_index' as int")
 
-            row: FlatUniswapV3Row = {
+            row_v3: FlatUniswapV3Row = {
                 **base,
-                "event_index": event_index_value,
+                "log_index": event_index_value,
                 "event_type": _required_str(event=event, field="event_type"),
-                "dex_symbol": _required_str(event=event, field="dex_symbol"),
-                "symbol_0": _required_str(event=event, field="symbol_0"),
-                "symbol_1": _required_str(event=event, field="symbol_1"),
-                "decimals_0": _required_int(event=event, field="decimals_0"),
-                "decimals_1": _required_int(event=event, field="decimals_1"),
-                "sender": _optional_str(event=event, field="sender"),
-                "recipient": _optional_str(event=event, field="recipient"),
-                "owner": _optional_str(event=event, field="owner"),
-                "amount": _optional_float(event=event, field="amount"),
-                "amount_0": _required_float(event=event, field="amount_0"),
-                "amount_1": _required_float(event=event, field="amount_1"),
-                "virtual_liquidity": _optional_float(
+                "event_dex_symbol": _required_str(event=event, field="dex_symbol"),
+                "event_symbol_0": _required_str(event=event, field="symbol_0"),
+                "event_symbol_1": _required_str(event=event, field="symbol_1"),
+                "event_decimals_0": _required_int(event=event, field="decimals_0"),
+                "event_decimals_1": _required_int(event=event, field="decimals_1"),
+                "event_sender": _optional_str(event=event, field="sender"),
+                "event_recipient": _optional_str(event=event, field="recipient"),
+                "event_owner": _optional_str(event=event, field="owner"),
+                "event_amount": _optional_float(event=event, field="amount"),
+                "event_amount_0": _required_float(event=event, field="amount_0"),
+                "event_amount_1": _required_float(event=event, field="amount_1"),
+                "event_virtual_liquidity": _optional_float(
                     event=event, field="virtual_liquidity"
                 ),
-                "tick": _optional_int(event=event, field="tick"),
-                "sqrt_price_x96": _optional_float(event=event, field="sqrt_price_x96"),
-                "price": _optional_float(event=event, field="price"),
-                "tick_lower": _optional_int(event=event, field="tick_lower"),
-                "tick_upper": _optional_int(event=event, field="tick_upper"),
-                "virtual_reserve_0": _optional_float(
+                "event_tick": _optional_int(event=event, field="tick"),
+                "event_sqrt_price_x96": _optional_float(
+                    event=event, field="sqrt_price_x96"
+                ),
+                "event_price": _optional_float(event=event, field="price"),
+                "event_tick_lower": _optional_int(event=event, field="tick_lower"),
+                "event_tick_upper": _optional_int(event=event, field="tick_upper"),
+                "event_virtual_reserve_0": _optional_float(
                     event=event, field="virtual_reserve_0"
                 ),
-                "virtual_reserve_1": _optional_float(
+                "event_virtual_reserve_1": _optional_float(
                     event=event, field="virtual_reserve_1"
                 ),
             }
-            yield row
+            yield row_v3
         return
 
     raise ValueError(f"Unsupported protocol: {protocol}")
 
 
-def _required_str(*, event: dict[str, object], field: str) -> str:
+def _required_str(*, event: Mapping[str, object], field: str) -> str:
     value = event.get(field)
     if not isinstance(value, str) or not value:
         raise TypeError(f"Event field '{field}' must be a non-empty str")
     return value
 
 
-def _optional_str(*, event: dict[str, object], field: str) -> str | None:
+def _optional_str(*, event: Mapping[str, object], field: str) -> str | None:
     value = event.get(field)
     if value is None:
         return None
@@ -340,14 +372,14 @@ def _optional_str(*, event: dict[str, object], field: str) -> str | None:
     return value
 
 
-def _required_int(*, event: dict[str, object], field: str) -> int:
+def _required_int(*, event: Mapping[str, object], field: str) -> int:
     value = event.get(field)
     if not isinstance(value, int):
         raise TypeError(f"Event field '{field}' must be an int")
     return value
 
 
-def _optional_int(*, event: dict[str, object], field: str) -> int | None:
+def _optional_int(*, event: Mapping[str, object], field: str) -> int | None:
     value = event.get(field)
     if value is None:
         return None
@@ -356,7 +388,7 @@ def _optional_int(*, event: dict[str, object], field: str) -> int | None:
     return value
 
 
-def _required_float(*, event: dict[str, object], field: str) -> float:
+def _required_float(*, event: Mapping[str, object], field: str) -> float:
     value = event.get(field)
     if isinstance(value, bool):
         raise TypeError(f"Event field '{field}' must be a float")
@@ -365,7 +397,7 @@ def _required_float(*, event: dict[str, object], field: str) -> float:
     return float(value)
 
 
-def _optional_float(*, event: dict[str, object], field: str) -> float | None:
+def _optional_float(*, event: Mapping[str, object], field: str) -> float | None:
     value = event.get(field)
     if value is None:
         return None
