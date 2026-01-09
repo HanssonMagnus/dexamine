@@ -56,7 +56,9 @@ class JsonRpcClient:
                 self.node_url, headers=headers, json=payload, timeout=timeout_seconds
             )
         except requests.RequestException as exc:
-            logger.error("JSON-RPC request failed", extra={"payload": payload}, exc_info=True)
+            logger.error(
+                "JSON-RPC request failed", extra={"payload": payload}, exc_info=True
+            )
             raise ConnectionError(f"JSON-RPC request failed: {exc}") from exc
 
         try:
@@ -136,10 +138,11 @@ class JsonRpcClient:
             request_id=request_id,
         )
         if result is None:
-            raise JsonRpcResultNotFoundError(f"Block not found for block_number={block_number}")
+            raise JsonRpcResultNotFoundError(
+                f"Block not found for block_number={block_number}"
+            )
         if not isinstance(result, dict):
             raise JsonRpcResponseFormatError(
                 f"Block result must be an object, got {type(result)}"
             )
         return result  # type: ignore[return-value]
-

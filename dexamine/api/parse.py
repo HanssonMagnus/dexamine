@@ -15,7 +15,9 @@ class RawPositionResult(TypedDict):
     block: JsonObject
 
 
-def parse_position_raw(node_url: str, block_number: int, tx_index: int) -> RawPositionResult:
+def parse_position_raw(
+    node_url: str, block_number: int, tx_index: int
+) -> RawPositionResult:
     """
     Fetch raw transaction, receipt, and block data for a tx position.
 
@@ -37,4 +39,3 @@ def parse_position_raw(node_url: str, block_number: int, tx_index: int) -> RawPo
     )
 
     return {"tx": tx, "receipt": receipt, "block": block}
-

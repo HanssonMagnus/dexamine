@@ -26,7 +26,9 @@ def test_parse_position_raw_happy_path() -> None:
     ]
 
     with patch("requests.post", side_effect=side_effect) as mocked_post:
-        out = parse_position_raw(node_url="http://localhost:8545", block_number=1, tx_index=0)
+        out = parse_position_raw(
+            node_url="http://localhost:8545", block_number=1, tx_index=0
+        )
 
     assert mocked_post.call_count == 3
     assert out["tx"] == tx_result
@@ -48,5 +50,6 @@ def test_parse_position_raw_missing_tx_hash_raises() -> None:
 
     with patch("requests.post", side_effect=side_effect):
         with pytest.raises(ValueError, match="missing a valid 'hash'"):
-            parse_position_raw(node_url="http://localhost:8545", block_number=1, tx_index=0)
-
+            parse_position_raw(
+                node_url="http://localhost:8545", block_number=1, tx_index=0
+            )
