@@ -53,6 +53,31 @@ class ParsedPositionResult(TypedDict):
     events: list[EventDict]
 
 
+def parse_positions(
+    *,
+    node_url: str,
+    positions: list[tuple[int, int]],
+    protocol: Protocol,
+    exchange_pair_address: str | None,
+    batch_size: int,
+) -> list[dict[str, object]]:
+    """
+    Convenience wrapper around DexamineSession.parse_positions(...).
+
+    For very large workloads, prefer creating a DexamineSession once and iterating
+    the generator returned by session.parse_positions(...).
+    """
+    session = DexamineSession.from_node_url(node_url)
+    return list(
+        session.parse_positions(
+            positions=positions,
+            protocol=protocol,
+            exchange_pair_address=exchange_pair_address,
+            batch_size=batch_size,
+        )
+    )
+
+
 def parse_position(
     *,
     node_url: str,
