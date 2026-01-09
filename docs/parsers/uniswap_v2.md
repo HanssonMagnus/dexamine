@@ -31,3 +31,12 @@ receives `696961612401492081` since there is some other latent cost to the speci
 To mitigate any potential issues here, I would recommend that you understand the ERC20 protocol
 that you are analyzing. You can also run `./tests/integration_tests/sync_swap_events.py` and
 investigate if there are any edge cases.
+
+#### Sync event Uniswap v2
+The sync event in the logs outputs the reserves of token0 and token1 in the liquidity pool. The
+sync function is called each time a mint, burn, or swap event takes place. However, it is unclear
+from the Uniswap v2 docs if the sync event emits the reserves after the mint, burn, or swap has
+taken place.
+
+As it turns out after testing, the sync event emits the inventory of the liquidity pool after the swap has taken
+place.
