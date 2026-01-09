@@ -20,6 +20,40 @@ result = session.parse_position(
 events = result["events"]
 ```
 
+### Flat output (`output_format="flat"`) for CSV export
+
+For a CSV-friendly output, use `output_format="flat"`. This returns **one row per parsed
+event** (so a transaction with multiple events becomes multiple rows).
+
+Important: `output_format="flat"` is **opinionated**. It does not include the full raw
+transaction / receipt / block payload. Instead, it emits a selected set of fields
+designed for analysis and direct CSV export.
+
+For large workloads, prefer the session generator to stream rows:
+
+```python
+from dexamine.api.session import DexamineSession
+
+session = DexamineSession.from_node_url("http://localhost:8545")
+for row in session.parse_positions(
+    positions=[(12376729, 59), (12376730, 10)],
+    protocol="uniswap_v3",
+    exchange_pair_address=None,
+    batch_size=2000,
+    output_format="flat",
+):
+    pass
+```
+
+Note: `DexamineSession.parse_positions(...)` is a generator. For small experiments you
+can materialize it with `rows = list(...)`, but do not do this for large workloads.
+
+Flat columns (Uniswap v3):
+
+```text
+timestamp,block_number,index,event_index,hash,from_address,to_address,value,gas,gasPrice,maxPriorityFeePerGas,maxFeePerGas,event_type,dex_symbol,symbol_0,symbol_1,decimals_0,decimals_1,sender,recipient,owner,amount,amount_0,amount_1,virtual_liquidity,tick,sqrt_price_x96,price,tick_lower,tick_upper,virtual_reserve_0,virtual_reserve_1,to_type
+```
+
 For high throughput, use batching:
 
 ```python

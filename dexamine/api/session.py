@@ -10,12 +10,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Iterator, Literal
 
+from dexamine.api.flat_output import FlatRow, iter_flat_rows
 from dexamine.parsers import uniswap_v2_parser, uniswap_v3_parser
 from dexamine.metadata.resolver import MetadataResolver
 from dexamine.rpc.json_rpc_client import JsonObject, JsonRpcClient, to_hex_quantity
 from dexamine.shared import general_helpers
 
 Protocol = Literal["uniswap_v2", "uniswap_v3"]
+OutputFormat = Literal["raw", "flat"]
 EventDict = dict[str, float | int | str | None]
 
 
@@ -98,7 +100,8 @@ class DexamineSession:
         tx_index: int,
         protocol: Protocol,
         exchange_pair_address: str | None,
-    ) -> dict[str, object]:
+        output_format: OutputFormat = "raw",
+    ) -> dict[str, object] | list[FlatRow]:
         raw = self.parse_position_raw(block_number=block_number, tx_index=tx_index)
 
         receipt = raw["receipt"]
@@ -120,7 +123,20 @@ class DexamineSession:
                 uniswap_v2_pair_abi=self.uniswap_v2_pair_abi,
                 exchange_pair_address=exchange_pair_address_value,
             )
-            return {**raw, "events": events}
+            if output_format == "raw":
+                return {**raw, "events": events}
+
+            return list(
+                iter_flat_rows(
+                    protocol=protocol,
+                    tx=raw["tx"],
+                    receipt=raw["receipt"],
+                    block=raw["block"],
+                    block_number=block_number,
+                    tx_index=tx_index,
+                    events=events,
+                )
+            )
 
         if protocol == "uniswap_v3":
             parsed = uniswap_v3_parser.parse_all_v3_events(
@@ -133,7 +149,20 @@ class DexamineSession:
                 exchange_pair_address=exchange_pair_address_value,
             )
             events = [] if parsed is None else parsed
-            return {**raw, "events": events}
+            if output_format == "raw":
+                return {**raw, "events": events}
+
+            return list(
+                iter_flat_rows(
+                    protocol=protocol,
+                    tx=raw["tx"],
+                    receipt=raw["receipt"],
+                    block=raw["block"],
+                    block_number=block_number,
+                    tx_index=tx_index,
+                    events=events,
+                )
+            )
 
         raise ValueError(f"Unsupported protocol: {protocol}")
 
@@ -144,7 +173,8 @@ class DexamineSession:
         protocol: Protocol,
         exchange_pair_address: str | None,
         batch_size: int,
-    ) -> Iterator[dict[str, object]]:
+        output_format: OutputFormat = "raw",
+    ) -> Iterator[dict[str, object] | FlatRow]:
         """
         Parse many tx positions efficiently using JSON-RPC batching.
 
@@ -217,7 +247,7 @@ class DexamineSession:
 
             # 4) Parse logs for each position
             for i, pos in enumerate(chunk, start=1):
-                block_number, _ = pos
+                block_number, tx_index = pos
                 receipt_value = receipt_results.get(i)
                 if not isinstance(receipt_value, dict):
                     raise TypeError(
@@ -243,12 +273,26 @@ class DexamineSession:
                         uniswap_v2_pair_abi=self.uniswap_v2_pair_abi,
                         exchange_pair_address=exchange_pair_address_value,
                     )
-                    yield {
-                        "tx": tx_by_pos[pos],
-                        "receipt": receipt,
-                        "block": block_by_number[block_number],
-                        "events": events,
-                    }
+                    tx = tx_by_pos[pos]
+                    block = block_by_number[block_number]
+                    if output_format == "raw":
+                        yield {
+                            "tx": tx,
+                            "receipt": receipt,
+                            "block": block,
+                            "events": events,
+                        }
+                        continue
+
+                    yield from iter_flat_rows(
+                        protocol=protocol,
+                        tx=tx,
+                        receipt=receipt,
+                        block=block,
+                        block_number=block_number,
+                        tx_index=tx_index,
+                        events=events,
+                    )
                     continue
 
                 if protocol == "uniswap_v3":
@@ -262,12 +306,26 @@ class DexamineSession:
                         exchange_pair_address=exchange_pair_address_value,
                     )
                     events = [] if parsed is None else parsed
-                    yield {
-                        "tx": tx_by_pos[pos],
-                        "receipt": receipt,
-                        "block": block_by_number[block_number],
-                        "events": events,
-                    }
+                    tx = tx_by_pos[pos]
+                    block = block_by_number[block_number]
+                    if output_format == "raw":
+                        yield {
+                            "tx": tx,
+                            "receipt": receipt,
+                            "block": block,
+                            "events": events,
+                        }
+                        continue
+
+                    yield from iter_flat_rows(
+                        protocol=protocol,
+                        tx=tx,
+                        receipt=receipt,
+                        block=block,
+                        block_number=block_number,
+                        tx_index=tx_index,
+                        events=events,
+                    )
                     continue
 
                 raise ValueError(f"Unsupported protocol: {protocol}")
