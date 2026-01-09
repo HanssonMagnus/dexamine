@@ -29,10 +29,9 @@ def sqrt_price_x96_to_price(sqrt_price_x96, token0_dec, token1_dec):
 ########################################################################################
 # Uniswap v3 ABI call node functions
 ########################################################################################
-def get_v3_pair(v3_pair_address, uniswap_v3_pair_abi):
+def get_v3_pair(*, node_url: str, v3_pair_address: str, uniswap_v3_pair_abi):
     """Get smart contract addresses for the tokens in a v3 pair from node."""
-    url = constants.NODE_URL
-    w3 = Web3(Web3.HTTPProvider(url))
+    w3 = Web3(Web3.HTTPProvider(node_url))
     v3_pair_address = Web3.to_checksum_address(v3_pair_address)
     swap_contract = w3.eth.contract(address=v3_pair_address, abi=uniswap_v3_pair_abi)
     token0 = swap_contract.functions.token0().call()
@@ -40,7 +39,7 @@ def get_v3_pair(v3_pair_address, uniswap_v3_pair_abi):
     return token0, token1
 
 
-def get_v3_dex(v3_pair_address, uniswap_v3_pair_abi):
+def get_v3_dex(*, node_url: str, v3_pair_address: str, uniswap_v3_pair_abi):
     """
     Check if the given pool address belongs to Uniswap V3. Uniswap V3 pools are not
     ERC20 contracts, thus there is no way to get the name of the DEX only to validate if
@@ -53,8 +52,7 @@ def get_v3_dex(v3_pair_address, uniswap_v3_pair_abi):
     Returns:
     str: "UniV3" if the pool belongs to Uniswap V3, "<contract_address>" otherwise.
     """
-    url = constants.NODE_URL
-    w3 = Web3(Web3.HTTPProvider(url))
+    w3 = Web3(Web3.HTTPProvider(node_url))
     v3_pair_address = Web3.to_checksum_address(v3_pair_address)
     dex_contract = w3.eth.contract(address=v3_pair_address, abi=uniswap_v3_pair_abi)
     dex_address = dex_contract.functions.factory().call()
