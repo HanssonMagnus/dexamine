@@ -15,6 +15,7 @@ from web3 import Web3
 # Import modules
 from dexamine.shared import constants, general_helpers, uniswap_v3_parsing
 from dexamine.shared.general_classes import DexEvent, DexEventType
+from dexamine.metadata.resolver import MetadataResolver
 
 # Get a logger
 logger = logging.getLogger(__name__)
@@ -269,6 +270,9 @@ class UniswapV3Burn(DexEvent):
 # Parse all Uniswap v3 swap, mint, and burn events from a transaction
 ########################################################################################
 def parse_all_v3_events(
+    *,
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     erc20_abi: dict[str, Any],
     erc20_bytes32_abi: dict[str, Any],
@@ -323,6 +327,8 @@ def parse_all_v3_events(
                 smart_contract = Web3.to_checksum_address(logs[swap_index]["address"])
                 if smart_contract == exchange_pair_address:
                     swap = parse_v3_swap(
+                        node_url,
+                        metadata_resolver,
                         logs,
                         swap_index,
                         erc20_abi,
@@ -335,7 +341,13 @@ def parse_all_v3_events(
         elif not exchange_pair_address:  # if string is empty, i.e., == ''
             # Parse all swaps regardless of exchange pair
             swaps = parse_v3_swaps(
-                logs, swap_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+                node_url,
+                metadata_resolver,
+                logs,
+                swap_indexes,
+                erc20_abi,
+                erc20_bytes32_abi,
+                uniswap_v3_pair_abi,
             )
             for swap in swaps:
                 if swap is not None:  # Since parse_trade(s) can return None
@@ -348,6 +360,8 @@ def parse_all_v3_events(
                 smart_contract = Web3.to_checksum_address(logs[mint_index]["address"])
                 if smart_contract == exchange_pair_address:
                     mint = parse_v3_mint(
+                        node_url,
+                        metadata_resolver,
                         logs,
                         mint_index,
                         erc20_abi,
@@ -360,7 +374,13 @@ def parse_all_v3_events(
         elif not exchange_pair_address:
             # Parse all mints regardless of exchange pair
             mints = parse_v3_mints(
-                logs, mint_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+                node_url,
+                metadata_resolver,
+                logs,
+                mint_indexes,
+                erc20_abi,
+                erc20_bytes32_abi,
+                uniswap_v3_pair_abi,
             )
             for mint in mints:
                 if mint is not None:
@@ -373,6 +393,8 @@ def parse_all_v3_events(
                 smart_contract = Web3.to_checksum_address(logs[burn_index]["address"])
                 if smart_contract == exchange_pair_address:
                     burn = parse_v3_burn(
+                        node_url,
+                        metadata_resolver,
                         logs,
                         burn_index,
                         erc20_abi,
@@ -385,7 +407,13 @@ def parse_all_v3_events(
         elif not exchange_pair_address:
             # Parse all burns regardless of exchange pair
             burns = parse_v3_burns(
-                logs, burn_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+                node_url,
+                metadata_resolver,
+                logs,
+                burn_indexes,
+                erc20_abi,
+                erc20_bytes32_abi,
+                uniswap_v3_pair_abi,
             )
             for burn in burns:
                 if burn is not None:
@@ -399,6 +427,8 @@ def parse_all_v3_events(
 ########################################################################################
 # It the parse_v3_swaps function even used???
 def parse_v3_swaps(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     swap_indexes: list[int],
     erc20_abi: dict[str, Any],
@@ -413,7 +443,13 @@ def parse_v3_swaps(
     for swap_index in swap_indexes:
 
         swap = parse_v3_swap(
-            logs, swap_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+            node_url,
+            metadata_resolver,
+            logs,
+            swap_index,
+            erc20_abi,
+            erc20_bytes32_abi,
+            uniswap_v3_pair_abi,
         )
 
         if swap is not None:
@@ -423,6 +459,8 @@ def parse_v3_swaps(
 
 
 def parse_v3_swap(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     swap_index: int,
     erc20_abi: dict[str, Any],
@@ -440,16 +478,38 @@ def parse_v3_swap(
     """
     # Collect meta data
     swap_contract = logs[swap_index]["address"]
-    token_0, token_1 = uniswap_v3_parsing.get_v3_pair(
-        swap_contract, uniswap_v3_pair_abi
-    )
-    dex_symbol = uniswap_v3_parsing.get_v3_dex(swap_contract, uniswap_v3_pair_abi)
-    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
-        token_0, erc20_abi, erc20_bytes32_abi
-    )
-    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
-        token_1, erc20_abi, erc20_bytes32_abi
-    )
+    if metadata_resolver is None:
+        token_0, token_1 = uniswap_v3_parsing.get_v3_pair(
+            node_url=node_url,
+            v3_pair_address=swap_contract,
+            uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+        )
+        dex_symbol = uniswap_v3_parsing.get_v3_dex(
+            node_url=node_url,
+            v3_pair_address=swap_contract,
+            uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+        )
+        symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_0,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+        symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_1,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+    else:
+        pool_meta = metadata_resolver.get_uniswap_v3_pool(swap_contract)
+        token_0 = pool_meta.token0
+        token_1 = pool_meta.token1
+        dex_symbol = pool_meta.dex_symbol
+        token0_meta = metadata_resolver.get_erc20(token_0)
+        token1_meta = metadata_resolver.get_erc20(token_1)
+        symbol_0, decimals_0 = token0_meta.symbol, token0_meta.decimals
+        symbol_1, decimals_1 = token1_meta.symbol, token1_meta.decimals
 
     # Collect sender and recipient from topics
     sender = logs[swap_index]["topics"][1]
@@ -494,6 +554,8 @@ def parse_v3_swap(
 # Functions to parse mint events
 ########################################################################################
 def parse_v3_mints(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     mint_indexes: list[int],
     erc20_abi: dict[str, Any],
@@ -509,7 +571,13 @@ def parse_v3_mints(
     mints = []
     for mint_index in mint_indexes:
         mint = parse_v3_mint(
-            logs, mint_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+            node_url,
+            metadata_resolver,
+            logs,
+            mint_index,
+            erc20_abi,
+            erc20_bytes32_abi,
+            uniswap_v3_pair_abi,
         )
 
         if mint is not None:
@@ -519,6 +587,8 @@ def parse_v3_mints(
 
 
 def parse_v3_mint(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     mint_index: int,
     erc20_abi: dict[str, Any],
@@ -537,16 +607,38 @@ def parse_v3_mint(
     """
 
     mint_contract = logs[mint_index]["address"]
-    token_0, token_1 = uniswap_v3_parsing.get_v3_pair(
-        mint_contract, uniswap_v3_pair_abi
-    )
-    dex_symbol = uniswap_v3_parsing.get_v3_dex(mint_contract, uniswap_v3_pair_abi)
-    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
-        token_0, erc20_abi, erc20_bytes32_abi
-    )
-    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
-        token_1, erc20_abi, erc20_bytes32_abi
-    )
+    if metadata_resolver is None:
+        token_0, token_1 = uniswap_v3_parsing.get_v3_pair(
+            node_url=node_url,
+            v3_pair_address=mint_contract,
+            uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+        )
+        dex_symbol = uniswap_v3_parsing.get_v3_dex(
+            node_url=node_url,
+            v3_pair_address=mint_contract,
+            uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+        )
+        symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_0,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+        symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_1,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+    else:
+        pool_meta = metadata_resolver.get_uniswap_v3_pool(mint_contract)
+        token_0 = pool_meta.token0
+        token_1 = pool_meta.token1
+        dex_symbol = pool_meta.dex_symbol
+        token0_meta = metadata_resolver.get_erc20(token_0)
+        token1_meta = metadata_resolver.get_erc20(token_1)
+        symbol_0, decimals_0 = token0_meta.symbol, token0_meta.decimals
+        symbol_1, decimals_1 = token1_meta.symbol, token1_meta.decimals
 
     # Collect owner, tick_lower, and tick_upper from topics
     owner = logs[mint_index]["topics"][1]
@@ -588,6 +680,8 @@ def parse_v3_mint(
 # Functions to parse mint events
 ########################################################################################
 def parse_v3_burns(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     burn_indexes: list[int],
     erc20_abi: dict[str, Any],
@@ -607,7 +701,13 @@ def parse_v3_burns(
     burns = []
     for burn_index in burn_indexes:
         burn = parse_v3_burn(
-            logs, burn_index, erc20_abi, erc20_bytes32_abi, uniswap_v3_pair_abi
+            node_url,
+            metadata_resolver,
+            logs,
+            burn_index,
+            erc20_abi,
+            erc20_bytes32_abi,
+            uniswap_v3_pair_abi,
         )
 
         if burn is not None:
@@ -617,6 +717,8 @@ def parse_v3_burns(
 
 
 def parse_v3_burn(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     burn_index: int,
     erc20_abi: dict[str, Any],
@@ -635,16 +737,38 @@ def parse_v3_burn(
     """
 
     burn_contract = logs[burn_index]["address"]
-    token_0, token_1 = uniswap_v3_parsing.get_v3_pair(
-        burn_contract, uniswap_v3_pair_abi
-    )
-    dex_symbol = uniswap_v3_parsing.get_v3_dex(burn_contract, uniswap_v3_pair_abi)
-    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
-        token_0, erc20_abi, erc20_bytes32_abi
-    )
-    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
-        token_1, erc20_abi, erc20_bytes32_abi
-    )
+    if metadata_resolver is None:
+        token_0, token_1 = uniswap_v3_parsing.get_v3_pair(
+            node_url=node_url,
+            v3_pair_address=burn_contract,
+            uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+        )
+        dex_symbol = uniswap_v3_parsing.get_v3_dex(
+            node_url=node_url,
+            v3_pair_address=burn_contract,
+            uniswap_v3_pair_abi=uniswap_v3_pair_abi,
+        )
+        symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_0,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+        symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_1,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+    else:
+        pool_meta = metadata_resolver.get_uniswap_v3_pool(burn_contract)
+        token_0 = pool_meta.token0
+        token_1 = pool_meta.token1
+        dex_symbol = pool_meta.dex_symbol
+        token0_meta = metadata_resolver.get_erc20(token_0)
+        token1_meta = metadata_resolver.get_erc20(token_1)
+        symbol_0, decimals_0 = token0_meta.symbol, token0_meta.decimals
+        symbol_1, decimals_1 = token1_meta.symbol, token1_meta.decimals
 
     # Collect owner, tick_lower, and tick_upper from topics
     owner = logs[burn_index]["topics"][1]

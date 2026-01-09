@@ -10,7 +10,7 @@ repos:
     hooks:
       - id: black-check
         name: black (check)
-        entry: python -m black --check dexamine scripts user_examples
+        entry: python -m black --check dexamine
         language: system
         pass_filenames: false
 

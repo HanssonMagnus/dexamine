@@ -1,17 +1,57 @@
 # Parsers Documentation - `dexamine` Project
 
-## Uniswap v3: `./dexamine/parsers/uniswap_v3_parser.py`
-This file contains parsers for liquidity taking and liquidity provision events for Uniswap v3.
+## Uniswap v3
 
-##### `parse_all_v3_events(logs, erc20_abi, uniswap_v3_pair_abi, exchange_pair_address='')`
+### Recommended usage (public API)
+
+For Uniswap v3 parsing, prefer the public position-based API (this keeps node access,
+batching, and caching consistent):
+
+```python
+from dexamine.api.session import DexamineSession
+
+session = DexamineSession.from_node_url("http://localhost:8545")
+result = session.parse_position(
+    block_number=12376729,
+    tx_index=59,
+    protocol="uniswap_v3",
+    exchange_pair_address=None,
+)
+events = result["events"]
+```
+
+For high throughput, use batching:
+
+```python
+for parsed in session.parse_positions(
+    positions=[(12376729, 59), (12376730, 10)],
+    protocol="uniswap_v3",
+    exchange_pair_address=None,
+    batch_size=2000,
+):
+    pass
+```
+
+### Internal parser module (advanced use)
+
+The internal parser lives in `dexamine/parsers/uniswap_v3_parser.py`. If you already have
+receipt logs and want to call the parser directly, use:
+
+- `parse_all_v3_events(...)`
+
+#### `parse_all_v3_events(...)`
+
 Parse all Unsiwap v3 swaps, mints, and burns from a tx.
+
 Inputs:
-logs: Logs from transaction receipt.
-exchange_pair_address: string of the exchange pair smart contract address.
+
+- logs: Logs from transaction receipt.
+- exchange_pair_address: string of the exchange pair smart contract address.
 
 For each Uniswap v3 event (swap, mint, burn), the following variables are parsed:
 
 Meta data from the transaction:
+
 - timestamp: The Unix timestamp indicating when the transaction occurred.
 - block_number: The number of the block in the Ethereum blockchain in which the
                 transaction was recorded.
@@ -28,6 +68,7 @@ Meta data from the transaction:
 - maxFeePerGas: The maximum fee per unit of gas (in wei) the sender is willing to pay.
 
 Variables from the event:
+
 - 'event_type': Specifies the type of event: "swap", "mint", or "burn".
 - 'dex_symbol': The symbol of the decentralized exchange.
 - 'symbol_0': The symbol of the first token in the exchange pair.
@@ -51,7 +92,8 @@ Variables from the event:
 - 'to_type': Type of agent: uni (manual), defi (algorithmic), mev (arbitrage), or
              contract_creation.
 
-##### `parse_v3_swap(logs, swap_index, erc20_abi, uniswap_v3_pair_abi)`
+#### `parse_v3_swap(...)`
+
 The swap event in Uniswap v3 is rather straightforward and contain the following variables:
 
 - amount0: pool change in token0 (negative if the pool sends out the amount).
@@ -61,6 +103,7 @@ The swap event in Uniswap v3 is rather straightforward and contain the following
 - tick: tick after the swap was executed.
 
 The functions parses out the following variables:
+
 - type_of_event: Specifies the type of event in this case "swap".
 - dex_symbol: The symbol of the decentralized exchange, here representing Uniswap v3.
 - symbol_0: The symbol of the first token in the trading pair.
@@ -78,6 +121,7 @@ The functions parses out the following variables:
 - tick_upper: The upper tick of the price range at which to provide liquidity ('NA' for swaps).
 
 ## Appendix Events
+
 This appendix contains all events emitted by the Uniswap v3 pool contract.
 
 - [IUniswapV3PoolEvents Docs](https://docs.uniswap.org/contracts/v3/reference/core/interfaces/pool/IUniswapV3PoolEvents)
@@ -93,23 +137,26 @@ observations that can be stored.
 - SetFeeProtocol: Emitted when the protocol fee is changed by the pool.
 - CollectProtocol: Emitted when the collected protocol fees are withdrawn by the factory owner.
 
-
 ## Appendix Glossary
+
 This appendix is based on the following resources:
 
 - [A Primer on Uniswap v3 Math](https://blog.uniswap.org/uniswap-v3-math-primer)
 - [A Primer on Uniswap v3 Math Part 2](https://blog.uniswap.org/uniswap-v3-math-primer-2)
 
-#### Liquidity
+### Liquidity
+
 We can calculate liquidity as the square root of the multiple virtual reserves within the range.
 It's stored as a square root for gas efficiency: `L = sqrt(x_virtual * y_virtual)`.
 
-#### Method ID
+### Method ID
+
 The method ID is the first 4 bytes of the Keccak-256 hash of the function signature. For example,
 to get the method ID for `swapExactInputSingle(...)`, you would hash the full function signature
 (including parameter types) and take the first 4 bytes.
 
-#### Q notation
+### Q notation
+
 [Q notation](https://en.wikipedia.org/wiki/Q_(number_format)), commonly referred to as "fixed-point
 arithmetic notation," is a way of representing fractional numbers in systems that lack native
 support for floating-point numbers. This notation is particularly useful in computing environments
@@ -128,13 +175,15 @@ k, where k represents the count of bits allocated for the fraction part in Q not
 converting a value like `sqrtPriceX96`, which is in Q96 format, to it `sqrtPrice` involves dividing
 it by 2 raised to the power of 96.
 
-#### sqrtPriceX96
+### sqrtPriceX96
+
 In Uniswap v3, the `sqrtPriceX96` value represents the current mid-price in the pool, and it is not
 the same as the execution price of a trade. The execution price of a trade in an Automated Market
 Maker (AMM) like Uniswap can differ from the mid-price due to price slippage caused by the trade's
 size relative to the liquidity.
 
-#### tick
+### tick
+
 "Ticks" in Uniswap v3 are directly related to the price. It is used to determine the liquidity that
 is in range, which results in specific price ranges. Uniswap v3 pools are made up of ticks ranging
 from -887272 to 887272, which functionally equate to a token price between 0 and infinity.
@@ -163,10 +212,12 @@ amount.
 
 Only swaps can change the tick.
 
-#### tick-spacing
+### tick-spacing
+
 "Tick-spacing" is the distance between two ticks, as defined by the fee tier.
 
-#### Virtual liquidity
+### Virtual liquidity
+
 In Uniswap v3, when we talk about liquidity in these pools, we really mean virtual liquidity. When
 we concentrate liquidity within a range, we construct a virtual xy=k price curve that works exactly
 like v2, but within the specified price range. This virtual curve is designed to ensure that the
@@ -174,4 +225,3 @@ amount of assets (represented by real x and y) traded as the price approaches ei
 range is equal to the real liquidity that has been deposited into the range. Liquidity is constant
 between ticks, similar to k in Uniswap v2's xy=k model, and can only be adjusted by depositing or
 withdrawing liquidity from the protocol.
-

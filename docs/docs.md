@@ -1,6 +1,5 @@
 # Documentation for `dexamine`
 
-- [Miscellaneous](./misc/misc_docs)
+- [Miscellaneous](./misc/misc_docs.md)
+- [API](./api.md)
 - [Parsers](./parsers/)
-- [Scripts](./scripts/)
-- [Tests](./tests/tests_docs)

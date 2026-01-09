@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 # RPC call functions
 ########################################################################################
 def get_tx_receipt_block_by_index(
-    block_hex: str, index_hex: str
+    *, node_url: str, block_hex: str, index_hex: str
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     """
     Get tx, receipt, and block response from node.
@@ -41,14 +41,16 @@ def get_tx_receipt_block_by_index(
         tuple (dict, dict, dict): Transaction, receipt, and block data.
 
     """
-    tx_data = get_tx_data_by_block_and_index(block_hex, index_hex)
+    tx_data = get_tx_data_by_block_and_index(
+        node_url=node_url, block_hex=block_hex, index_hex=index_hex
+    )
     tx_hash = tx_data["hash"]
-    receipt_data = get_receipt_data_by_hash(tx_hash)
-    block_data = get_block_data_by_block_number(block_hex)
+    receipt_data = get_receipt_data_by_hash(node_url=node_url, tx_hash=tx_hash)
+    block_data = get_block_data_by_block_number(node_url=node_url, block_hex=block_hex)
     return tx_data, receipt_data, block_data
 
 
-def get_tx_data_by_hash(tx_hash: str) -> dict[str, Any]:
+def get_tx_data_by_hash(*, node_url: str, tx_hash: str) -> dict[str, Any]:
     """
     Get tx response from node.
 
@@ -59,7 +61,6 @@ def get_tx_data_by_hash(tx_hash: str) -> dict[str, Any]:
         dict: JSON dict object of transation data.
 
     """
-    url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -68,14 +69,17 @@ def get_tx_data_by_hash(tx_hash: str) -> dict[str, Any]:
         "id": 1,
     }
     timeout_seconds = 10
-    res_tx = requests.post(url, headers=headers, json=payload, timeout=timeout_seconds)
+    res_tx = requests.post(
+        node_url, headers=headers, json=payload, timeout=timeout_seconds
+    )
     tx_data = res_tx.json()["result"]
     return tx_data
 
 
-def get_tx_data_by_block_and_index(block_hex: str, index_hex: str) -> dict[str, Any]:
+def get_tx_data_by_block_and_index(
+    *, node_url: str, block_hex: str, index_hex: str
+) -> dict[str, Any]:
     """Get tx response from node."""
-    url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -84,14 +88,15 @@ def get_tx_data_by_block_and_index(block_hex: str, index_hex: str) -> dict[str, 
         "id": 1,
     }
     timeout_seconds = 10
-    res_tx = requests.post(url, headers=headers, json=payload, timeout=timeout_seconds)
+    res_tx = requests.post(
+        node_url, headers=headers, json=payload, timeout=timeout_seconds
+    )
     tx_data = res_tx.json()["result"]
     return tx_data
 
 
-def get_receipt_data_by_hash(tx_hash: str) -> dict[str, Any]:
+def get_receipt_data_by_hash(*, node_url: str, tx_hash: str) -> dict[str, Any]:
     """Get receipt response from node."""
-    url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -101,15 +106,14 @@ def get_receipt_data_by_hash(tx_hash: str) -> dict[str, Any]:
     }
     timeout_seconds = 10
     res_receipt = requests.post(
-        url, headers=headers, json=payload, timeout=timeout_seconds
+        node_url, headers=headers, json=payload, timeout=timeout_seconds
     )
     receipt_data = res_receipt.json()["result"]
     return receipt_data
 
 
-def get_block_data_by_block_number(block_hex: str) -> dict[str, Any]:
+def get_block_data_by_block_number(*, node_url: str, block_hex: str) -> dict[str, Any]:
     """Get block response from node."""
-    url = constants.NODE_URL
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -119,7 +123,7 @@ def get_block_data_by_block_number(block_hex: str) -> dict[str, Any]:
     }
     timeout_seconds = 10
     res_block = requests.post(
-        url, headers=headers, json=payload, timeout=timeout_seconds
+        node_url, headers=headers, json=payload, timeout=timeout_seconds
     )
     block_data = res_block.json()["result"]
     return block_data
@@ -129,7 +133,11 @@ def get_block_data_by_block_number(block_hex: str) -> dict[str, Any]:
 # ABI call functions
 ########################################################################################
 def get_erc20_symbol(
-    token_address: str, erc20_abi: dict[str, Any], erc20_bytes32_abi: dict[str, Any]
+    *,
+    node_url: str,
+    token_address: str,
+    erc20_abi: dict[str, Any],
+    erc20_bytes32_abi: dict[str, Any],
 ) -> tuple[str, int]:
     """
     Match an ERC-20 token smart contract address to its symbol and get the number of
@@ -147,8 +155,7 @@ def get_erc20_symbol(
     # Transform address to checksum address
     token_address = Web3.to_checksum_address(token_address)
     try:
-        url = constants.NODE_URL
-        w3 = Web3(Web3.HTTPProvider(url))
+        w3 = Web3(Web3.HTTPProvider(node_url))
         token_address = Web3.to_checksum_address(token_address)
         token_contract = w3.eth.contract(address=token_address, abi=erc20_abi)
         symbol = token_contract.functions.symbol().call()

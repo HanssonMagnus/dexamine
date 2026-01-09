@@ -56,8 +56,47 @@ This repository focuses on **Uniswap v2/v3 parsing from transaction receipt logs
   - `pre-commit run --all-files`
 
 ## Usage
-Refer to individual READMEs in [`docs/`](./docs/) for detailed usage instructions for each script
-and parser.
+### 1-minute example (single transaction position)
+Parse a single transaction by its position in a block (block number + transaction index):
+
+```python
+from dexamine import parse_position
+
+result = parse_position(
+    node_url="http://localhost:8545",
+    block_number=10008555,
+    tx_index=25,
+    protocol="uniswap_v2",
+    exchange_pair_address=None,
+)
+
+events = result["events"]
+```
+
+### High-throughput example (batched)
+For large workloads, create a session once per process and stream results:
+
+```python
+from dexamine.api.session import DexamineSession
+
+session = DexamineSession.from_node_url("http://localhost:8545")
+positions = [(10008555, 25), (10008566, 1)]
+
+for parsed in session.parse_positions(
+    positions=positions,
+    protocol="uniswap_v2",
+    exchange_pair_address=None,
+    batch_size=2000,
+):
+    # parsed = {"tx", "receipt", "block", "events"}
+    pass
+```
+
+### Multiprocessing note
+To scale to millions of transactions, shard `positions` across worker processes and
+instantiate `DexamineSession` inside each worker.
+
+See [`docs/docs.md`](./docs/docs.md) for more documentation.
 
 ## FAQ
 

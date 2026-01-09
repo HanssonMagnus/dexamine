@@ -33,7 +33,9 @@ def test_get_tx_data_by_hash_success():
         mocked_post.return_value.json.return_value = expected_response
 
         # Call the function
-        response = general_helpers.get_tx_data_by_hash(tx_hash)
+        response = general_helpers.get_tx_data_by_hash(
+            node_url=constants.NODE_URL, tx_hash=tx_hash
+        )
 
         # Assertions
         mocked_post.assert_called_once()
@@ -50,7 +52,9 @@ def test_get_tx_data_by_hash_not_found():
     with patch("requests.post") as mocked_post:
         mocked_post.return_value.json.return_value = expected_response
 
-        response = general_helpers.get_tx_data_by_hash(tx_hash)
+        response = general_helpers.get_tx_data_by_hash(
+            node_url=constants.NODE_URL, tx_hash=tx_hash
+        )
 
         assert response is None
 
@@ -71,7 +75,9 @@ def test_get_tx_data_by_block_and_index_success():
 
         # Call the function
         response = general_helpers.get_tx_data_by_block_and_index(
-            block_number, transaction_index
+            node_url=constants.NODE_URL,
+            block_hex=block_number,
+            index_hex=transaction_index,
         )
 
         # Assertions
@@ -90,7 +96,9 @@ def test_get_tx_data_by_block_and_index_not_found():
         mocked_post.return_value.json.return_value = expected_response
 
         response = general_helpers.get_tx_data_by_block_and_index(
-            block_number, transaction_index
+            node_url=constants.NODE_URL,
+            block_hex=block_number,
+            index_hex=transaction_index,
         )
 
         assert response is None
@@ -110,7 +118,9 @@ def test_get_receipt_data_by_hash_success():
         mocked_post.return_value.json.return_value = expected_response
 
         # Call the function
-        response = general_helpers.get_receipt_data_by_hash(tx_hash)
+        response = general_helpers.get_receipt_data_by_hash(
+            node_url=constants.NODE_URL, tx_hash=tx_hash
+        )
 
         # Assertions
         mocked_post.assert_called_once()
@@ -126,7 +136,9 @@ def test_get_receipt_data_by_hash_not_found():
     with patch("requests.post") as mocked_post:
         mocked_post.return_value.json.return_value = expected_response
 
-        response = general_helpers.get_receipt_data_by_hash(tx_hash)
+        response = general_helpers.get_receipt_data_by_hash(
+            node_url=constants.NODE_URL, tx_hash=tx_hash
+        )
 
         assert response is None
 
@@ -145,7 +157,9 @@ def test_get_block_data_by_block_number_success():
         mocked_post.return_value.json.return_value = expected_response
 
         # Call the function
-        response = general_helpers.get_block_data_by_block_number(block_number)
+        response = general_helpers.get_block_data_by_block_number(
+            node_url=constants.NODE_URL, block_hex=block_number
+        )
 
         # Assertions
         mocked_post.assert_called_once()
@@ -161,7 +175,9 @@ def test_get_block_data_by_block_number_not_found():
     with patch("requests.post") as mocked_post:
         mocked_post.return_value.json.return_value = expected_response
 
-        response = general_helpers.get_block_data_by_block_number(block_number)
+        response = general_helpers.get_block_data_by_block_number(
+            node_url=constants.NODE_URL, block_hex=block_number
+        )
 
         assert response is None
 

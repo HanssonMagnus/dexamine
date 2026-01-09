@@ -16,6 +16,7 @@ from web3 import Web3
 # Import modules
 from dexamine.shared import constants, general_helpers, uniswap_v2_parsing
 from dexamine.shared.general_classes import DexEvent, DexEventType
+from dexamine.metadata.resolver import MetadataResolver
 
 # Get a logger
 logger = logging.getLogger(__name__)
@@ -216,6 +217,9 @@ class UniswapV2Lp(UniswapV2Event):
 # Parse all Uniswap v2 swaps, mints, and burns from a transaction
 ########################################################################################
 def parse_all_uniswap_v2_events(
+    *,
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     erc20_abi: dict[str, Any],
     erc20_bytes32_abi: dict[str, Any],
@@ -257,7 +261,13 @@ def parse_all_uniswap_v2_events(
     if swap_indexes:  # If the list is not empty
         if exchange_pair_address == "":
             swaps = parse_uniswap_v2_swaps(
-                logs, swap_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
+                node_url,
+                metadata_resolver,
+                logs,
+                swap_indexes,
+                erc20_abi,
+                erc20_bytes32_abi,
+                uniswap_v2_pair_abi,
             )
             for swap in swaps:
                 if swap is not None:  # Since parse_trade(s) can return None
@@ -267,6 +277,8 @@ def parse_all_uniswap_v2_events(
                 smart_contract = Web3.to_checksum_address(logs[swap_index]["address"])
                 if smart_contract == exchange_pair_address:
                     swap = parse_uniswap_v2_swap(
+                        node_url,
+                        metadata_resolver,
                         logs,
                         swap_index,
                         erc20_abi,
@@ -280,7 +292,13 @@ def parse_all_uniswap_v2_events(
     if lp_indexes:
         if exchange_pair_address == "":
             lps = parse_uniswap_v2_lps(
-                logs, lp_indexes, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
+                node_url,
+                metadata_resolver,
+                logs,
+                lp_indexes,
+                erc20_abi,
+                erc20_bytes32_abi,
+                uniswap_v2_pair_abi,
             )
             for lp in lps:
                 if lp is not None:
@@ -290,6 +308,8 @@ def parse_all_uniswap_v2_events(
                 smart_contract = Web3.to_checksum_address(logs[lp_index]["address"])
                 if smart_contract == exchange_pair_address:
                     lp = parse_uniswap_v2_lp(
+                        node_url,
+                        metadata_resolver,
                         logs,
                         lp_index,
                         erc20_abi,
@@ -306,6 +326,8 @@ def parse_all_uniswap_v2_events(
 # Swap parse functions
 ########################################################################################
 def parse_uniswap_v2_swaps(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     swap_indexes: list[int],
     erc20_abi: dict[str, Any],
@@ -322,7 +344,13 @@ def parse_uniswap_v2_swaps(
     swaps = []
     for swap_index in swap_indexes:
         swap = parse_uniswap_v2_swap(
-            logs, swap_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
+            node_url,
+            metadata_resolver,
+            logs,
+            swap_index,
+            erc20_abi,
+            erc20_bytes32_abi,
+            uniswap_v2_pair_abi,
         )
         swaps.append(swap)
 
@@ -330,6 +358,8 @@ def parse_uniswap_v2_swaps(
 
 
 def parse_uniswap_v2_swap(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     swap_index: int,
     erc20_abi: dict[str, Any],
@@ -360,16 +390,36 @@ def parse_uniswap_v2_swap(
     sync_log = logs[swap_index - 1]  # sync event is just before swap event
 
     swap_contract = logs[swap_index]["address"]
-    token_0, token_1 = uniswap_v2_parsing.get_v2_pair(
-        swap_contract, uniswap_v2_pair_abi
-    )
-    dex_symbol = uniswap_v2_parsing.get_v2_dex(swap_contract, erc20_abi)
-    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
-        token_0, erc20_abi, erc20_bytes32_abi
-    )
-    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
-        token_1, erc20_abi, erc20_bytes32_abi
-    )
+    if metadata_resolver is None:
+        token_0, token_1 = uniswap_v2_parsing.get_v2_pair(
+            node_url=node_url,
+            v2_pair_address=swap_contract,
+            uniswap_v2_pair_abi=uniswap_v2_pair_abi,
+        )
+        dex_symbol = uniswap_v2_parsing.get_v2_dex(
+            node_url=node_url, v2_pair_address=swap_contract, erc20_abi=erc20_abi
+        )
+        symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_0,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+        symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_1,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+    else:
+        pair_meta = metadata_resolver.get_uniswap_v2_pair(swap_contract)
+        token_0 = pair_meta.token0
+        token_1 = pair_meta.token1
+        dex_symbol = pair_meta.dex_symbol
+        token0_meta = metadata_resolver.get_erc20(token_0)
+        token1_meta = metadata_resolver.get_erc20(token_1)
+        symbol_0, decimals_0 = token0_meta.symbol, token0_meta.decimals
+        symbol_1, decimals_1 = token1_meta.symbol, token1_meta.decimals
 
     # Collect the swap amounts delta x_t and delta y_t
     swap_data = logs[swap_index]["data"][2:]  # 256 characters after removing 0x
@@ -407,6 +457,8 @@ def parse_uniswap_v2_swap(
 # Liquidity provision parse functions
 ########################################################################################
 def parse_uniswap_v2_lps(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     lp_indexes: list[int],
     erc20_abi: dict[str, Any],
@@ -426,7 +478,13 @@ def parse_uniswap_v2_lps(
     lps = []
     for lp_index in lp_indexes:
         lp = parse_uniswap_v2_lp(
-            logs, lp_index, erc20_abi, erc20_bytes32_abi, uniswap_v2_pair_abi
+            node_url,
+            metadata_resolver,
+            logs,
+            lp_index,
+            erc20_abi,
+            erc20_bytes32_abi,
+            uniswap_v2_pair_abi,
         )
         lps.append(lp)
 
@@ -434,6 +492,8 @@ def parse_uniswap_v2_lps(
 
 
 def parse_uniswap_v2_lp(
+    node_url: str,
+    metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     lp_index: int,
     erc20_abi: dict[str, Any],
@@ -466,14 +526,36 @@ def parse_uniswap_v2_lp(
     sync_log = logs[lp_index - 1]  # sync event is just before lp event
 
     lp_contract = logs[lp_index]["address"]
-    token_0, token_1 = uniswap_v2_parsing.get_v2_pair(lp_contract, uniswap_v2_pair_abi)
-    dex_symbol = uniswap_v2_parsing.get_v2_dex(lp_contract, erc20_abi)
-    symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
-        token_0, erc20_abi, erc20_bytes32_abi
-    )
-    symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
-        token_1, erc20_abi, erc20_bytes32_abi
-    )
+    if metadata_resolver is None:
+        token_0, token_1 = uniswap_v2_parsing.get_v2_pair(
+            node_url=node_url,
+            v2_pair_address=lp_contract,
+            uniswap_v2_pair_abi=uniswap_v2_pair_abi,
+        )
+        dex_symbol = uniswap_v2_parsing.get_v2_dex(
+            node_url=node_url, v2_pair_address=lp_contract, erc20_abi=erc20_abi
+        )
+        symbol_0, decimals_0 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_0,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+        symbol_1, decimals_1 = general_helpers.get_erc20_symbol(
+            node_url=node_url,
+            token_address=token_1,
+            erc20_abi=erc20_abi,
+            erc20_bytes32_abi=erc20_bytes32_abi,
+        )
+    else:
+        pair_meta = metadata_resolver.get_uniswap_v2_pair(lp_contract)
+        token_0 = pair_meta.token0
+        token_1 = pair_meta.token1
+        dex_symbol = pair_meta.dex_symbol
+        token0_meta = metadata_resolver.get_erc20(token_0)
+        token1_meta = metadata_resolver.get_erc20(token_1)
+        symbol_0, decimals_0 = token0_meta.symbol, token0_meta.decimals
+        symbol_1, decimals_1 = token1_meta.symbol, token1_meta.decimals
 
     # Collect how much was deposited
     lp_data = logs[lp_index]["data"][2:]  # len 128

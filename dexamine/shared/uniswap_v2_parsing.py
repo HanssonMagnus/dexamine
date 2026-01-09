@@ -22,12 +22,10 @@ logger = logging.getLogger(__name__)
 # Uniswap v2 ABI call node functions
 ########################################################################################
 def get_v2_pair(
-    v2_pair_address: str,
-    uniswap_v2_pair_abi: dict[str, Any],
+    *, node_url: str, v2_pair_address: str, uniswap_v2_pair_abi: dict[str, Any]
 ) -> tuple[str, str]:
     """Get meta data for an v2 pair from node."""
-    url = constants.NODE_URL
-    w3 = Web3(Web3.HTTPProvider(url))
+    w3 = Web3(Web3.HTTPProvider(node_url))
     v2_pair_address = Web3.to_checksum_address(v2_pair_address)
     swap_contract = w3.eth.contract(address=v2_pair_address, abi=uniswap_v2_pair_abi)
     token0 = swap_contract.functions.token0().call()
@@ -35,10 +33,11 @@ def get_v2_pair(
     return token0, token1
 
 
-def get_v2_dex(v2_pair_address: str, erc20_abi: dict[str, Any]) -> str:
+def get_v2_dex(
+    *, node_url: str, v2_pair_address: str, erc20_abi: dict[str, Any]
+) -> str:
     """Get meta data for an v2 DEX from node."""
-    url = constants.NODE_URL
-    w3 = Web3(Web3.HTTPProvider(url))
+    w3 = Web3(Web3.HTTPProvider(node_url))
     v2_pair_address = Web3.to_checksum_address(v2_pair_address)
     dex_contract = w3.eth.contract(address=v2_pair_address, abi=erc20_abi)
     dex_symbol = dex_contract.functions.symbol().call()
