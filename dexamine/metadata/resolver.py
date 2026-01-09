@@ -109,4 +109,3 @@ class MetadataResolver:
         meta = V3PoolMetadata(token0=token0, token1=token1, dex_symbol=dex_symbol)
         self._v3_pool_cache[key] = meta
         return meta
-

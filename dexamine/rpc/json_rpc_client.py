@@ -99,7 +99,10 @@ class JsonRpcClient:
         except ValueError as exc:
             logger.error(
                 "JSON-RPC batch response is not valid JSON",
-                extra={"payload_len": len(payload), "status_code": response.status_code},
+                extra={
+                    "payload_len": len(payload),
+                    "status_code": response.status_code,
+                },
                 exc_info=True,
             )
             raise JsonRpcResponseFormatError(
@@ -121,7 +124,9 @@ class JsonRpcClient:
 
         return out
 
-    def batch_call(self, calls: list[tuple[str, JsonArray, int]]) -> dict[int, JsonValue]:
+    def batch_call(
+        self, calls: list[tuple[str, JsonArray, int]]
+    ) -> dict[int, JsonValue]:
         """
         Execute a JSON-RPC batch request.
 
@@ -153,7 +158,9 @@ class JsonRpcClient:
                 )
 
             if "error" in resp and resp["error"] is not None:
-                raise JsonRpcError(f"JSON-RPC error (id={response_id}): {resp['error']}")
+                raise JsonRpcError(
+                    f"JSON-RPC error (id={response_id}): {resp['error']}"
+                )
 
             if "result" not in resp:
                 raise JsonRpcResponseFormatError(

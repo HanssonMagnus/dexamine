@@ -51,7 +51,9 @@ class DexamineSession:
         rpc = JsonRpcClient(node_url=node_url)
         erc20_abi = general_helpers.get_json_abi("erc20/ERC20_abi.json")
         erc20_bytes32_abi = general_helpers.get_json_abi("erc20/ERC20_bytes32_abi.json")
-        uniswap_v2_pair_abi = general_helpers.get_json_abi("uniswap_v2/IUniswapV2Pair.json")
+        uniswap_v2_pair_abi = general_helpers.get_json_abi(
+            "uniswap_v2/IUniswapV2Pair.json"
+        )
         uniswap_v3_pair_abi = general_helpers.get_json_abi(
             "uniswap_v3/UniswapV3PoolABI.json"
         )
@@ -72,7 +74,9 @@ class DexamineSession:
             metadata=metadata,
         )
 
-    def parse_position_raw(self, *, block_number: int, tx_index: int) -> dict[str, JsonObject]:
+    def parse_position_raw(
+        self, *, block_number: int, tx_index: int
+    ) -> dict[str, JsonObject]:
         tx = self.rpc.get_transaction_by_block_number_and_index(
             block_number=block_number, tx_index=tx_index, request_id=1
         )
@@ -102,7 +106,9 @@ class DexamineSession:
         if not isinstance(logs_value, list):
             raise TypeError("Receipt is missing 'logs' as a list")
 
-        exchange_pair_address_value = "" if exchange_pair_address is None else exchange_pair_address
+        exchange_pair_address_value = (
+            "" if exchange_pair_address is None else exchange_pair_address
+        )
 
         if protocol == "uniswap_v2":
             events = uniswap_v2_parser.parse_all_uniswap_v2_events(
@@ -168,7 +174,9 @@ class DexamineSession:
             for i, pos in enumerate(chunk, start=1):
                 tx_value = tx_results.get(i)
                 if not isinstance(tx_value, dict):
-                    raise TypeError(f"Transaction result must be an object, got {type(tx_value)}")
+                    raise TypeError(
+                        f"Transaction result must be an object, got {type(tx_value)}"
+                    )
                 tx: JsonObject = tx_value  # runtime-validated above
 
                 tx_hash_value = tx.get("hash")
@@ -182,7 +190,9 @@ class DexamineSession:
             receipt_results = self.rpc.batch_call(receipt_calls)
 
             # 3) Fetch blocks once per unique block number
-            unique_blocks: list[int] = sorted({block_number for block_number, _ in chunk})
+            unique_blocks: list[int] = sorted(
+                {block_number for block_number, _ in chunk}
+            )
             block_id_by_number: dict[int, int] = {}
             block_calls: list[tuple[str, list[object], int]] = []
             for i, block_number in enumerate(unique_blocks, start=1):
@@ -200,7 +210,9 @@ class DexamineSession:
             for block_number, request_id in block_id_by_number.items():
                 block_value = block_results.get(request_id)
                 if not isinstance(block_value, dict):
-                    raise TypeError(f"Block result must be an object, got {type(block_value)}")
+                    raise TypeError(
+                        f"Block result must be an object, got {type(block_value)}"
+                    )
                 block_by_number[block_number] = block_value  # type: ignore[assignment]
 
             # 4) Parse logs for each position
@@ -208,7 +220,9 @@ class DexamineSession:
                 block_number, _ = pos
                 receipt_value = receipt_results.get(i)
                 if not isinstance(receipt_value, dict):
-                    raise TypeError(f"Receipt result must be an object, got {type(receipt_value)}")
+                    raise TypeError(
+                        f"Receipt result must be an object, got {type(receipt_value)}"
+                    )
                 receipt: JsonObject = receipt_value  # runtime-validated above
 
                 logs_value = receipt.get("logs")
@@ -257,4 +271,3 @@ class DexamineSession:
                     continue
 
                 raise ValueError(f"Unsupported protocol: {protocol}")
-

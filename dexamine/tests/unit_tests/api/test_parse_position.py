@@ -52,4 +52,3 @@ def test_parse_position_uniswap_v3_none_becomes_empty_list() -> None:
         )
 
     assert out["events"] == session_result["events"]
-

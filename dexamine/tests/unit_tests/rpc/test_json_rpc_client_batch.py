@@ -35,7 +35,9 @@ def test_batch_call_raises_on_error_object() -> None:
     def side_effect(*_args, **_kwargs):
         class Response:
             def json(self):
-                return [{"jsonrpc": "2.0", "id": 1, "error": {"code": -1, "message": "x"}}]
+                return [
+                    {"jsonrpc": "2.0", "id": 1, "error": {"code": -1, "message": "x"}}
+                ]
 
         return Response()
 
@@ -44,4 +46,3 @@ def test_batch_call_raises_on_error_object() -> None:
     with patch("requests.post", side_effect=side_effect):
         with pytest.raises(JsonRpcError, match=r"JSON-RPC error"):
             client.batch_call([("methodA", [], 1)])
-

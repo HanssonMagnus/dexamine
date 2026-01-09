@@ -33,7 +33,9 @@ def get_v2_pair(
     return token0, token1
 
 
-def get_v2_dex(*, node_url: str, v2_pair_address: str, erc20_abi: dict[str, Any]) -> str:
+def get_v2_dex(
+    *, node_url: str, v2_pair_address: str, erc20_abi: dict[str, Any]
+) -> str:
     """Get meta data for an v2 DEX from node."""
     w3 = Web3(Web3.HTTPProvider(node_url))
     v2_pair_address = Web3.to_checksum_address(v2_pair_address)
