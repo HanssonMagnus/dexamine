@@ -4,8 +4,9 @@ API entrypoints for parsing by transaction position (block number + tx index).
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import Literal, TypedDict, overload
 
+from dexamine.api.flat_output import FlatRow
 from dexamine.rpc.json_rpc_client import JsonObject, JsonRpcClient
 from dexamine.api.session import DexamineSession
 
@@ -43,6 +44,7 @@ def parse_position_raw(
 
 
 Protocol = Literal["uniswap_v2", "uniswap_v3"]
+OutputFormat = Literal["raw", "flat"]
 EventDict = dict[str, float | int | str | None]
 
 
@@ -53,6 +55,7 @@ class ParsedPositionResult(TypedDict):
     events: list[EventDict]
 
 
+@overload
 def parse_positions(
     *,
     node_url: str,
@@ -60,7 +63,31 @@ def parse_positions(
     protocol: Protocol,
     exchange_pair_address: str | None,
     batch_size: int,
-) -> list[dict[str, object]]:
+    output_format: Literal["raw"] = "raw",
+) -> list[dict[str, object]]: ...
+
+
+@overload
+def parse_positions(
+    *,
+    node_url: str,
+    positions: list[tuple[int, int]],
+    protocol: Protocol,
+    exchange_pair_address: str | None,
+    batch_size: int,
+    output_format: Literal["flat"],
+) -> list[FlatRow]: ...
+
+
+def parse_positions(
+    *,
+    node_url: str,
+    positions: list[tuple[int, int]],
+    protocol: Protocol,
+    exchange_pair_address: str | None,
+    batch_size: int,
+    output_format: OutputFormat = "raw",
+) -> list[dict[str, object]] | list[FlatRow]:
     """
     Convenience wrapper around DexamineSession.parse_positions(...).
 
@@ -74,8 +101,33 @@ def parse_positions(
             protocol=protocol,
             exchange_pair_address=exchange_pair_address,
             batch_size=batch_size,
+            output_format=output_format,
         )
     )
+
+
+@overload
+def parse_position(
+    *,
+    node_url: str,
+    block_number: int,
+    tx_index: int,
+    protocol: Protocol,
+    exchange_pair_address: str | None,
+    output_format: Literal["raw"] = "raw",
+) -> ParsedPositionResult: ...
+
+
+@overload
+def parse_position(
+    *,
+    node_url: str,
+    block_number: int,
+    tx_index: int,
+    protocol: Protocol,
+    exchange_pair_address: str | None,
+    output_format: Literal["flat"],
+) -> list[FlatRow]: ...
 
 
 def parse_position(
@@ -85,7 +137,8 @@ def parse_position(
     tx_index: int,
     protocol: Protocol,
     exchange_pair_address: str | None,
-) -> ParsedPositionResult:
+    output_format: OutputFormat = "raw",
+) -> ParsedPositionResult | list[FlatRow]:
     """
     Fetch raw data for a tx position and parse Uniswap v2/v3 events.
 
@@ -97,7 +150,13 @@ def parse_position(
         tx_index=tx_index,
         protocol=protocol,
         exchange_pair_address=exchange_pair_address,
+        output_format=output_format,
     )
+
+    if output_format == "flat":
+        if not isinstance(result, list):
+            raise TypeError("Expected flat output as a list of rows")
+        return result
 
     return {
         "tx": result["tx"],  # type: ignore[typeddict-item]
