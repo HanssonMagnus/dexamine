@@ -92,6 +92,14 @@ for parsed in session.parse_positions(
     pass
 ```
 
+### Flat output (`output_format="flat"`) columns
+
+Flat output emits **one row per parsed event** and is intended for direct CSV export.
+Column definitions are documented in:
+
+- `docs/api.md` (shared `block_*`, `tx_*`, `receipt_*`, `receipt_log_index`, `tx_to_type`)
+- `docs/parsers/uniswap_v2.md` and `docs/parsers/uniswap_v3.md` (protocol-specific `event_*` fields)
+
 ### Multiprocessing note
 To scale to millions of transactions, shard `positions` across worker processes and
 instantiate `DexamineSession` inside each worker.

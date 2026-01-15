@@ -21,6 +21,7 @@ def test_iter_flat_rows_uniswap_v2_emits_one_row_per_event_and_none_for_missing_
     receipt: JsonObject = {}
     block: JsonObject = {
         "timestamp": "0x1",
+        "gasLimit": "0xf",
         "gasUsed": "0xa",
         "transactions": ["0x1", "0x2", "0x3"],
     }
@@ -83,14 +84,15 @@ def test_iter_flat_rows_uniswap_v2_emits_one_row_per_event_and_none_for_missing_
 
     assert len(rows) == 2
     assert rows[0]["tx_index"] == 5
-    assert rows[0]["log_index"] == 10
-    assert rows[0]["block_gas"] == 10
-    assert rows[0]["block_txes"] == 3
+    assert rows[0]["receipt_log_index"] == 10
+    assert rows[0]["block_gas_used"] == 10
+    assert rows[0]["block_transactions_count"] == 3
     assert rows[0]["tx_gas_price"] == int("3b9aca00", 16)
+    assert rows[0]["receipt_effective_gas_price"] == int("3b9aca00", 16)
     assert rows[0]["tx_max_priority_fee_per_gas"] is None
     assert rows[0]["tx_max_fee_per_gas"] is None
 
-    assert rows[1]["log_index"] == 11
+    assert rows[1]["receipt_log_index"] == 11
     assert rows[1]["event_amount_0_in"] is None
 
 
@@ -104,7 +106,12 @@ def test_iter_flat_rows_uniswap_v3_keeps_optional_fields_as_none() -> None:
         "gasPrice": "0x1",
     }
     receipt: JsonObject = {"effectiveGasPrice": "0x2"}
-    block: JsonObject = {"timestamp": "0x2", "gasUsed": "0xb", "transactions": []}
+    block: JsonObject = {
+        "timestamp": "0x2",
+        "gasLimit": "0x1",
+        "gasUsed": "0xb",
+        "transactions": [],
+    }
 
     events: list[dict[str, float | int | str | None]] = [
         {
@@ -149,9 +156,10 @@ def test_iter_flat_rows_uniswap_v3_keeps_optional_fields_as_none() -> None:
 
     assert len(rows) == 1
     row = rows[0]
-    assert row["tx_gas_price"] == 2
-    assert row["block_gas"] == 11
-    assert row["block_txes"] == 0
+    assert row["tx_gas_price"] == 1
+    assert row["receipt_effective_gas_price"] == 2
+    assert row["block_gas_used"] == 11
+    assert row["block_transactions_count"] == 0
     assert row["event_tick_lower"] is None
     assert row["event_tick_upper"] is None
     assert row["event_amount"] is None

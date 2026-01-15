@@ -51,8 +51,25 @@ can materialize it with `rows = list(...)`, but do not do this for large workloa
 Flat columns (Uniswap v2):
 
 ```text
-block_timestamp,block_number,block_gas,block_txes,tx_index,log_index,tx_hash,tx_from,tx_to,tx_value,tx_gas,tx_gas_price,tx_max_priority_fee_per_gas,tx_max_fee_per_gas,tx_to_type,event_type,event_dex_symbol,event_symbol_0,event_symbol_1,event_decimals_0,event_decimals_1,event_amount_0,event_amount_1,event_amount_0_in,event_amount_0_out,event_amount_1_in,event_amount_1_out,event_reserve_0,event_reserve_1,event_mid_price,event_invariant
+block_timestamp,block_number,block_base_fee_per_gas,block_gas_limit,block_gas_used,block_transactions_count,tx_index,receipt_log_index,tx_hash,tx_from,tx_to,tx_value,tx_gas,tx_gas_price,receipt_gas_used,receipt_effective_gas_price,tx_max_priority_fee_per_gas,tx_max_fee_per_gas,tx_type,tx_to_type,event_type,event_dex_symbol,event_symbol_0,event_symbol_1,event_decimals_0,event_decimals_1,event_amount_0,event_amount_1,event_amount_0_in,event_amount_0_out,event_amount_1_in,event_amount_1_out,event_reserve_0,event_reserve_1,event_mid_price,event_invariant
 ```
+
+### Field definitions
+
+Shared (non-event) columns are documented in `docs/api.md` under “Flat output columns”.
+
+Uniswap v2 `event_*` columns:
+
+- `event_type`: event type (e.g. `swap`, `mint`, `burn`)
+- `event_dex_symbol`: DEX identifier (e.g. `UniswapV2`)
+- `event_symbol_0` / `event_symbol_1`: ERC-20 symbols for token0/token1
+- `event_decimals_0` / `event_decimals_1`: ERC-20 decimals for token0/token1
+- `event_amount_0` / `event_amount_1`: net amounts (base units) for token0/token1
+- `event_amount_0_in` / `event_amount_0_out`: swap in/out components for token0 (base units; `None` for non-swaps)
+- `event_amount_1_in` / `event_amount_1_out`: swap in/out components for token1 (base units; `None` for non-swaps)
+- `event_reserve_0` / `event_reserve_1`: pool reserves after the event (base units)
+- `event_mid_price`: mid price after the event (base units)
+- `event_invariant`: constant product invariant after the event (base units)
 
 For high throughput, use batching:
 

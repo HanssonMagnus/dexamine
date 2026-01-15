@@ -51,7 +51,7 @@ can materialize it with `rows = list(...)`, but do not do this for large workloa
 Flat columns (Uniswap v3):
 
 ```text
-block_timestamp,block_number,block_gas,block_txes,tx_index,log_index,tx_hash,tx_from,tx_to,tx_value,tx_gas,tx_gas_price,tx_max_priority_fee_per_gas,tx_max_fee_per_gas,tx_to_type,event_type,event_dex_symbol,event_symbol_0,event_symbol_1,event_decimals_0,event_decimals_1,event_sender,event_recipient,event_owner,event_amount,event_amount_0,event_amount_1,event_virtual_liquidity,event_tick,event_sqrt_price_x96,event_price,event_tick_lower,event_tick_upper,event_virtual_reserve_0,event_virtual_reserve_1
+block_timestamp,block_number,block_base_fee_per_gas,block_gas_limit,block_gas_used,block_transactions_count,tx_index,receipt_log_index,tx_hash,tx_from,tx_to,tx_value,tx_gas,tx_gas_price,receipt_gas_used,receipt_effective_gas_price,tx_max_priority_fee_per_gas,tx_max_fee_per_gas,tx_type,tx_to_type,event_type,event_dex_symbol,event_symbol_0,event_symbol_1,event_decimals_0,event_decimals_1,event_sender,event_recipient,event_owner,event_amount,event_amount_0,event_amount_1,event_virtual_liquidity,event_tick,event_sqrt_price_x96,event_price,event_tick_lower,event_tick_upper,event_virtual_reserve_0,event_virtual_reserve_1
 ```
 
 For high throughput, use batching:
@@ -79,83 +79,90 @@ Parse all Unsiwap v3 swaps, mints, and burns from a tx.
 
 Inputs:
 
-- logs: Logs from transaction receipt.
-- exchange_pair_address: string of the exchange pair smart contract address.
+- `logs`: Logs from transaction receipt.
+- `exchange_pair_address`: String of the exchange pair smart contract address.
 
 For each Uniswap v3 event (swap, mint, burn), the following variables are parsed:
 
+Shared (non-event) columns are documented in `docs/api.md` under “Flat output columns”.
+
 Meta data from the transaction:
 
-- block_timestamp: The Unix timestamp indicating when the transaction occurred.
-- block_number: The number of the block in the Ethereum blockchain in which the
+- `block_timestamp`: The Unix timestamp indicating when the transaction occurred.
+- `block_number`: The number of the block in the Ethereum blockchain in which the
                 transaction was recorded.
-- block_gas: Total gas used in the block.
-- block_txes: Total number of transactions in the block.
-- tx_index: A sequential number indicating the transaction's position within the block.
-- log_index: Index of the log entry within the receipt logs.
-- tx_hash: The unique transaction hash, an identifier for the transaction.
-- tx_from: The Ethereum address of the transaction initiator.
-- tx_to: The Ethereum address of the transaction recipient.
-- tx_value: The amount of Ether transferred in the transaction (is usually 0 for smart
+- `block_base_fee_per_gas`: EIP-1559 base fee per gas (in wei), if available.
+- `block_gas_limit`: Gas limit of the block.
+- `block_gas_used`: Total gas used in the block.
+- `block_transactions_count`: Total number of transactions in the block.
+- `tx_index`: A sequential number indicating the transaction's position within the block.
+- `receipt_log_index`: Index of the parsed event within the receipt logs list.
+- `tx_hash`: The unique transaction hash, an identifier for the transaction.
+- `tx_from`: The Ethereum address of the transaction initiator.
+- `tx_to`: The Ethereum address of the transaction recipient.
+- `tx_value`: The amount of Ether transferred in the transaction (is usually 0 for smart
         contract interactions, e.g., Unsiwap).
-- tx_gas: The total amount of gas used by the transaction.
-- tx_gas_price: The price of gas (in wei) at the time of the transaction.
-- tx_max_priority_fee_per_gas: The maximum priority fee per unit of gas (in wei) specified for
+- `tx_gas`: The gas limit of the transaction (from `tx.gas`).
+- `tx_gas_price`: Gas price as specified on the transaction (from `tx.gasPrice`), if available.
+- `receipt_gas_used`: Gas used by the transaction (from `receipt.gasUsed`), if available.
+- `receipt_effective_gas_price`: Effective gas price paid (from `receipt.effectiveGasPrice`), if available.
+- `tx_max_priority_fee_per_gas`: The maximum priority fee per unit of gas (in wei) specified for
                         the transaction.
-- tx_max_fee_per_gas: The maximum fee per unit of gas (in wei) the sender is willing to pay.
-- tx_to_type: Type of agent: uni (manual), defi (algorithmic), mev (arbitrage), or
+- `tx_max_fee_per_gas`: The maximum fee per unit of gas (in wei) the sender is willing to pay.
+- `tx_type`: Transaction type (EIP-2718), if available.
+- `tx_to_type`: Type of agent: uni (manual), defi (algorithmic), mev (arbitrage), or
              contract_creation.
 
 Variables from the event:
 
-- 'event_type': Specifies the type of event: "swap", "mint", or "burn".
-- 'event_dex_symbol': The symbol of the decentralized exchange.
-- 'event_symbol_0': The symbol of the first token in the exchange pair.
-- 'event_symbol_1': The symbol of the second token in the exchange pair.
-- 'event_decimals_0': The number of decimals of the first token in the exchange pair.
-- 'event_decimals_1': The number of decimals of the second token in the exchange pair.
-- 'event_sender': The address that minted liquidity or swapped.
-- 'event_recipient': The address that received the output of a swap.
-- 'event_owner': The owner of the position and recipient of any minted/burned liquidity.
-- 'event_amount': The amount of liquidity minted/burned to the position range.
-- 'event_amount_0': How much token0 was required for the minted/burned liquidity.
-- 'event_amount_1': How much token0 was required for the minted/burned liquidity.
-- 'event_virtual_liquidity': The virtual liquidity of the pool after the swap.
-- 'event_tick': The log base 1.0001 of price of the pool after the swap.
-- 'event_sqrt_price_x96': The sqrt(mid-price) of the pool after the swap, as a Q64.96.
-- 'event_price': The mid-price of the pool after the swap.
-- 'event_tick_lower': The lower tick of the LP position.
-- 'event_tick_upper': The upper tick of the LP position.
-- 'event_virtual_reserve_0': The virtual reserve of token0 after the swap in base units.
-- 'event_virtual_reserve_1': The virtual reserve of token0 after the swap in base units.
+- `event_type`: Specifies the type of event: `swap`, `mint`, or `burn`.
+- `event_dex_symbol`: The symbol of the decentralized exchange.
+- `event_symbol_0`: The symbol of the first token in the exchange pair.
+- `event_symbol_1`: The symbol of the second token in the exchange pair.
+- `event_decimals_0`: The number of decimals of the first token in the exchange pair.
+- `event_decimals_1`: The number of decimals of the second token in the exchange pair.
+- `event_sender`: The address that minted liquidity or swapped.
+- `event_recipient`: The address that received the output of a swap.
+- `event_owner`: The owner of the position and recipient of any minted/burned liquidity.
+- `event_amount`: The amount of liquidity minted/burned to the position range.
+- `event_amount_0`: How much token0 was required for the minted/burned liquidity.
+- `event_amount_1`: How much token0 was required for the minted/burned liquidity.
+- `event_virtual_liquidity`: The virtual liquidity of the pool after the swap.
+- `event_tick`: The log base 1.0001 of price of the pool after the swap.
+- `event_sqrt_price_x96`: The sqrt(mid-price) of the pool after the swap, as a Q64.96.
+- `event_price`: The mid-price of the pool after the swap.
+- `event_tick_lower`: The lower tick of the LP position.
+- `event_tick_upper`: The upper tick of the LP position.
+- `event_virtual_reserve_0`: The virtual reserve of token0 after the swap in base units.
+- `event_virtual_reserve_1`: The virtual reserve of token0 after the swap in base units.
 
 #### `parse_v3_swap(...)`
 
 The swap event in Uniswap v3 is rather straightforward and contain the following variables:
 
-- amount0: pool change in token0 (negative if the pool sends out the amount).
-- amount1: pool change in token1 (negative if the pool sends out the amount).
-- sqrtPriceX96: mid-price of the pool after the swap expressed in Q notation.
-- liquidity: in-range liquidity of pool after the swap.
-- tick: tick after the swap was executed.
+- `amount0`: Pool change in token0 (negative if the pool sends out the amount).
+- `amount1`: Pool change in token1 (negative if the pool sends out the amount).
+- `sqrtPriceX96`: Mid-price of the pool after the swap expressed in Q notation.
+- `liquidity`: In-range liquidity of pool after the swap.
+- `tick`: Tick after the swap was executed.
 
 The functions parses out the following variables:
 
-- type_of_event: Specifies the type of event in this case "swap".
-- dex_symbol: The symbol of the decentralized exchange, here representing Uniswap v3.
-- symbol_0: The symbol of the first token in the trading pair.
-- symbol_1: The symbol of the second token in the trading pair.
-- decimals_0: The number of decimal places used by the first token.
-- decimals_1: The number of decimal places used by the second token.
-- amount_0: The amount of the first token in the transaction.
-- amount_1: The amount of the second token in the transaction.
-- liquidity: The liquidity of the pool after the swap.
-- tick: The tick after the swap was executed ('NA' for mints and burns).
-- sqrtPriceX96: The square root of the mid-price after the swap in X96 format ('NA' for mints and
+- `type_of_event`: Specifies the type of event in this case `swap`.
+- `dex_symbol`: The symbol of the decentralized exchange, here representing Uniswap v3.
+- `symbol_0`: The symbol of the first token in the trading pair.
+- `symbol_1`: The symbol of the second token in the trading pair.
+- `decimals_0`: The number of decimal places used by the first token.
+- `decimals_1`: The number of decimal places used by the second token.
+- `amount_0`: The amount of the first token in the transaction.
+- `amount_1`: The amount of the second token in the transaction.
+- `liquidity`: The liquidity of the pool after the swap.
+- `tick`: The tick after the swap was executed (`NA` for mints and burns).
+- `sqrtPriceX96`: The square root of the mid-price after the swap in X96 format (`NA` for mints and
   burns).
-- price: The transformed mid-price after the swap in base units ('NA' for mints and burns).
-- tick_lower: The lower tick of the price range at which to provide liquidity ('NA' for swaps).
-- tick_upper: The upper tick of the price range at which to provide liquidity ('NA' for swaps).
+- `price`: The transformed mid-price after the swap in base units (`NA` for mints and burns).
+- `tick_lower`: The lower tick of the price range at which to provide liquidity (`NA` for swaps).
+- `tick_upper`: The upper tick of the price range at which to provide liquidity (`NA` for swaps).
 
 ## Appendix Events
 
