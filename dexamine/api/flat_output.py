@@ -17,18 +17,23 @@ Protocol = Literal["uniswap_v2", "uniswap_v3"]
 class _BaseFlatRow(TypedDict):
     block_timestamp: int
     block_number: int
-    block_gas: int
-    block_txes: int
+    block_base_fee_per_gas: int | None
+    block_gas_limit: int
+    block_gas_used: int
+    block_transactions_count: int
     tx_index: int
-    log_index: int
+    receipt_log_index: int
     tx_hash: str
     tx_from: str
     tx_to: str | None
     tx_value: int
     tx_gas: int
     tx_gas_price: int | None
+    receipt_gas_used: int | None
+    receipt_effective_gas_price: int | None
     tx_max_priority_fee_per_gas: int | None
     tx_max_fee_per_gas: int | None
+    tx_type: int | None
     tx_to_type: str
 
 
@@ -80,18 +85,23 @@ FlatRow = FlatUniswapV2Row | FlatUniswapV3Row
 FLAT_UNISWAP_V2_COLUMNS: tuple[str, ...] = (
     "block_timestamp",
     "block_number",
-    "block_gas",
-    "block_txes",
+    "block_base_fee_per_gas",
+    "block_gas_limit",
+    "block_gas_used",
+    "block_transactions_count",
     "tx_index",
-    "log_index",
+    "receipt_log_index",
     "tx_hash",
     "tx_from",
     "tx_to",
     "tx_value",
     "tx_gas",
     "tx_gas_price",
+    "receipt_gas_used",
+    "receipt_effective_gas_price",
     "tx_max_priority_fee_per_gas",
     "tx_max_fee_per_gas",
+    "tx_type",
     "tx_to_type",
     "event_type",
     "event_dex_symbol",
@@ -115,18 +125,23 @@ FLAT_UNISWAP_V2_COLUMNS: tuple[str, ...] = (
 FLAT_UNISWAP_V3_COLUMNS: tuple[str, ...] = (
     "block_timestamp",
     "block_number",
-    "block_gas",
-    "block_txes",
+    "block_base_fee_per_gas",
+    "block_gas_limit",
+    "block_gas_used",
+    "block_transactions_count",
     "tx_index",
-    "log_index",
+    "receipt_log_index",
     "tx_hash",
     "tx_from",
     "tx_to",
     "tx_value",
     "tx_gas",
     "tx_gas_price",
+    "receipt_gas_used",
+    "receipt_effective_gas_price",
     "tx_max_priority_fee_per_gas",
     "tx_max_fee_per_gas",
+    "tx_type",
     "tx_to_type",
     "event_type",
     "event_dex_symbol",
@@ -169,11 +184,19 @@ def _parse_block_timestamp(*, block: JsonObject) -> int:
     return _parse_hex_int(value=block.get("timestamp"), field_name="block.timestamp")
 
 
+def _parse_block_base_fee_per_gas(*, block: JsonObject) -> int | None:
+    return _parse_hex_int_optional(value=block.get("baseFeePerGas"))
+
+
+def _parse_block_gas_limit(*, block: JsonObject) -> int:
+    return _parse_hex_int(value=block.get("gasLimit"), field_name="block.gasLimit")
+
+
 def _parse_block_gas_used(*, block: JsonObject) -> int:
     return _parse_hex_int(value=block.get("gasUsed"), field_name="block.gasUsed")
 
 
-def _parse_block_txes(*, block: JsonObject) -> int:
+def _parse_block_transactions_count(*, block: JsonObject) -> int:
     txes_value = block.get("transactions")
     if not isinstance(txes_value, list):
         raise TypeError("block.transactions must be a list")
@@ -211,7 +234,15 @@ def _tx_gas(*, tx: JsonObject) -> int:
     return _parse_hex_int(value=tx.get("gas"), field_name="tx.gas")
 
 
-def _tx_gas_price(*, tx: JsonObject, receipt: JsonObject) -> int | None:
+def _receipt_gas_used(*, receipt: JsonObject) -> int | None:
+    return _parse_hex_int_optional(value=receipt.get("gasUsed"))
+
+
+def _tx_gas_price(*, tx: JsonObject) -> int | None:
+    return _parse_hex_int_optional(value=tx.get("gasPrice"))
+
+
+def _receipt_effective_gas_price(*, tx: JsonObject, receipt: JsonObject) -> int | None:
     effective = receipt.get("effectiveGasPrice")
     if effective is not None:
         return _parse_hex_int_optional(value=effective)
@@ -226,6 +257,10 @@ def _tx_max_fee(*, tx: JsonObject) -> int | None:
     return _parse_hex_int_optional(value=tx.get("maxFeePerGas"))
 
 
+def _tx_type(*, tx: JsonObject) -> int | None:
+    return _parse_hex_int_optional(value=tx.get("type"))
+
+
 def _base_row(
     *,
     tx: JsonObject,
@@ -238,18 +273,25 @@ def _base_row(
     return {
         "block_timestamp": _parse_block_timestamp(block=block),
         "block_number": block_number,
-        "block_gas": _parse_block_gas_used(block=block),
-        "block_txes": _parse_block_txes(block=block),
+        "block_base_fee_per_gas": _parse_block_base_fee_per_gas(block=block),
+        "block_gas_limit": _parse_block_gas_limit(block=block),
+        "block_gas_used": _parse_block_gas_used(block=block),
+        "block_transactions_count": _parse_block_transactions_count(block=block),
         "tx_index": tx_index,
-        "log_index": -1,  # populated per event (aka log index)
+        "receipt_log_index": -1,  # populated per event (index into receipt.logs)
         "tx_hash": _tx_hash(tx=tx),
         "tx_from": _tx_from(tx=tx),
         "tx_to": to_address,
         "tx_value": _tx_value(tx=tx),
         "tx_gas": _tx_gas(tx=tx),
-        "tx_gas_price": _tx_gas_price(tx=tx, receipt=receipt),
+        "tx_gas_price": _tx_gas_price(tx=tx),
+        "receipt_gas_used": _receipt_gas_used(receipt=receipt),
+        "receipt_effective_gas_price": _receipt_effective_gas_price(
+            tx=tx, receipt=receipt
+        ),
         "tx_max_priority_fee_per_gas": _tx_max_priority_fee(tx=tx),
         "tx_max_fee_per_gas": _tx_max_fee(tx=tx),
+        "tx_type": _tx_type(tx=tx),
         "tx_to_type": parse_to_type(to_address),
     }
 
@@ -287,7 +329,7 @@ def iter_flat_rows(
 
             row: FlatUniswapV2Row = {
                 **base,
-                "log_index": event_index_value,
+                "receipt_log_index": event_index_value,
                 "event_type": _required_str(event=event, field="event_type"),
                 "event_dex_symbol": _required_str(event=event, field="dex_symbol"),
                 "event_symbol_0": _required_str(event=event, field="symbol_0"),
@@ -320,7 +362,7 @@ def iter_flat_rows(
 
             row_v3: FlatUniswapV3Row = {
                 **base,
-                "log_index": event_index_value,
+                "receipt_log_index": event_index_value,
                 "event_type": _required_str(event=event, field="event_type"),
                 "event_dex_symbol": _required_str(event=event, field="dex_symbol"),
                 "event_symbol_0": _required_str(event=event, field="symbol_0"),
