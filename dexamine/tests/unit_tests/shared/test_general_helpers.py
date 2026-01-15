@@ -362,6 +362,11 @@ def test_parse_to_type_with_uni_router():
     assert general_helpers.parse_to_type(uni_address) == "dex_router"
 
 
+def test_parse_to_type_with_uni_universal_router_v4():
+    uni_address = "0x66a9893cC07D91D95644AEDD05D03f95e1dBA8Af"
+    assert general_helpers.parse_to_type(uni_address) == "dex_router"
+
+
 def test_parse_to_type_with_defi_address():
     """Test if to_address is "defi", using a generic non-MEV, non-Uniswap address."""
     defi_address = "0x_defi_contract_address"
