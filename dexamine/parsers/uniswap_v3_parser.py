@@ -38,8 +38,8 @@ class UniswapV3Swap(DexEvent):
     virtual_liquidity: int  # The virtual liquidity of the pool after the swap.
     tick: int  # The log base 1.0001 of price of the pool after the swap.
     price: float = field(init=False)  # Base unit exchange rate.
-    virtual_reserve_0: float = field(init=False)  # Virtual reserev of token 0.
-    virtual_reserve_1: float = field(init=False)  # Virtual reserev of token 1.
+    virtual_reserve_0: float | None = field(init=False)  # Virtual reserev of token 0.
+    virtual_reserve_1: float | None = field(init=False)  # Virtual reserev of token 1.
     event_type: str = DexEventType.SWAP.value  # Type of event.
 
     def __post_init__(self) -> None:
@@ -52,18 +52,17 @@ class UniswapV3Swap(DexEvent):
         self.price = self.sqrt_price_x96_to_price()
 
         # Calculate base unit virtual reserves
-        self.virtual_reserve_0 = self.calculate_virtual_reserve_0()
-        self.virtual_reserve_1 = self.calculate_virtual_reserve_1()
-
-        # Validate that the virtual reserves are positive
-        if self.virtual_reserve_0 <= 0:
-            raise ValueError(
-                f"virtual_reserve_0 must be greater than 0, got {self.virtual_reserve_0}"
-            )
-        if self.virtual_reserve_1 <= 0:
-            raise ValueError(
-                f"virtual_reserve_1 must be greater than 0, got {self.virtual_reserve_1}"
-            )
+        # Note: Uniswap v3 swap event includes "liquidity" which can be 0 at certain
+        # ticks (out-of-range / boundary conditions). In that case, "virtual reserves"
+        # are not meaningful, but the swap event itself is still valid.
+        vr0 = self.calculate_virtual_reserve_0()
+        vr1 = self.calculate_virtual_reserve_1()
+        if vr0 <= 0 or vr1 <= 0:
+            self.virtual_reserve_0 = None
+            self.virtual_reserve_1 = None
+        else:
+            self.virtual_reserve_0 = vr0
+            self.virtual_reserve_1 = vr1
 
     # Class methods
     def sqrt_price_x96_to_price(self) -> float:
@@ -73,21 +72,21 @@ class UniswapV3Swap(DexEvent):
         https://blog.uniswap.org/uniswap-v3-math-primer"""
         sqrt_price = self.sqrt_price_x96 / 2**96
         price = sqrt_price**2
-        return (10**self.decimals_1 / 10**self.decimals_0) / price
+        return float((10**self.decimals_1 / 10**self.decimals_0) / price)
 
     def calculate_virtual_reserve_0(self) -> float:
         """Calculate the virtual reserve of token 0 after the swap. Equation 6.5 in
         Uniswap v3 Core Whitepaper."""
         sqrt_price = self.sqrt_price_x96 / 2**96
         virtual_reserve_0 = self.virtual_liquidity / sqrt_price
-        return self.transform_to_base(virtual_reserve_0, self.decimals_0)
+        return float(self.transform_to_base(virtual_reserve_0, self.decimals_0))
 
     def calculate_virtual_reserve_1(self) -> float:
         """Calculate the virtual reserve of token 1 after the swap. Equation 6.6 in
         Uniswap v3 Core Whitepaper."""
         sqrt_price = self.sqrt_price_x96 / 2**96
         virtual_reserve_1 = self.virtual_liquidity * sqrt_price
-        return self.transform_to_base(virtual_reserve_1, self.decimals_1)
+        return float(self.transform_to_base(virtual_reserve_1, self.decimals_1))
 
     def get_event_data(self) -> dict[str, float | int | str | None]:
         """
@@ -309,9 +308,9 @@ def parse_all_v3_events(
         topics_0, [constants.UNISWAP_V3_BURN_EVENT]
     )
 
-    # Return the function is no swap, mint, or burn events are found
+    # Return the function if no swap, mint, or burn events are found
     if not swap_indexes and not mint_indexes and not burn_indexes:
-        return None
+        return []
 
     # Convert exchange_pair_address to checksum
     if exchange_pair_address:
@@ -439,7 +438,7 @@ def parse_v3_swaps(
     Inpur arguments:
         swap_indexes: Index of where the swap event occur in the logs, e.g., [4, 7]
     """
-    swaps = []
+    swaps: list[dict[str, float | int | str | None] | None] = []
     for swap_index in swap_indexes:
 
         swap = parse_v3_swap(
@@ -452,8 +451,7 @@ def parse_v3_swaps(
             uniswap_v3_pair_abi,
         )
 
-        if swap is not None:
-            swaps.append(swap)
+        swaps.append(swap)
 
     return swaps
 
@@ -568,7 +566,7 @@ def parse_v3_mints(
     Args:
         mint_indexes: Index of where the mint event occur in the logs, e.g., [4, 7]
     """
-    mints = []
+    mints: list[dict[str, float | int | str | None] | None] = []
     for mint_index in mint_indexes:
         mint = parse_v3_mint(
             node_url,
@@ -580,8 +578,7 @@ def parse_v3_mints(
             uniswap_v3_pair_abi,
         )
 
-        if mint is not None:
-            mints.append(mint)
+        mints.append(mint)
 
     return mints
 
@@ -698,7 +695,7 @@ def parse_v3_burns(
         erc20_bytes32_abi (dict): ERC-20 Bytes32 ABI.
         uniswap_v3_pair_abi: ABI of the pair to collect the symbol of the DEX.
     """
-    burns = []
+    burns: list[dict[str, float | int | str | None] | None] = []
     for burn_index in burn_indexes:
         burn = parse_v3_burn(
             node_url,
@@ -710,8 +707,7 @@ def parse_v3_burns(
             uniswap_v3_pair_abi,
         )
 
-        if burn is not None:
-            burns.append(burn)
+        burns.append(burn)
 
     return burns
 
