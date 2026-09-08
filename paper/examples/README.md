@@ -1,12 +1,16 @@
 # Recorded Uniswap v3 transaction
 
-From the repository root, with dexamine 1.1.0 installed from the commit pinned in
-the manuscript (or with this checkout installed using `python -m pip install .`):
+From the repository root, with dexamine 1.1.0 installed from the release tag
+(or with this checkout installed using `python -m pip install .`):
 
 ```bash
 python paper/examples/parse_recorded_transaction.py
 python paper/examples/parse_recorded_transaction.py --check
 ```
+
+Before v1.1.0 is tagged, use the permanent commit command in the
+[installation instructions](../../docs/installation.md). It includes the required
+metadata-seeding API; v1.0.0 does not.
 
 This example parses transaction 59 in Ethereum block 12,376,729, whose hash is
 `0x125e0b641d4a4b08806bf52c0c6757648c9963bcda8681e4f996f09e00d4c2cc`.

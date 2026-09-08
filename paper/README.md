@@ -43,10 +43,12 @@ python paper/examples/parse_recorded_transaction.py --check
 See [examples/README.md](examples/README.md) for the recorded transaction, transport
 replay, supplied metadata and optional live-node execution. The expected output is
 tracked, and CI checks it on every paper build. No live node is needed for the default
-example. Install version 1.1.0 from the commit identified in the code metadata table;
-version 1.0.0 does not provide `MetadataResolver.seed`. The table pins the software
-snapshot described by the manuscript; a v1.1.0 release tag will follow after merging
-the PR. The example and manuscript are maintained in this directory.
+example. The code metadata table identifies version 1.1.0; version 1.0.0 does not
+provide `MetadataResolver.seed`. The v1.1.0 tag must point to this PR's merge commit
+before submission. Until that tag is published, use the working commit-pinned
+command in [installation instructions](../docs/installation.md). The citation and
+changelog dates must match the actual release date if publication of the tag is delayed.
+The example and manuscript are maintained in this directory.
 
 ## Assemble submission files
 

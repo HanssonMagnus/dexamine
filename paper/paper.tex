@@ -50,10 +50,10 @@ Ethereum \sep Uniswap \sep Decentralized finance \sep Market microstructure \sep
 \hline
 \textbf{Nr.} & \textbf{Code metadata description} & \textbf{Metadata} \\
 \hline
-C1 & Current code version & 1.1.0 (commit snapshot) \\
+C1 & Current code version & 1.1.0 \\
 \hline
 C2 & Permanent GitHub link to code/repository used for this code version &
-\url{https://github.com/HanssonMagnus/dexamine/tree/d62095ab0544618f134cc25684b1203ffb476e53} \\
+\url{https://github.com/HanssonMagnus/dexamine/tree/v1.1.0} \\
 \hline
 C3 & Legal Code License & GNU General Public License v3.0 or later \\
 \hline
@@ -68,7 +68,7 @@ An Ethereum endpoint retaining the requested blocks and receipts is needed for l
 No compilation of dexamine is required. \\
 \hline
 C7 & If available Link to developer documentation/manual &
-\url{https://github.com/HanssonMagnus/dexamine/blob/d62095ab0544618f134cc25684b1203ffb476e53/docs/docs.md} \\
+\url{https://github.com/HanssonMagnus/dexamine/blob/v1.1.0/docs/docs.md} \\
 \hline
 C8 & Support email for questions & \nolinkurl{hansson.carl.magnus@gmail.com} \\
 \hline
@@ -286,7 +286,7 @@ ordered observations of liquidity provision without assigning those interpretati
 inside the parser.
 
 The accompanying script
-\href{https://github.com/HanssonMagnus/dexamine/tree/d62095ab0544618f134cc25684b1203ffb476e53/paper/examples}{\texttt{parse\_recorded\_transaction.py}}
+\href{https://github.com/HanssonMagnus/dexamine/tree/v1.1.0/paper/examples}{\texttt{parse\_recorded\_transaction.py}}
 reproduces the complete output offline using the repository's recorded transaction,
 receipt, and block responses, with explicitly supplied USDC, WETH, and pool metadata.
 It replays the public RPC client's \texttt{call} method and uses
@@ -311,7 +311,7 @@ pool information. Reusing a parser provides consistent treatment of token units,
 liquidity changes, and execution metadata across analyses. It also makes the data
 transformations inspectable independently of the statistical model. The research use
 of version 1 predates the first public release. The code metadata identifies the
-1.1.0 snapshot described here, which adds the public metadata-seeding interface
+1.1.0 release described here, which adds the public metadata-seeding interface
 used by the offline example.
 
 The same representation supports further studies of liquidity provision, execution
