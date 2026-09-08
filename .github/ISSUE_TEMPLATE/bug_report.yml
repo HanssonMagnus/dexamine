@@ -1,0 +1,69 @@
+name: Bug report
+description: Report incorrect parsing, a crash, or any other defect.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. A transaction position that reproduces the problem is
+        the single most useful thing you can include.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you observe, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: >-
+        The smallest snippet that shows the problem. Please include the protocol and the
+        transaction position (block number and transaction index).
+      render: python
+      placeholder: |
+        from dexamine import parse_position
+
+        result = parse_position(
+            node_url="...",
+            block_number=12376729,
+            tx_index=59,
+            protocol="uniswap_v3",
+            exchange_pair_address=None,
+        )
+    validations:
+      required: true
+
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Traceback or incorrect output
+      render: text
+
+  - type: input
+    id: version
+    attributes:
+      label: dexamine version
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "3.12.3"
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Ethereum endpoint
+      description: >-
+        Which client or provider, and whether it retains the history for the block in
+        question. Do not paste an endpoint URL that contains an API key.
+      placeholder: "Erigon 2.60, full history"

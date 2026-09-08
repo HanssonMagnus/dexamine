@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest a change or addition.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        `dexamine` deliberately does one thing: parse Uniswap v2 and v3 `swap`, `mint`
+        and `burn` events from Ethereum receipt logs. Please read the scope section of
+        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) before opening a request that
+        would broaden that.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What analysis are you trying to do?
+      description: >-
+        Describe the problem rather than the solution. Knowing the research question
+        usually makes the right API obvious.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
