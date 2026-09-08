@@ -7,7 +7,6 @@ This directory holds the JOSS paper for `dexamine`.
 ├── paper.md                 # the paper (JOSS markdown + YAML frontmatter)
 ├── paper.bib                # references
 ├── paper.pdf                # built output
-├── REVIEW.md                # submission readiness review
 └── tikz/                    # retained figure sources (not used in the paper)
     ├── event_classification/
     └── flow_chart/
