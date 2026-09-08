@@ -1,49 +1,22 @@
-% Transaction routing classification used by dexamine.
-%
-% dexamine derives the route from the transaction `to` address alone, matched against
-% the canonical Uniswap deployments in dexamine/shared/constants.py:uniswap_address_list.
-% This gives two routed buckets -- no curated third-party label data is involved.
-\documentclass[border=5pt]{standalone}
+% Destination labels use only the top-level transaction address and bundled constants.
+\documentclass[border=6pt]{standalone}
 \usepackage{tikz}
-\usepackage{amsmath}
-\usetikzlibrary{positioning, arrows.meta, calc}
-
+\usetikzlibrary{arrows.meta}
 \begin{document}
-
 \begin{tikzpicture}[
-    box/.style = {rectangle, draw=black, thin, align=center,
-                  minimum width=3.6cm, minimum height=1.3cm, font=\large},
-    stage/.style = {font=\large\bfseries},
-    code/.style = {font=\normalsize\ttfamily},
-    arrow/.style = {-Latex, thin},
-    line/.style = {-, thin}
+  box/.style={draw, rounded corners=2pt, align=center, text width=4.2cm,
+    minimum height=0.85cm, inner sep=5pt, font=\small},
+  arrow/.style={-Stealth, semithick},
+  label/.style={font=\small, fill=white, inner sep=2pt}
 ]
-
-% Stage 1: transaction initiation
-\node[box] (eoa) {EOA \\ (Agent)};
-
-% Stage 2: transaction routing
-\node[box, above right=0.5cm and 2.2cm of eoa] (router)
-    {Uniswap Router \\ (direct) \\[2pt] \texttt{uniswap\_router}};
-\node[box, below right=0.5cm and 2.2cm of eoa] (contract)
-    {Other Smart Contract \\ (indirect) \\[2pt] \texttt{other\_contract}};
-
-% Stage 3: execution
-\node[box, right=2.2cm of $(router.east)!0.5!(contract.east)$] (pool)
-    {Uniswap Pool \\ (v2 / v3)};
-
-% Stage labels, aligned on one baseline
-\node[stage, anchor=south] at ($(eoa.north -| eoa) + (0, 1.35cm)$) {Tx initiation};
-\node[stage, anchor=south] at ($(router.north) + (0, 0.6cm)$)
-    {Tx routing (\texttt{tx\_to\_type})};
-\node[stage, anchor=south] at ($(pool.north -| pool) + (0, 1.35cm)$) {Event execution};
-
-% Arrows
-\draw[arrow] (eoa.east) to[out=0, in=180] (router.west);
-\draw[arrow] (eoa.east) to[out=0, in=180] (contract.west);
-\draw[arrow] (router.east) to[out=0, in=180] (pool.west);
-\draw[arrow] (contract.east) to[out=0, in=180] (pool.west);
-
+\node[box] (missing) at (0,0) {Is the transaction's top-level\\\texttt{to} field \texttt{None}?};
+\node[box] (creation) at (6.5,0) {\texttt{contract\_creation}};
+\node[box] (listed) at (0,-1.8) {Does the address match a bundled\\Uniswap router or periphery address?};
+\node[box] (router) at (6.5,-1.8) {\texttt{uniswap\_router}};
+\node[box] (other) at (0,-3.6) {\texttt{other\_contract}};
+\draw[arrow] (missing) -- node[label,above] {Yes} (creation);
+\draw[arrow] (missing) -- node[label,left] {No} (listed);
+\draw[arrow] (listed) -- node[label,above] {Yes} (router);
+\draw[arrow] (listed) -- node[label,left] {No} (other);
 \end{tikzpicture}
-
 \end{document}

@@ -50,10 +50,10 @@ Ethereum \sep Uniswap \sep Decentralized finance \sep Market microstructure \sep
 \hline
 \textbf{Nr.} & \textbf{Code metadata description} & \textbf{Metadata} \\
 \hline
-C1 & Current code version & 1.0.0 \\
+C1 & Current code version & 1.1.0 (commit snapshot) \\
 \hline
 C2 & Permanent GitHub link to code/repository used for this code version &
-\url{https://github.com/HanssonMagnus/dexamine/tree/52616a612eca522bd069cc6afa0c86f8eb5c47e2} (tag v1.0.0) \\
+\url{https://github.com/HanssonMagnus/dexamine/tree/d62095ab0544618f134cc25684b1203ffb476e53} \\
 \hline
 C3 & Legal Code License & GNU General Public License v3.0 or later \\
 \hline
@@ -62,12 +62,13 @@ C4 & Code versioning system used & Git \\
 C5 & Software code languages, tools, and services used & Python; Ethereum JSON-RPC \\
 \hline
 C6 & Compilation requirements, operating environments \& dependencies &
-Verified on Linux with Python 3.10. Requires Python 3.10 or newer, web3 6.15.0 or newer, and requests 2.31.0 or newer.
+Verified in continuous integration on Linux with Python 3.10, 3.11, 3.12, and 3.13.
+Requires Python 3.10 or newer, web3 6.15.0 or newer, and requests 2.31.0 or newer.
 An Ethereum endpoint retaining the requested blocks and receipts is needed for live parsing.
 No compilation of dexamine is required. \\
 \hline
 C7 & If available Link to developer documentation/manual &
-\url{https://github.com/HanssonMagnus/dexamine/blob/v1.0.0/docs/docs.md} \\
+\url{https://github.com/HanssonMagnus/dexamine/blob/d62095ab0544618f134cc25684b1203ffb476e53/docs/docs.md} \\
 \hline
 C8 & Support email for questions & \nolinkurl{hansson.carl.magnus@gmail.com} \\
 \hline
@@ -122,8 +123,8 @@ data construction in two studies of decentralized markets \cite{hansson2024,hans
 
 \section{Software description}
 \subsection{Software architecture}
-The implementation separates JSON-RPC retrieval, contract metadata resolution,
-protocol parsers, and output construction. A reusable session loads contract interfaces
+Figure~\ref{fig:architecture} shows the separation of JSON-RPC retrieval, contract
+metadata resolution, protocol parsers, and output construction. A reusable session loads contract interfaces
 and retains pool and token metadata across calls. dexamine's JSON-RPC client uses
 Requests \cite{requests} to retrieve transactions, receipts, and blocks over HTTP.
 web3.py \cite{web3py} supplies contract calls for pool and token metadata and address
@@ -137,6 +138,17 @@ of distinct contracts encountered. Users can divide positions across processes w
 one session per worker. Processing rates depend on endpoint latency and capacity,
 batch size, and metadata cache misses; no throughput advantage over other extraction
 tools is claimed here.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\linewidth]{tikz/flow_chart/flow_chart.pdf}
+\caption{Data flow within a session. The RPC client retrieves execution records;
+the metadata resolver supplies pool and token information. Protocol parsers decode
+receipt logs, and the output layer joins the resulting events to transaction and
+block metadata. Offline replay supplies recorded RPC results and seeded metadata.
+Diagram revised in TikZ with OpenAI Codex assistance.}
+\label{fig:architecture}
+\end{figure}
 
 \subsection{Software functionalities}
 The package supports Uniswap v2 and v3 swaps, mints, and burns on Ethereum mainnet.
@@ -171,10 +183,20 @@ apply to the entire transaction and are repeated across its events. They do not
 allocate execution costs to individual trades.
 
 Destination labels compare the transaction's top-level destination against a bundled
-list of Uniswap router and periphery addresses. Other destinations and contract
+list of Uniswap router and periphery addresses (Figure~\ref{fig:destination}). Other destinations and contract
 creation receive separate labels. This classification does not reconstruct internal
 call paths or establish trader identity, arbitrage, or maximal extractable value.
 Those interpretations require additional evidence.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.95\linewidth]{tikz/event_classification/event_classification.pdf}
+\caption{Construction of the \texttt{tx\_to\_type} label from the transaction's
+top-level destination. The \texttt{other\_contract} label covers every remaining
+destination; it does not establish an address's economic role or reconstruct the
+path to a pool. Diagram revised in TikZ with OpenAI Codex assistance.}
+\label{fig:destination}
+\end{figure}
 
 \subsection{Reproducibility and verification}
 \label{subsec:verification}
@@ -183,11 +205,17 @@ the repository's first commit is dated 25 November 2023. In subsequent developme
 the author used Anthropic Claude and OpenAI ChatGPT to assist with writing tests,
 reviewing code, and updating the repository. The commit history documents the
 development sequence and includes explicit AI attributions for later changes.
+For this article, OpenAI Codex (GPT-6) also assisted with the metadata-seeding API
+and its tests.
 
 Reproducibility depends on the software version, source responses, and resolved
 metadata. Pool and token metadata are queried at the latest block and cached.
 Changes to token metadata can therefore affect repeated runs even when historical
 logs are unchanged. Retaining input responses and metadata supports replication.
+The public \texttt{MetadataResolver.seed} method accepts recorded token and pool
+metadata, normalizes addresses, and replaces the supplied cache entries. Missing
+entries still trigger endpoint queries; callers retain responsibility for the
+provenance of supplied metadata.
 The endpoint must serve the requested historical blocks and receipts and support
 metadata calls, but the parser does not require historical contract-state queries.
 Users should also retain transaction hashes when selecting positions, since chain
@@ -258,11 +286,13 @@ transaction's economic purpose. Joining such records across transactions yields
 ordered observations of liquidity provision without assigning those interpretations
 inside the parser.
 
-The accompanying script \texttt{parse\_recorded\_transaction.py}
+The accompanying script
+\href{https://github.com/HanssonMagnus/dexamine/tree/d62095ab0544618f134cc25684b1203ffb476e53/paper/examples}{\texttt{parse\_recorded\_transaction.py}}
 reproduces the complete output offline using the repository's recorded transaction,
 receipt, and block responses, with explicitly supplied USDC, WETH, and pool metadata.
-It replaces the RPC transport with fixture replay while exercising the same session,
-parser, and output construction. Unexpected HTTP access is rejected. The committed
+It replays the public RPC client's \texttt{call} method and uses
+\texttt{MetadataResolver.seed} while exercising the same session, parser, and output
+construction. Unexpected HTTP access is rejected. The committed
 JSON output can be checked with \texttt{--check}; \texttt{--node-url} instead enables
 live retrieval. The example demonstrates the transformation of one historical
 transaction, rather than reproducing either complete research dataset.
@@ -281,8 +311,9 @@ Both applications require preserving the sequence of events and their associated
 pool information. Reusing a parser provides consistent treatment of token units,
 liquidity changes, and execution metadata across analyses. It also makes the data
 transformations inspectable independently of the statistical model. The research use
-of version 1 predates the public v1.0.0 release; the release metadata identifies the
-code distributed with this software article.
+of version 1 predates the first public release. The code metadata identifies the
+1.1.0 snapshot described here, which adds the public metadata-seeding interface
+used by the offline example.
 
 The same representation supports further studies of liquidity provision, execution
 costs, and price adjustment. Researchers can select different transaction samples or
@@ -326,7 +357,8 @@ The original software was written by the author without generative AI assistance
 Later use of Claude and ChatGPT for software maintenance is described in
 Section~\ref{subsec:verification}.
 OpenAI Codex (GPT-6) assisted with manuscript organization and editing, reference
-checking, the reproducible example, and the publication build. The author reviewed
+checking, revisions to the TikZ figures, the reproducible example, and the publication
+build. The author reviewed
 manuscript drafts and supplied corrections and clarifications. Checks performed
 during revision included comparison with source code and cited sources, offline
 execution of the example, and manuscript compilation. The author remains responsible

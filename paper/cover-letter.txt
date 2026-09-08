@@ -14,7 +14,7 @@ the reusable software and its verification.
 
 The software is publicly available at https://github.com/HanssonMagnus/dexamine
 under the GNU General Public License v3.0 or later. The manuscript identifies the
-v1.0.0 code version and supplies a worked example based on recorded Ethereum
+1.1.0 code version and supplies a worked example based on recorded Ethereum
 responses. The example can be reproduced without a live node, and the repository
 provides installation instructions, tests, documentation and contribution guidance.
 

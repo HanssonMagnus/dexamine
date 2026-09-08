@@ -13,6 +13,9 @@ for name in ("paper.pdf", "highlights.txt", "cover-letter.txt"):
 with ZipFile(output / "latex-source.zip", "w", ZIP_DEFLATED) as archive:
     for name in ("paper.tex", "paper.bib", "paper.bbl"):
         archive.write(paper / name, name)
+    for source in sorted((paper / "tikz").rglob("*")):
+        if source.suffix in {".tex", ".pdf"}:
+            archive.write(source, source.relative_to(paper))
     for name in ("elsarticle.cls", "elsarticle-num.bst"):
         source = subprocess.check_output(["kpsewhich", name], text=True).strip()
         if not source:

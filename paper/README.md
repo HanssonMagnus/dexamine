@@ -8,10 +8,19 @@ The template specifies five main sections, a code metadata table, about 100 abst
 words, at most six keywords, a 4,000-word limit and at most six figures. Its main-text
 page target is six pages, excluding metadata, tables, figures and references.
 
+Both official templates, checked on 8 September 2026, use metadata rows **C1–C8**
+and do not include a reproducible-capsule row. This manuscript
+preserves that numbering. Its offline example is documented below; it is not a
+separately hosted reproducible capsule.
+
+The root `Licence.txt` duplicates `LICENSE` because the SoftwareX template explicitly
+requires that filename. `LICENSE` is authoritative; keep `Licence.txt` byte-identical
+when updating it (`cp LICENSE Licence.txt`).
+
 ## Build
 
 Install a TeX distribution with `elsarticle`, `latexmk`, `xurl`, `microtype`, `listings`,
-`tabularx` and `booktabs`. On Ubuntu:
+`tabularx`, `booktabs`, `standalone` and TikZ. On Ubuntu:
 
 ```bash
 sudo apt-get install latexmk texlive-publishers texlive-latex-extra texlive-fonts-recommended texlive-extra-utils
@@ -34,8 +43,10 @@ python paper/examples/parse_recorded_transaction.py --check
 See [examples/README.md](examples/README.md) for the recorded transaction, transport
 replay, supplied metadata and optional live-node execution. The expected output is
 tracked, and CI checks it on every paper build. No live node is needed for the default
-example. The code metadata table points to the public v1.0.0 software release; the
-example and manuscript are maintained in this directory.
+example. Install version 1.1.0 from the commit identified in the code metadata table;
+version 1.0.0 does not provide `MetadataResolver.seed`. The table pins the software
+snapshot described by the manuscript; a v1.1.0 release tag will follow after merging
+the PR. The example and manuscript are maintained in this directory.
 
 ## Assemble submission files
 
@@ -46,8 +57,10 @@ make -C paper bundle
 This creates `paper/submission/paper.pdf`, `highlights.txt`, `cover-letter.txt` and `latex-source.zip`.
 The source archive includes the manuscript, bibliography, generated reference list,
 and Elsevier class and bibliography style. Other TeX packages come from the TeX
-distribution. Generated submission files are ignored by Git.
+distribution. Both figure PDFs and their TikZ sources are included. Generated
+submission files are ignored by Git.
 
 [The paper workflow](../.github/workflows/draft-pdf.yml) checks the example, builds
-the manuscript, and uploads these files as an artifact. The `tikz/` directory retains
-previous figure sources; the current manuscript does not include those figures.
+the manuscript, and uploads these files as an artifact. The two figures in `tikz/`
+show the session architecture and destination-label decision rules. `make` rebuilds
+their PDFs when their sources change; the adjacent PNGs are preview exports.
