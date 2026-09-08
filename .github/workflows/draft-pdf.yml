@@ -1,21 +1,44 @@
-on: [push]
+name: SoftwareX manuscript
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   paper:
     runs-on: ubuntu-latest
-    name: Paper Draft
+    name: Paper and recorded example
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build draft PDF
-        uses: openjournals/openjournals-draft-action@master
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          journal: joss
-          paper-path: paper/paper.md
+          python-version: '3.12'
 
-      - name: Upload
+      - name: Install package
+        run: python -m pip install .
+
+      - name: Verify recorded example
+        run: python paper/examples/parse_recorded_transaction.py --check
+
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y latexmk texlive-publishers texlive-latex-extra texlive-fonts-recommended
+
+      - name: Build manuscript and submission files
+        run: make -C paper bundle
+
+      - name: Report manuscript word count
+        run: make -C paper count
+
+      - name: Upload submission files
         uses: actions/upload-artifact@v4
         with:
-          name: paper
-          path: paper/paper.pdf
+          name: softwarex-manuscript
+          path: paper/submission/
