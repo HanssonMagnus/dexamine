@@ -49,9 +49,7 @@ def make_metadata_resolver(
         v2_pairs: pair address -> (token0, token1, dex_symbol).
         v3_pools: pool address -> (token0, token1, dex_symbol).
 
-    Addresses are used verbatim as cache keys, so the parsers must be given the same
-    spelling. Pool and pair addresses are checksummed by the resolver, so pass them in
-    checksum form; token addresses are only used as dictionary keys here.
+    Addresses are normalized by the public MetadataResolver.seed API.
     """
     resolver = MetadataResolver(
         node_url=UNUSED_NODE_URL,
@@ -61,23 +59,18 @@ def make_metadata_resolver(
         uniswap_v3_pair_abi=[],
     )
 
-    for address, (symbol, decimals) in (erc20 or {}).items():
-        resolver._erc20_cache[address] = (
-            Erc20Metadata(  # pylint: disable=protected-access
-                symbol=symbol, decimals=decimals
-            )
-        )
-    for address, (token0, token1, dex_symbol) in (v2_pairs or {}).items():
-        resolver._v2_pair_cache[address] = (
-            V2PairMetadata(  # pylint: disable=protected-access
-                token0=token0, token1=token1, dex_symbol=dex_symbol
-            )
-        )
-    for address, (token0, token1, dex_symbol) in (v3_pools or {}).items():
-        resolver._v3_pool_cache[address] = (
-            V3PoolMetadata(  # pylint: disable=protected-access
-                token0=token0, token1=token1, dex_symbol=dex_symbol
-            )
-        )
-
+    resolver.seed(
+        erc20={
+            address: Erc20Metadata(symbol, decimals)
+            for address, (symbol, decimals) in (erc20 or {}).items()
+        },
+        v2_pairs={
+            address: V2PairMetadata(token0, token1, dex_symbol)
+            for address, (token0, token1, dex_symbol) in (v2_pairs or {}).items()
+        },
+        v3_pools={
+            address: V3PoolMetadata(token0, token1, dex_symbol)
+            for address, (token0, token1, dex_symbol) in (v3_pools or {}).items()
+        },
+    )
     return resolver

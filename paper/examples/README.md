@@ -1,6 +1,7 @@
 # Recorded Uniswap v3 transaction
 
-From the repository root, with dexamine installed:
+From the repository root, with dexamine 1.1.0 installed from the commit pinned in
+the manuscript (or with this checkout installed using `python -m pip install .`):
 
 ```bash
 python paper/examples/parse_recorded_transaction.py
@@ -12,12 +13,15 @@ This example parses transaction 59 in Ethereum block 12,376,729, whose hash is
 It created the Uniswap v3 USDC/WETH 0.05% pool and minted its first position.
 
 The default mode reads the existing transaction, receipt and block fixtures in
-`dexamine/tests/test_data/node_responses/`. Only the RPC transport is replaced;
+`dexamine/tests/test_data/node_responses/`. The public `JsonRpcClient.call` method is
+replaced with fixture replay;
 the public session interface, protocol parser and flat-output construction run normally.
-Contract metadata is supplied through the existing offline-test helper: USDC has six
+Contract metadata is supplied through the public `MetadataResolver.seed` method: USDC has six
 decimals, WETH has eighteen, and the pool contains those tokens in that order.
 Unexpected HTTP requests fail immediately. The script checks the requested RPC
 parameters against the recorded transaction before returning a response.
+No test helper is imported and no private resolver state is accessed. The JSON
+fixtures are data inputs; the test suite itself is not needed to run the example.
 
 `expected_output.json` contains the complete result. Its `receipt_log_index` is **5**,
 the zero-based offset within the receipt; the source log's block-wide `logIndex` is
