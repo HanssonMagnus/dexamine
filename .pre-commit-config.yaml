@@ -6,8 +6,12 @@ repos:
       - id: check-toml
       - id: check-merge-conflict
       - id: check-added-large-files
+      # Recorded node responses and vendored ABIs are kept byte-for-byte as the
+      # node and the upstream projects produced them.
       - id: end-of-file-fixer
+        exclude: ^(dexamine/resources/|dexamine/tests/test_data/|paper/tikz/)
       - id: trailing-whitespace
+        exclude: ^(dexamine/resources/|dexamine/tests/test_data/|paper/tikz/)
 
   - repo: local
     hooks:
