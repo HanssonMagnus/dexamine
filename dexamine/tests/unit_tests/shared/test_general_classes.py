@@ -42,7 +42,7 @@ def test_transform_to_base_zero_decimals():
 # Test for transform_to_base with None amount
 def test_transform_to_base_none_amount():
     with pytest.raises(ValueError):
-        DexEvent.transform_to_base(None, 2)
+        DexEvent.transform_to_base(None, 2)  # type: ignore[arg-type]
 
 
 # Test for transform_to_base with boundary conditions
@@ -71,6 +71,6 @@ def test_dex_event_type_values():
 # Test for EthereumToType
 ########################################################################################
 def test_ethereum_to_type_values():
-    assert EthereumToType.DEX_ROUTER.value == "dex_router"
-    assert EthereumToType.SMART_CONTRACT.value == "smart_contract"
+    assert EthereumToType.UNISWAP_ROUTER.value == "uniswap_router"
+    assert EthereumToType.OTHER_CONTRACT.value == "other_contract"
     assert EthereumToType.CONTRACT_CREATION.value == "contract_creation"

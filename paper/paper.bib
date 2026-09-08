@@ -1,45 +1,117 @@
-@techreport{adams2020,
-  title={Uniswap v2 core},
-  author={Adams, Hayden and Zinsmeister, Noah and Robinson, Dan},
-  year={2020},
-  institution={Tech. rep., Uniswap}
-}
-
-@techreport{adams2021,
-  title={Uniswap v3 core},
-  author={Adams, Hayden and Zinsmeister, Noah and Salem, Moody and Keefer, River and Robinson, Dan},
-  year={2021},
-  institution={Tech. rep., Uniswap}
-}
+@comment{Ethereum and Uniswap protocol references}
 
 @misc{buterin2013,
-title = {A Next-Generation Smart Contract and Decentralized Application Platform},
-howpublished = {White paper},
-year = {2013},
-url = {https://ethereum.org/en/whitepaper/},
-author = {Vitalik Buterin}
-}
-
-@software{erigon2022,
-    author = {{Erigon Team}},
-    month = {2},
-    title = {{Erigon}},
-    url = {https://github.com/ledgerwatch/erigon},
-    year = {2022}
-}
-
-@software{trueblocks2022,
-    author = {{TrueBlocks Team}},
-    month = {2},
-    title = {{TrueBlocks: Lightweight indexing for any EVM-based blockchain}},
-    url = {https://trueblocks.io/},
-    year = {2022}
+  author       = {Vitalik Buterin},
+  title        = {A Next-Generation Smart Contract and Decentralized Application Platform},
+  howpublished = {White paper},
+  year         = {2013},
+  url          = {https://ethereum.org/en/whitepaper/}
 }
 
 @misc{wood2014,
-title = {Ethereum: A Secure Decentralised Generalised Transaction Ledger},
-howpublished = {Yellow paper},
-year = {2014},
-url = {http://gavwood.com/Paper.pdf},
-author = {Gavin Wood}
+  author       = {Gavin Wood},
+  title        = {Ethereum: A Secure Decentralised Generalised Transaction Ledger},
+  howpublished = {Yellow paper},
+  year         = {2014},
+  url          = {https://ethereum.github.io/yellowpaper/paper.pdf}
+}
+
+@techreport{adams2020,
+  author      = {Adams, Hayden and Zinsmeister, Noah and Robinson, Dan},
+  title       = {Uniswap v2 Core},
+  institution = {Uniswap},
+  year        = {2020},
+  url         = {https://uniswap.org/whitepaper.pdf}
+}
+
+@techreport{adams2021,
+  author      = {Adams, Hayden and Zinsmeister, Noah and Salem, Moody and Keefer, River and Robinson, Dan},
+  title       = {Uniswap v3 Core},
+  institution = {Uniswap},
+  year        = {2021},
+  url         = {https://uniswap.org/whitepaper-v3.pdf}
+}
+
+@comment{Related software}
+
+@software{web3py,
+  author = {{web3.py contributors}},
+  title  = {{web3.py}: A {Python} library for interacting with {Ethereum}},
+  year   = {2024},
+  url    = {https://web3py.readthedocs.io}
+}
+
+@software{ethereumetl,
+  author = {Medvedev, Evgeny and {D5 contributors}},
+  title  = {{Ethereum ETL}: Export blockchain data to {CSV} or {JSON} files},
+  year   = {2018},
+  url    = {https://github.com/blockchain-etl/ethereum-etl}
+}
+
+@software{cryo2023,
+  author = {{Paradigm}},
+  title  = {{cryo}: Extract blockchain data to {Parquet}, {CSV}, {JSON} or {Python} dataframes},
+  year   = {2023},
+  url    = {https://github.com/paradigmxyz/cryo}
+}
+
+@software{graphnode,
+  author = {{The Graph Protocol}},
+  title  = {{Graph Node}: An indexing and query layer for blockchain data},
+  year   = {2018},
+  url    = {https://github.com/graphprotocol/graph-node}
+}
+
+@software{erigon,
+  author = {{Erigon Technologies}},
+  title  = {{Erigon}: An {Ethereum} implementation on the efficiency frontier},
+  year   = {2022},
+  url    = {https://github.com/erigontech/erigon}
+}
+
+@software{trueblocks,
+  author = {{TrueBlocks Team}},
+  title  = {{TrueBlocks}: Lightweight indexing for any {EVM}-based blockchain},
+  year   = {2022},
+  url    = {https://github.com/TrueBlocks/trueblocks-core}
+}
+
+@comment{Research on decentralized exchanges}
+
+@article{lehar2025,
+  author  = {Lehar, Alfred and Parlour, Christine A.},
+  title   = {Decentralized Exchange: The {Uniswap} Automated Market Maker},
+  journal = {The Journal of Finance},
+  volume  = {80},
+  number  = {1},
+  pages   = {321--374},
+  year    = {2025},
+  doi     = {10.1111/jofi.13405}
+}
+
+@article{barbon2025,
+  author  = {Barbon, Andrea and Ranaldo, Angelo},
+  title   = {On the Quality of Cryptocurrency Markets: Centralized versus Decentralized Exchanges},
+  journal = {Management Science},
+  year    = {2025},
+  doi     = {10.1287/mnsc.2024.07703}
+}
+
+@inproceedings{daian2020,
+  author    = {Daian, Philip and Goldfeder, Steven and Kell, Tyler and Li, Yunqi and
+               Zhao, Xueyuan and Bentov, Iddo and Breidenbach, Lorenz and Juels, Ari},
+  title     = {Flash Boys 2.0: Frontrunning in Decentralized Exchanges, Miner Extractable
+               Value, and Consensus Instability},
+  booktitle = {2020 IEEE Symposium on Security and Privacy (SP)},
+  pages     = {910--927},
+  year      = {2020},
+  doi       = {10.1109/SP40000.2020.00040}
+}
+
+@misc{hansson2024,
+  author       = {Magnus Hansson},
+  title        = {Price Discovery in Constant Product Markets},
+  howpublished = {SSRN working paper},
+  year         = {2024},
+  doi          = {10.2139/ssrn.4582649}
 }

@@ -1,5 +1,35 @@
 # API
 
+`dexamine` exposes a small public API. Everything below is importable from the top-level
+package:
+
+```python
+from dexamine import DexamineSession, parse_position, parse_position_raw, parse_positions
+```
+
+- `parse_position` — parse one `(block_number, tx_index)` position.
+- `parse_positions` — parse many positions (a convenience wrapper that materializes a
+  list; prefer `DexamineSession` for large workloads).
+- `parse_position_raw` — fetch the transaction, receipt and block without parsing.
+- `DexamineSession` — reuses ABIs and caches pool and token metadata across calls.
+
+See also [Installation](./installation.md) and
+[Scope and limitations](./limitations.md).
+
+## Errors
+
+- `JsonRpcResultNotFoundError` — the node answered with `null` for a transaction,
+  receipt or block. The message names the position that could not be fetched. Usually
+  means the position does not exist, or the endpoint has pruned that history.
+- `JsonRpcError` — the node returned an error object (rate limits, pruned history).
+- `JsonRpcResponseFormatError` — the response was not in the expected shape.
+The three above are importable from `dexamine.rpc.json_rpc_client`;
+`JsonRpcResultNotFoundError` subclasses `LookupError`, `JsonRpcError` subclasses
+`RuntimeError`, and `JsonRpcResponseFormatError` subclasses `ValueError`.
+
+A plain `ValueError` is raised for an unsupported `protocol`, a non-positive
+`batch_size`, or a transaction the node returned without a usable `hash`.
+
 ## Parse a single transaction position
 
 ```python
@@ -21,7 +51,7 @@ events = result["events"]
 For high throughput, use a session and stream results:
 
 ```python
-from dexamine.api.session import DexamineSession
+from dexamine import DexamineSession
 
 session = DexamineSession.from_node_url("http://localhost:8545")
 
@@ -46,7 +76,7 @@ Also note that `DexamineSession.parse_positions(...)` is a generator; it is inte
 be consumed as a stream for large workloads.
 
 ```python
-from dexamine.api.session import DexamineSession
+from dexamine import DexamineSession
 
 session = DexamineSession.from_node_url("http://localhost:8545")
 rows = session.parse_positions(
@@ -94,7 +124,18 @@ fee-related fields are in **wei** and timestamps are Unix seconds.
 - `tx_max_priority_fee_per_gas`: from `tx.maxPriorityFeePerGas` (`None` if missing)
 - `tx_max_fee_per_gas`: from `tx.maxFeePerGas` (`None` if missing)
 - `tx_type`: from `tx.type` (EIP-2718; `None` if missing)
-- `tx_to_type`: derived from `tx_to` (see `dexamine/shared/general_helpers.py:parse_to_type`)
+- `tx_to_type`: routing classification derived from `tx_to`
+  (see `dexamine/shared/general_helpers.py:parse_to_type`). One of:
+  - `uniswap_router`: sent directly to a canonical Uniswap router or periphery contract
+    (the deployments listed in `dexamine/shared/constants.py:uniswap_address_list`)
+  - `other_contract`: routed through any other contract (aggregator, arbitrage bot, or
+    another DeFi protocol)
+  - `contract_creation`: `tx_to` is `None`
+
+  The classification uses protocol constants only. It deliberately does not depend on
+  curated third-party label sets (for example Etherscan account labels), so the output
+  is deterministic and stable over time. Finer attribution of `other_contract`
+  transactions is left to the user.
 
 ### Protocol-specific `event_*` columns
 

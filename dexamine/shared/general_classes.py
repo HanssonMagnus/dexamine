@@ -22,7 +22,7 @@ class DexEvent:
     symbol_1: str  # Symbol of the second ERC-20 token in the pair (token 1).
     decimals_0: int  # Number of decimals of token 0.
     decimals_1: int  # Number of decimals of token 1.
-    event_index: int  # Index of the log event in the transaction. FIX THE REMAINING V2 CODE ALSO!
+    event_index: int  # Index of the log event in the transaction.
 
     @staticmethod
     def transform_to_base(amount: int | float, decimals: int) -> float | int:
@@ -51,10 +51,15 @@ class DexEventType(Enum):
 # General classes
 ########################################################################################
 class EthereumToType(Enum):
-    """Class of types of Ethereum to addresses."""
+    """
+    Class of types of Ethereum `to` addresses.
 
-    DEX_ROUTER = (
-        "dex_router"  # Transaction is sent directly to any DEX router addresses.
-    )
-    SMART_CONTRACT = "smart_contract"  # Transaction is sent to a DeFi smart contract.
+    The classification is intentionally coarse and derived only from protocol
+    constants (the canonical Uniswap deployments in
+    `dexamine.shared.constants.uniswap_address_list`). No curated third-party
+    label data is used, so the classification is reproducible and stable over time.
+    """
+
+    UNISWAP_ROUTER = "uniswap_router"  # Sent directly to a canonical Uniswap router.
+    OTHER_CONTRACT = "other_contract"  # Routed through any other contract.
     CONTRACT_CREATION = "contract_creation"  # If to_address is empty (None).

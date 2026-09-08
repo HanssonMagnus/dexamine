@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, or data parsed with it, please cite it as below."
+title: dexamine
+abstract: >-
+  dexamine is a Python package that parses Uniswap v2 and Uniswap v3 events (swap,
+  mint and burn) from Ethereum transaction receipt logs. Given a transaction position
+  (block number and transaction index), it fetches the transaction, receipt and block
+  from any Ethereum JSON-RPC endpoint, decodes the Uniswap events, and returns
+  normalized records that join the economic content of each event with the execution
+  metadata of the transaction that produced it.
+type: software
+version: 1.0.0
+date-released: "2026-09-08"
+license: GPL-3.0-or-later
+repository-code: "https://github.com/HanssonMagnus/dexamine"
+url: "https://github.com/HanssonMagnus/dexamine"
+authors:
+  - family-names: Hansson
+    given-names: Magnus
+    orcid: "https://orcid.org/0009-0004-4318-5145"
+    affiliation: "Stockholm University and Swedish House of Finance"
+keywords:
+  - ethereum
+  - uniswap
+  - decentralized exchange
+  - decentralized finance
+  - blockchain
+  - market microstructure
+  - python

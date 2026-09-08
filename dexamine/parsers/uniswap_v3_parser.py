@@ -1,5 +1,5 @@
 """
-This file contains the parser for Unsiwap v3 events.
+This file contains the parser for Uniswap v3 events.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
@@ -15,6 +15,7 @@ from web3 import Web3
 # Import modules
 from dexamine.shared import constants, general_helpers, uniswap_v3_parsing
 from dexamine.shared.general_classes import DexEvent, DexEventType
+from dexamine.shared.general_helpers import Abi
 from dexamine.metadata.resolver import MetadataResolver
 
 # Get a logger
@@ -273,13 +274,13 @@ def parse_all_v3_events(
     node_url: str,
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v3_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v3_pair_abi: Abi,
     exchange_pair_address: str = "",
 ) -> list[dict[str, float | int | str | None]]:
     """
-    Parse all Unsiwap v3 swaps, mints, and burns from a tx.
+    Parse all Uniswap v3 swaps, mints, and burns from a tx.
 
     Args:
         logs (dict): Logs from a transaction's receipt.
@@ -323,8 +324,8 @@ def parse_all_v3_events(
     if swap_indexes:  # If the list is not empty
         if exchange_pair_address:  # If string is not empty
             for swap_index in swap_indexes:
-                smart_contract = Web3.to_checksum_address(logs[swap_index]["address"])
-                if smart_contract == exchange_pair_address:
+                pool_address = Web3.to_checksum_address(logs[swap_index]["address"])
+                if pool_address == exchange_pair_address:
                     swap = parse_v3_swap(
                         node_url,
                         metadata_resolver,
@@ -356,8 +357,8 @@ def parse_all_v3_events(
     if mint_indexes:
         if exchange_pair_address:
             for mint_index in mint_indexes:
-                smart_contract = Web3.to_checksum_address(logs[mint_index]["address"])
-                if smart_contract == exchange_pair_address:
+                pool_address = Web3.to_checksum_address(logs[mint_index]["address"])
+                if pool_address == exchange_pair_address:
                     mint = parse_v3_mint(
                         node_url,
                         metadata_resolver,
@@ -389,8 +390,8 @@ def parse_all_v3_events(
     if burn_indexes:
         if exchange_pair_address:
             for burn_index in burn_indexes:
-                smart_contract = Web3.to_checksum_address(logs[burn_index]["address"])
-                if smart_contract == exchange_pair_address:
+                pool_address = Web3.to_checksum_address(logs[burn_index]["address"])
+                if pool_address == exchange_pair_address:
                     burn = parse_v3_burn(
                         node_url,
                         metadata_resolver,
@@ -424,15 +425,14 @@ def parse_all_v3_events(
 ########################################################################################
 # Funtioncs to parse swap events
 ########################################################################################
-# It the parse_v3_swaps function even used???
 def parse_v3_swaps(
     node_url: str,
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     swap_indexes: list[int],
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v3_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v3_pair_abi: Abi,
 ) -> list[dict[str, float | int | str | None] | None]:
     """Parse all v3 swaps of the tx by identifying all swap events and parse them.
     Inpur arguments:
@@ -461,9 +461,9 @@ def parse_v3_swap(
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     swap_index: int,
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v3_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v3_pair_abi: Abi,
 ) -> dict[str, float | int | str | None] | None:
     """
     Parse a Uniswap v3 swap event.
@@ -556,9 +556,9 @@ def parse_v3_mints(
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     mint_indexes: list[int],
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v3_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v3_pair_abi: Abi,
 ) -> list[dict[str, float | int | str | None] | None]:
     """
     Parse all v3 mints of the tx by identifying all mint events and parse them.
@@ -588,9 +588,9 @@ def parse_v3_mint(
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     mint_index: int,
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v3_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v3_pair_abi: Abi,
 ) -> dict[str, float | int | str | None] | None:
     """
     Parse a Uniswap v3 mint event (deposit liquidity).
@@ -681,9 +681,9 @@ def parse_v3_burns(
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     burn_indexes: list[int],
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v3_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v3_pair_abi: Abi,
 ) -> list[dict[str, float | int | str | None] | None]:
     """
     Parse all v3 burns of the tx by identifying all burn events and parse them.
@@ -717,9 +717,9 @@ def parse_v3_burn(
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     burn_index: int,
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v3_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v3_pair_abi: Abi,
 ) -> dict[str, float | int | str | None] | None:
     """
     Parse a Uniswap v2 burn event (remove liquidity).

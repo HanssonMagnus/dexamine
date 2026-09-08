@@ -46,7 +46,7 @@ def test_parse_positions_flat_wraps_session_generator() -> None:
             "tx_max_priority_fee_per_gas": None,
             "tx_max_fee_per_gas": None,
             "tx_type": None,
-            "tx_to_type": "smart_contract",
+            "tx_to_type": "other_contract",
             "event_type": "swap",
             "event_dex_symbol": "UniswapV2",
             "event_symbol_0": "A",

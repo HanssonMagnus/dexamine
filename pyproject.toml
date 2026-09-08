@@ -1,35 +1,62 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "dexamine"
-version = "0.1.0"
-description = "Examine DEX data from Ethereum archive nodes."
+version = "1.0.0"
+description = "Parse Uniswap v2/v3 events from Ethereum transaction receipt logs."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "GPL-3.0" }
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 authors = [{ name = "Magnus Hansson", email = "hansson.carl.magnus@gmail.com" }]
+keywords = [
+  "ethereum",
+  "uniswap",
+  "decentralized-exchange",
+  "defi",
+  "blockchain",
+  "market-microstructure",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Office/Business :: Financial",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Typing :: Typed",
+]
 dependencies = [
   "web3>=6.15.0",
-  "pandas>=2.2.0",
-  "eth-abi>=5.0.0",
-  "pyarrow>=15.0.0",
-  "polars>=1.11.0",
-  "plotly>=5.24.1",
-  "nbformat>=5.10.4",
   "requests>=2.31.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/HanssonMagnus/dexamine"
+Repository = "https://github.com/HanssonMagnus/dexamine"
+Documentation = "https://github.com/HanssonMagnus/dexamine/blob/main/docs/docs.md"
+Issues = "https://github.com/HanssonMagnus/dexamine/issues"
+Changelog = "https://github.com/HanssonMagnus/dexamine/blob/main/CHANGELOG.md"
+
 [project.optional-dependencies]
+# Development tooling is pinned to compatible releases. Formatters and linters change
+# their output and add new checks between minor versions, so an unpinned range makes CI
+# results depend on when they run rather than on what the code says. Bump these
+# deliberately, in their own commit, so any resulting churn is reviewable.
 dev = [
-  "black>=24.1.1",
-  "mypy>=1.8.0",
-  "pylint>=3.0.3",
-  "pytest>=8.0.0",
-  "types-requests>=2.31.0.20240125",
-  "ipykernel>=6.29.5",
-  "pre-commit>=3.6.0",
+  "black~=26.5.1",
+  "mypy~=2.3.1",
+  "pylint~=4.0.8",
+  "pytest~=9.1.0",
+  "types-requests~=2.32.0",
+  "pre-commit~=4.4.0",
 ]
 
 [tool.setuptools]

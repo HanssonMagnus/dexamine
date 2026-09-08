@@ -1,14 +1,12 @@
-# Parsers Documentation - `dexamine` Project
+# Uniswap v2 parser
 
-## Uniswap v2
-
-### Recommended usage (public API)
+## Recommended usage (public API)
 
 For Uniswap v2 parsing, prefer the public position-based API (this keeps node access,
 batching, and caching consistent):
 
 ```python
-from dexamine.api.session import DexamineSession
+from dexamine import DexamineSession
 
 session = DexamineSession.from_node_url("http://localhost:8545")
 result = session.parse_position(
@@ -20,7 +18,7 @@ result = session.parse_position(
 events = result["events"]
 ```
 
-### Flat output (`output_format="flat"`) for CSV export
+## Flat output (`output_format="flat"`) for CSV export
 
 For a CSV-friendly output, use `output_format="flat"`. This returns **one row per parsed
 event** (so a transaction with multiple events becomes multiple rows).
@@ -32,7 +30,7 @@ designed for analysis and direct CSV export.
 For large workloads, prefer the session generator to stream rows:
 
 ```python
-from dexamine.api.session import DexamineSession
+from dexamine import DexamineSession
 
 session = DexamineSession.from_node_url("http://localhost:8545")
 for row in session.parse_positions(
@@ -54,7 +52,7 @@ Flat columns (Uniswap v2):
 block_timestamp,block_number,block_base_fee_per_gas,block_gas_limit,block_gas_used,block_transactions_count,tx_index,receipt_log_index,tx_hash,tx_from,tx_to,tx_value,tx_gas,tx_gas_price,receipt_gas_used,receipt_effective_gas_price,tx_max_priority_fee_per_gas,tx_max_fee_per_gas,tx_type,tx_to_type,event_type,event_dex_symbol,event_symbol_0,event_symbol_1,event_decimals_0,event_decimals_1,event_amount_0,event_amount_1,event_amount_0_in,event_amount_0_out,event_amount_1_in,event_amount_1_out,event_reserve_0,event_reserve_1,event_mid_price,event_invariant
 ```
 
-### Field definitions
+## Field definitions
 
 Shared (non-event) columns are documented in `docs/api.md` under “Flat output columns”.
 
@@ -83,7 +81,7 @@ for parsed in session.parse_positions(
     pass
 ```
 
-### Notes on Uniswap v2 swaps (net amounts)
+## Notes on Uniswap v2 swaps (net amounts)
 
 The parser reports the net traded amounts as:
 
@@ -114,7 +112,7 @@ receives `696961612401492081` since there is some other latent cost to the speci
 To mitigate any potential issues here, I would recommend that you understand the ERC20 protocol
 that you are analyzing.
 
-### Sync event ordering
+## Sync event ordering
 
 The sync event in the logs outputs the reserves of token0 and token1 in the liquidity pool. The
 sync function is called each time a mint, burn, or swap event takes place. However, it is unclear
@@ -124,7 +122,7 @@ taken place.
 As it turns out after testing, the sync event emits the inventory of the liquidity pool after the swap has taken
 place.
 
-### Internal parser module (advanced use)
+## Internal parser module (advanced use)
 
 If you already have receipt logs and want to call the parser directly, see:
 

@@ -4,7 +4,7 @@ API entrypoints for parsing by transaction position (block number + tx index).
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict, overload
+from typing import Literal, TypedDict, cast, overload
 
 from dexamine.api.flat_output import FlatRow
 from dexamine.rpc.json_rpc_client import JsonObject, JsonRpcClient
@@ -95,7 +95,7 @@ def parse_positions(
     the generator returned by session.parse_positions(...).
     """
     session = DexamineSession.from_node_url(node_url)
-    return list(
+    results = list(
         session.parse_positions(
             positions=positions,
             protocol=protocol,
@@ -104,6 +104,11 @@ def parse_positions(
             output_format=output_format,
         )
     )
+
+    if output_format == "flat":
+        return cast(list[FlatRow], results)
+
+    return cast(list[dict[str, object]], results)
 
 
 @overload
@@ -158,9 +163,12 @@ def parse_position(
             raise TypeError("Expected flat output as a list of rows")
         return result
 
-    return {
-        "tx": result["tx"],  # type: ignore[typeddict-item]
-        "receipt": result["receipt"],  # type: ignore[typeddict-item]
-        "block": result["block"],  # type: ignore[typeddict-item]
-        "events": result["events"],  # type: ignore[typeddict-item]
-    }
+    if not isinstance(result, dict):
+        raise TypeError("Expected raw output as a mapping")
+
+    return ParsedPositionResult(
+        tx=cast(JsonObject, result["tx"]),
+        receipt=cast(JsonObject, result["receipt"]),
+        block=cast(JsonObject, result["block"]),
+        events=cast(list[EventDict], result["events"]),
+    )

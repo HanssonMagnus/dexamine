@@ -3,8 +3,15 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-yaml
+      - id: check-toml
       - id: check-merge-conflict
       - id: check-added-large-files
+      # Recorded node responses and vendored ABIs are kept byte-for-byte as the
+      # node and the upstream projects produced them.
+      - id: end-of-file-fixer
+        exclude: ^(dexamine/resources/|dexamine/tests/test_data/|paper/tikz/)
+      - id: trailing-whitespace
+        exclude: ^(dexamine/resources/|dexamine/tests/test_data/|paper/tikz/)
 
   - repo: local
     hooks:
@@ -20,9 +27,14 @@ repos:
         language: system
         pass_filenames: false
 
+      - id: mypy
+        name: mypy (strict)
+        entry: python -m mypy dexamine
+        language: system
+        pass_filenames: false
+
       - id: pytest
         name: pytest
         entry: python -m pytest dexamine/
         language: system
         pass_filenames: false
-

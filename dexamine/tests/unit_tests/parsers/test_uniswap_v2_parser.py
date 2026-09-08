@@ -21,7 +21,7 @@ from dexamine.parsers import uniswap_v2_parser
 
 
 ########################################################################################
-# Test for class UnsiwapV2Event
+# Test for class UniswapV2Event
 ########################################################################################
 def test_uniswap_v2_event_positive_reserves():
     """Test for UniswapV2Event class."""
@@ -38,7 +38,7 @@ def test_uniswap_v2_event_negative_reserves():
 
 
 ########################################################################################
-# Test for class UnsiwapV2Swap
+# Test for class UniswapV2Swap
 ########################################################################################
 def test_uniswap_v2_swap_valid():
     """Test for UniswapV2Event class with 500 USDC and 1 ETH."""
@@ -65,7 +65,9 @@ def test_uniswap_v2_swap_valid():
 def test_uniswap_v2_swap_invalid_amounts():
     """Test for invalid UniswapV2Swap."""
     with pytest.raises(ValueError):
-        UniswapV2Swap("UNI", "ETH", "USDT", 18, 6, 10, 1000, 2000, None, 100, 200, None)
+        UniswapV2Swap(
+            "UNI", "ETH", "USDT", 18, 6, 10, 1000, 2000, None, 100, 200, None  # type: ignore[arg-type]
+        )
 
 
 ########################################################################################

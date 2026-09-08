@@ -13,8 +13,16 @@ from typing import Iterable, Iterator, Literal
 from dexamine.api.flat_output import FlatRow, iter_flat_rows
 from dexamine.parsers import uniswap_v2_parser, uniswap_v3_parser
 from dexamine.metadata.resolver import MetadataResolver
-from dexamine.rpc.json_rpc_client import JsonObject, JsonRpcClient, to_hex_quantity
+from dexamine.rpc.json_rpc_client import (
+    JsonArray,
+    JsonObject,
+    JsonRpcClient,
+    JsonRpcResponseFormatError,
+    JsonRpcResultNotFoundError,
+    to_hex_quantity,
+)
 from dexamine.shared import general_helpers
+from dexamine.shared.general_helpers import Abi
 
 Protocol = Literal["uniswap_v2", "uniswap_v3"]
 OutputFormat = Literal["raw", "flat"]
@@ -42,10 +50,10 @@ def _chunked_positions(
 class DexamineSession:
     node_url: str
     rpc: JsonRpcClient
-    erc20_abi: dict
-    erc20_bytes32_abi: dict
-    uniswap_v2_pair_abi: dict
-    uniswap_v3_pair_abi: dict
+    erc20_abi: Abi
+    erc20_bytes32_abi: Abi
+    uniswap_v2_pair_abi: Abi
+    uniswap_v3_pair_abi: Abi
     metadata: MetadataResolver
 
     @classmethod
@@ -184,7 +192,7 @@ class DexamineSession:
         """
         for chunk in _chunked_positions(positions=positions, chunk_size=batch_size):
             # 1) Fetch transactions by (block_number, tx_index)
-            tx_calls: list[tuple[str, list[object], int]] = []
+            tx_calls: list[tuple[str, JsonArray, int]] = []
             for i, (block_number, tx_index) in enumerate(chunk, start=1):
                 tx_calls.append(
                     (
@@ -197,15 +205,21 @@ class DexamineSession:
             tx_results = self.rpc.batch_call(tx_calls)
 
             # 2) Fetch receipts by tx hash
-            receipt_calls: list[tuple[str, list[object], int]] = []
+            receipt_calls: list[tuple[str, JsonArray, int]] = []
             tx_by_pos: dict[tuple[int, int], JsonObject] = {}
             tx_hash_by_pos: dict[tuple[int, int], str] = {}
 
             for i, pos in enumerate(chunk, start=1):
                 tx_value = tx_results.get(i)
+                if tx_value is None:
+                    raise JsonRpcResultNotFoundError(
+                        f"Transaction not found for block_number={pos[0]}, "
+                        f"tx_index={pos[1]}"
+                    )
                 if not isinstance(tx_value, dict):
-                    raise TypeError(
-                        f"Transaction result must be an object, got {type(tx_value)}"
+                    raise JsonRpcResponseFormatError(
+                        f"Transaction result must be an object for position={pos}, "
+                        f"got {type(tx_value)}"
                     )
                 tx: JsonObject = tx_value  # runtime-validated above
 
@@ -224,7 +238,7 @@ class DexamineSession:
                 {block_number for block_number, _ in chunk}
             )
             block_id_by_number: dict[int, int] = {}
-            block_calls: list[tuple[str, list[object], int]] = []
+            block_calls: list[tuple[str, JsonArray, int]] = []
             for i, block_number in enumerate(unique_blocks, start=1):
                 block_id_by_number[block_number] = i
                 block_calls.append(
@@ -239,25 +253,38 @@ class DexamineSession:
             block_by_number: dict[int, JsonObject] = {}
             for block_number, request_id in block_id_by_number.items():
                 block_value = block_results.get(request_id)
-                if not isinstance(block_value, dict):
-                    raise TypeError(
-                        f"Block result must be an object, got {type(block_value)}"
+                if block_value is None:
+                    raise JsonRpcResultNotFoundError(
+                        f"Block not found for block_number={block_number}"
                     )
-                block_by_number[block_number] = block_value  # type: ignore[assignment]
+                if not isinstance(block_value, dict):
+                    raise JsonRpcResponseFormatError(
+                        f"Block result must be an object for "
+                        f"block_number={block_number}, got {type(block_value)}"
+                    )
+                block_by_number[block_number] = block_value
 
             # 4) Parse logs for each position
             for i, pos in enumerate(chunk, start=1):
                 block_number, tx_index = pos
                 receipt_value = receipt_results.get(i)
+                if receipt_value is None:
+                    raise JsonRpcResultNotFoundError(
+                        f"Receipt not found for block_number={block_number}, "
+                        f"tx_index={tx_index} (tx_hash={tx_hash_by_pos[pos]})"
+                    )
                 if not isinstance(receipt_value, dict):
-                    raise TypeError(
-                        f"Receipt result must be an object, got {type(receipt_value)}"
+                    raise JsonRpcResponseFormatError(
+                        f"Receipt result must be an object for position={pos}, "
+                        f"got {type(receipt_value)}"
                     )
                 receipt: JsonObject = receipt_value  # runtime-validated above
 
                 logs_value = receipt.get("logs")
                 if not isinstance(logs_value, list):
-                    raise TypeError(f"Receipt missing 'logs' list for position={pos}")
+                    raise JsonRpcResponseFormatError(
+                        f"Receipt missing 'logs' list for position={pos}"
+                    )
 
                 exchange_pair_address_value = (
                     "" if exchange_pair_address is None else exchange_pair_address
