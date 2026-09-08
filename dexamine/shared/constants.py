@@ -10,8 +10,12 @@ This file contains constants used by the dexamine Python package.
 import os
 
 ########################################################################################
-# Ethereum Archive Node
+# Ethereum node
 ########################################################################################
+# Convenience default for a locally running node. Every public API entrypoint takes
+# `node_url` explicitly; this is only a suggested value, not a fallback. An archive node
+# is not required: pool and token metadata are read at the latest block. What is required
+# is an endpoint that still serves the blocks and receipts being parsed.
 NODE_URL = "http://localhost:8545"
 
 ########################################################################################
