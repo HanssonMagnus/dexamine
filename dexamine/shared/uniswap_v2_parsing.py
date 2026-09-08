@@ -8,6 +8,7 @@ This file contains helper functions for parsers.uniswap_v2.
 
 # Import packages
 import logging
+from typing import cast
 from typing import Any
 from web3 import Web3
 
@@ -29,8 +30,8 @@ def get_v2_pair(
     w3 = Web3(Web3.HTTPProvider(node_url))
     v2_pair_address = Web3.to_checksum_address(v2_pair_address)
     swap_contract = w3.eth.contract(address=v2_pair_address, abi=uniswap_v2_pair_abi)
-    token0 = str(swap_contract.functions.token0().call())
-    token1 = str(swap_contract.functions.token1().call())
+    token0 = cast(str, swap_contract.functions.token0().call())
+    token1 = cast(str, swap_contract.functions.token1().call())
     return token0, token1
 
 
@@ -39,7 +40,7 @@ def get_v2_dex(*, node_url: str, v2_pair_address: str, erc20_abi: Abi) -> str:
     w3 = Web3(Web3.HTTPProvider(node_url))
     v2_pair_address = Web3.to_checksum_address(v2_pair_address)
     dex_contract = w3.eth.contract(address=v2_pair_address, abi=erc20_abi)
-    dex_symbol = str(dex_contract.functions.symbol().call())
+    dex_symbol = cast(str, dex_contract.functions.symbol().call())
     return dex_symbol
 
 

@@ -7,6 +7,8 @@ This file contains helper functions for parsers.uniswap_v3.
 """
 
 # Import packages
+from typing import cast
+
 from web3 import Web3
 
 # Import modules
@@ -24,8 +26,8 @@ def get_v3_pair(
     w3 = Web3(Web3.HTTPProvider(node_url))
     v3_pair_address = Web3.to_checksum_address(v3_pair_address)
     swap_contract = w3.eth.contract(address=v3_pair_address, abi=uniswap_v3_pair_abi)
-    token0 = str(swap_contract.functions.token0().call())
-    token1 = str(swap_contract.functions.token1().call())
+    token0 = cast(str, swap_contract.functions.token0().call())
+    token1 = cast(str, swap_contract.functions.token1().call())
     return token0, token1
 
 
@@ -45,7 +47,7 @@ def get_v3_dex(*, node_url: str, v3_pair_address: str, uniswap_v3_pair_abi: Abi)
     w3 = Web3(Web3.HTTPProvider(node_url))
     v3_pair_address = Web3.to_checksum_address(v3_pair_address)
     dex_contract = w3.eth.contract(address=v3_pair_address, abi=uniswap_v3_pair_abi)
-    dex_address = str(dex_contract.functions.factory().call())
+    dex_address = cast(str, dex_contract.functions.factory().call())
 
     if dex_address == constants.UNISWAP_V3_FACTORY_ADDRESS:
         dex_symbol = "UniV3"

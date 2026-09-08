@@ -7,7 +7,7 @@ This file contains general helper functions.
 """
 
 # Import packages
-from typing import Any
+from typing import Any, cast
 import logging
 import csv
 from io import StringIO
@@ -55,13 +55,13 @@ def get_erc20_symbol(
         w3 = Web3(Web3.HTTPProvider(node_url))
         token_address = Web3.to_checksum_address(token_address)
         token_contract = w3.eth.contract(address=token_address, abi=erc20_abi)
-        symbol = str(token_contract.functions.symbol().call())
-        decimals = int(token_contract.functions.decimals().call())
+        symbol = cast(str, token_contract.functions.symbol().call())
+        decimals = cast(int, token_contract.functions.decimals().call())
     except OverflowError as e:  # some tokens return symbol as bytes32
         logger.error(e, exc_info=True)
         token_contract = w3.eth.contract(address=token_address, abi=erc20_bytes32_abi)
         symbol = bytes32_to_string(token_contract.functions.symbol().call())
-        decimals = int(token_contract.functions.decimals().call())
+        decimals = cast(int, token_contract.functions.decimals().call())
 
     return symbol, decimals
 
