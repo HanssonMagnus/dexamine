@@ -14,7 +14,7 @@ Install a TeX distribution with `elsarticle`, `latexmk`, `xurl`, `microtype`, `l
 `tabularx` and `booktabs`. On Ubuntu:
 
 ```bash
-sudo apt-get install latexmk texlive-publishers texlive-latex-extra texlive-fonts-recommended
+sudo apt-get install latexmk texlive-publishers texlive-latex-extra texlive-fonts-recommended texlive-extra-utils
 make -C paper
 make -C paper count
 ```

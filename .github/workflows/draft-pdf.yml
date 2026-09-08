@@ -29,7 +29,7 @@ jobs:
       - name: Install LaTeX
         run: |
           sudo apt-get update
-          sudo apt-get install -y latexmk texlive-publishers texlive-latex-extra texlive-fonts-recommended
+          sudo apt-get install -y latexmk texlive-publishers texlive-latex-extra texlive-fonts-recommended texlive-extra-utils
 
       - name: Build manuscript and submission files
         run: make -C paper bundle
