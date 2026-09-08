@@ -211,7 +211,7 @@ Reproducibility depends on the software version, source responses, and resolved
 metadata. Pool and token metadata are queried at the latest block and cached.
 Changes to token metadata can therefore affect repeated runs even when historical
 logs are unchanged. Retaining input responses and metadata supports replication.
-The public \texttt{MetadataResolver.seed} method accepts recorded token and pool
+The public \texttt{MetadataResolver.\allowbreak seed} method accepts recorded token and pool
 metadata, normalizes addresses, and replaces the supplied cache entries. Missing
 entries still trigger endpoint queries; callers retain responsibility for the
 provenance of supplied metadata.
@@ -289,8 +289,8 @@ The accompanying script
 \href{https://github.com/HanssonMagnus/dexamine/tree/v1.1.0/paper/examples}{\texttt{parse\_recorded\_transaction.py}}
 reproduces the complete output offline using the repository's recorded transaction,
 receipt, and block responses, with explicitly supplied USDC, WETH, and pool metadata.
-It replays the public RPC client's \texttt{call} method and uses
-\texttt{MetadataResolver.seed} while exercising the same session, parser, and output
+It supplies metadata through \texttt{MetadataResolver.\allowbreak seed} and replays
+the public RPC client's \texttt{call} method while exercising the same session, parser, and output
 construction. Unexpected HTTP access is rejected. The committed
 JSON output can be checked with \texttt{--check}; \texttt{--node-url} instead enables
 live retrieval. The example demonstrates the transformation of one historical
@@ -343,6 +343,10 @@ Handelsbanken Research Foundations through a Browaldh Scholarship.
 \section*{CRediT authorship contribution statement}
 Magnus Hansson: Conceptualization, Methodology, Software, Validation, Writing (original
 draft), Writing (review and editing).
+
+\section*{Declaration of competing interest}
+The author declares that he has no known competing financial interests or personal
+relationships that could have appeared to influence the work reported in this paper.
 
 \section*{Data availability}
 The software is publicly available from the GitHub repository identified in the code
