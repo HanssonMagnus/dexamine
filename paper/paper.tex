@@ -85,10 +85,12 @@ contracts \cite{adams2020,adams2021}. Their public records provide data for empi
 studies of trading and liquidity provision. However, these records describe contract
 execution and must be interpreted before they become economic observations.
 
-Research on market quality and arbitrage requires more than trade prices and volumes
-\cite{lehar2025,barbon2026,daian2020}. A transaction's position within a block,
-execution fees, and the pool state following a trade help describe the conditions
-under which it executed. One transaction can contain several trades or liquidity
+Studies of decentralized exchange market quality examine liquidity and trading costs
+as well as prices \cite{lehar2025,barbon2026}. Research on arbitrage and transaction
+ordering also shows why execution sequence and fees matter \cite{daian2020}.
+A transaction's position within a block, execution fees, and the pool state following
+a trade help describe the conditions under which it executed. One transaction can
+contain several trades or liquidity
 events, each of which must remain distinguishable. A block timestamp alone does not
 recover their execution order.
 
@@ -100,14 +102,15 @@ inconsistent units, signs, and ordering. dexamine implements them in a reusable 
 library. The researcher supplies transaction positions, defined by block number and
 transaction index, and receives records for the supported events.
 
-Existing software supplies important parts of this workflow. web3.py offers RPC access,
-contract calls, and ABI-based event decoding \cite{web3py}. Ethereum ETL exports
+Related tools address extraction and indexing at different levels. Ethereum ETL exports
 blockchain records and selected token data \cite{ethereumetl}. cryo supports bulk
 extraction into tabular formats and event decoding from supplied signatures
 \cite{cryo2023}. Graph Node provides application-specific indexing and GraphQL queries
 through subgraphs and can be operated locally \cite{graphnode}. Its retained information
 depends on the chosen schema and mappings. TrueBlocks provides address-based transaction
-indexing and can supply positions for subsequent parsing \cite{trueblocks}.
+indexing \cite{trueblocks}. These tools are discussed as related software; dexamine
+does not import or invoke them. Researchers can use external tools to select
+transactions before passing their positions to dexamine.
 
 The contribution of dexamine is a common representation of Uniswap events joined to
 their execution metadata. Generic extraction tools still require these transformations,
@@ -121,9 +124,12 @@ data construction in two studies of decentralized markets \cite{hansson2024,hans
 \subsection{Software architecture}
 The implementation separates JSON-RPC retrieval, contract metadata resolution,
 protocol parsers, and output construction. A reusable session loads contract interfaces
-and retains pool and token metadata across calls. The RPC client retrieves transactions,
-receipts, and blocks; web3.py is used for metadata queries. The parsers interpret receipt
-logs, and the output layer joins their event records to execution metadata.
+and retains pool and token metadata across calls. dexamine's JSON-RPC client uses
+Requests \cite{requests} to retrieve transactions, receipts, and blocks over HTTP.
+web3.py \cite{web3py} supplies contract calls for pool and token metadata and address
+checksum conversion. Requests and web3.py are the two declared runtime dependencies.
+The protocol parsers decode event topics and fixed-width data fields directly in
+Python. The output layer joins these event records to execution metadata.
 
 Requests for multiple positions are batched. Results are yielded incrementally, so
 event records need not accumulate in memory. The metadata cache grows with the number
@@ -171,6 +177,13 @@ call paths or establish trader identity, arbitrage, or maximal extractable value
 Those interpretations require additional evidence.
 
 \subsection{Reproducibility and verification}
+\label{subsec:verification}
+The author wrote the original implementation without generative AI assistance;
+the repository's first commit is dated 25 November 2023. In subsequent development,
+the author used Anthropic Claude and OpenAI ChatGPT to assist with writing tests,
+reviewing code, and updating the repository. The commit history documents the
+development sequence and includes explicit AI attributions for later changes.
+
 Reproducibility depends on the software version, source responses, and resolved
 metadata. Pool and token metadata are queried at the latest block and cached.
 Changes to token metadata can therefore affect repeated runs even when historical
@@ -289,24 +302,17 @@ discovery, trader attribution, and statistical analysis remain the responsibilit
 the surrounding research workflow.
 
 \section*{Acknowledgements}
-I thank the TrueBlocks and Erigon \cite{erigon} teams for assistance with node operation
+I thank the TrueBlocks \cite{trueblocks} and Erigon \cite{erigon} teams for assistance with node operation
 and indexing, and members of the Flashbots and Uniswap communities for discussions
 of the protocols.
 
 \section*{Funding}
-This research received no specific grant from funding agencies in the public,
-commercial, or not-for-profit sectors.
+During preparation of this manuscript, the author received support from
+Handelsbanken Research Foundations through a Browaldh Scholarship.
 
 \section*{CRediT authorship contribution statement}
 Magnus Hansson: Conceptualization, Methodology, Software, Validation, Writing (original
 draft), Writing (review and editing).
-
-\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
-OpenAI Codex (GPT-6) was used to assist with manuscript organization and editing,
-reference verification, preparation of the reproducible example, and the publication
-build. The resulting text and example were checked against source records,
-implementation behavior, and published references. Verification included offline
-execution and manuscript compilation.
 
 \section*{Data availability}
 The software is publicly available from the GitHub repository identified in the code
@@ -314,6 +320,17 @@ metadata table. Recorded Ethereum responses used in the illustrative example are
 included in the repository under \path{dexamine/tests/test_data/node_responses}.
 The example script and expected output accompany this manuscript. The complete
 datasets of the cited research studies are not distributed with this example.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
+The original software was written by the author without generative AI assistance.
+Later use of Claude and ChatGPT for software maintenance is described in
+Section~\ref{subsec:verification}.
+OpenAI Codex (GPT-6) assisted with manuscript organization and editing, reference
+checking, the reproducible example, and the publication build. The author reviewed
+manuscript drafts and supplied corrections and clarifications. Checks performed
+during revision included comparison with source code and cited sources, offline
+execution of the example, and manuscript compilation. The author remains responsible
+for the manuscript and software.
 
 \bibliographystyle{elsarticle-num}
 \bibliography{paper}

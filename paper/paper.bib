@@ -1,20 +1,4 @@
-@comment{Ethereum and Uniswap protocol references}
-
-@misc{buterin2013,
-  author       = {Vitalik Buterin},
-  title        = {A Next-Generation Smart Contract and Decentralized Application Platform},
-  howpublished = {White paper},
-  year         = {2013},
-  url          = {https://ethereum.org/en/whitepaper/}
-}
-
-@misc{wood2014,
-  author       = {Gavin Wood},
-  title        = {Ethereum: A Secure Decentralised Generalised Transaction Ledger},
-  howpublished = {Yellow paper},
-  year         = {2014},
-  url          = {https://ethereum.github.io/yellowpaper/paper.pdf}
-}
+@comment{Uniswap protocol references}
 
 @techreport{adams2020,
   author      = {Adams, Hayden and Zinsmeister, Noah and Robinson, Dan},
@@ -32,54 +16,69 @@
   url         = {https://uniswap.org/whitepaper-v3.pdf}
 }
 
-@comment{Related software}
+@comment{Runtime dependencies and related software; access dates refer to the
+documentation consulted, not to the versions installed with dexamine.}
+
+@misc{requests,
+  author = {Reitz, Kenneth and {Requests contributors}},
+  title  = {{Requests}: {HTTP} for Humans},
+  year   = {n.d.},
+  url    = {https://requests.readthedocs.io/en/latest/},
+  note   = {Accessed 8 September 2026}
+}
 
 @misc{web3py,
   author = {{web3.py contributors}},
   title  = {{web3.py}: A {Python} library for interacting with {Ethereum}},
-  year   = {2024},
-  url    = {https://web3py.readthedocs.io}
+  year   = {n.d.},
+  url    = {https://web3py.readthedocs.io/en/stable/},
+  note   = {Accessed 8 September 2026}
 }
 
 @misc{ethereumetl,
-  author = {Medvedev, Evgeny and {D5 contributors}},
+  author = {{Ethereum ETL contributors}},
   title  = {{Ethereum ETL}: Export blockchain data to {CSV} or {JSON} files},
-  year   = {2018},
-  url    = {https://github.com/blockchain-etl/ethereum-etl}
+  year   = {n.d.},
+  url    = {https://github.com/blockchain-etl/ethereum-etl},
+  note   = {Accessed 8 September 2026}
 }
 
 @misc{cryo2023,
   author = {{Paradigm}},
   title  = {{cryo}: Extract blockchain data to {Parquet}, {CSV}, {JSON} or {Python} dataframes},
-  year   = {2023},
-  url    = {https://github.com/paradigmxyz/cryo}
+  year   = {n.d.},
+  url    = {https://github.com/paradigmxyz/cryo},
+  note   = {Accessed 8 September 2026}
 }
 
 @misc{graphnode,
   author = {{The Graph Protocol}},
   title  = {{Graph Node}: An indexing and query layer for blockchain data},
-  year   = {2018},
-  url    = {https://github.com/graphprotocol/graph-node}
+  year   = {n.d.},
+  url    = {https://github.com/graphprotocol/graph-node},
+  note   = {Accessed 8 September 2026}
 }
 
 @misc{erigon,
-  author = {{Erigon Technologies}},
+  author = {{Erigon contributors}},
   title  = {{Erigon}: An {Ethereum} implementation on the efficiency frontier},
-  year   = {2022},
-  url    = {https://github.com/erigontech/erigon}
+  year   = {n.d.},
+  url    = {https://github.com/erigontech/erigon},
+  note   = {Accessed 8 September 2026}
 }
 
 @misc{trueblocks,
   author = {{TrueBlocks Team}},
-  title  = {{TrueBlocks}: Lightweight indexing for any {EVM}-based blockchain},
-  year   = {2022},
-  url    = {https://github.com/TrueBlocks/trueblocks-core}
+  title  = {{TrueBlocks} / {Unchained Index}},
+  year   = {n.d.},
+  url    = {https://github.com/TrueBlocks/trueblocks-core},
+  note   = {Accessed 8 September 2026}
 }
 
 @comment{Research on decentralized exchanges}
 
 @article{lehar2025,
-  author  = {Lehar, Alfred and Parlour, Christine A.},
+  author  = {Lehar, Alfred and Parlour, Christine},
   title   = {Decentralized Exchange: The {Uniswap} Automated Market Maker},
   journal = {The Journal of Finance},
   volume  = {80},
@@ -100,7 +99,7 @@
 @inproceedings{daian2020,
   author    = {Daian, Philip and Goldfeder, Steven and Kell, Tyler and Li, Yunqi and
                Zhao, Xueyuan and Bentov, Iddo and Breidenbach, Lorenz and Juels, Ari},
-  title     = {Flash Boys 2.0: Frontrunning in Decentralized Exchanges, Miner Extractable
+  title     = {{Flash Boys 2.0}: Frontrunning in Decentralized Exchanges, Miner Extractable
                Value, and Consensus Instability},
   booktitle = {2020 IEEE Symposium on Security and Privacy (SP)},
   pages     = {910--927},
