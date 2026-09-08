@@ -21,165 +21,133 @@ bibliography: paper.bib
 
 # Summary
 
-`dexamine` is a Python package that turns raw Ethereum transaction data into structured,
-analysis-ready records of decentralized exchange (DEX) activity. Given a transaction
-position -- a block number and the index of a transaction within that block -- it
-fetches the transaction, its receipt and its block from any Ethereum JSON-RPC endpoint,
-decodes the Uniswap events emitted in the receipt logs, and returns normalized rows that
-combine the economic content of each event with the execution metadata of the
-transaction that produced it.
-
-Version `1.0.0` supports Uniswap v2 [@adams2020] and Uniswap v3 [@adams2021] on Ethereum
-mainnet, and parses the three events that define a constant-function market: `swap`,
-`mint` and `burn`. Each parsed event carries the token symbols and decimals of the pool,
-amounts converted to base units, and -- for swaps -- the resulting pool state (reserves,
-mid price and invariant for v2; tick, `sqrtPriceX96`, price and virtual reserves for v3).
-Alongside the event, `dexamine` reports the block timestamp, base fee, gas limit and gas
-used, the transaction's position in its block, its gas price and EIP-1559 fee fields, the
-gas actually consumed, and a routing classification of the transaction. The package
-builds on the block, transaction and state-transition abstractions of Ethereum
-[@buterin2013; @wood2014] and reads them through the standard JSON-RPC interface, so it
-works against any compliant client, such as `Erigon` [@erigon].
+Decentralized exchanges allow users to trade digital assets through programs executed
+on a blockchain. Their public transaction records provide a source of data for studying
+trading and liquidity provision, but these records require interpretation before they
+can be used in empirical research. `dexamine` is a Python package that converts Ethereum
+transaction records into structured observations of activity on Uniswap v2 and v3
+[@adams2020; @adams2021]. It extracts trades and changes in liquidity, identifies the
+tokens involved, and associates each event with its transaction costs and execution
+order. The package is intended for researchers studying price discovery, liquidity
+provision, and market microstructure in decentralized finance.
 
 # Statement of need
 
-Empirical work on decentralized exchanges is transaction-level work. Questions about
-price discovery, liquidity provision, execution quality and arbitrage cannot be answered
-from trade prices and volumes alone: they require knowing when in a block a trade
-executed, what it paid in gas, what path it took to the pool, and what the pool looked
-like immediately afterwards [@lehar2025; @barbon2025]. Because Ethereum orders
-transactions within blocks and prices execution through a fee market, that metadata *is*
-the microstructure -- it is not incidental to the trade, it is what distinguishes one
-trade from another at the same price [@daian2020].
+Research on decentralized exchanges requires data at the level of individual events.
+Trade prices and volumes alone do not describe the conditions under which a transaction
+executed. Its position within a block, execution fees, and the pool state following a
+trade are relevant to the analysis of market quality and arbitrage
+[@lehar2025; @barbon2026; @daian2020]. A single transaction can also contain several
+trades or liquidity events, which must remain distinguishable in the resulting dataset.
 
-That combination is exactly what is missing from the data most researchers actually use.
-Hosted analytics platforms and community-maintained subgraphs return aggregated series
-in which the link between an event and the transaction that produced it has already been
-dropped, and they cannot be re-run offline or pinned to a version, which makes results
-built on them hard to reproduce. General-purpose blockchain extraction tools go the other
-way: they export blocks, transactions and raw logs faithfully but leave protocol
-semantics to the user, so every project re-implements Uniswap log decoding, ERC-20
-metadata resolution and fixed-point conversion, each time with its own quiet mistakes.
+Ethereum exposes blocks, transactions, and event logs through its JSON-RPC interface.
+Constructing a research dataset from these records requires protocol-specific decoding,
+resolution of token metadata, conversion of integer quantities into token units, and
+joins between events and execution metadata. Repeating these steps in individual
+research projects increases implementation effort and creates opportunities for
+inconsistent units, signs, and event ordering.
 
-`dexamine` closes that gap for Uniswap. It is a small, installable library that a
-researcher points at their own node, and it returns one row per DEX event with both the
-protocol-level and the transaction-level fields already joined and converted. The output
-is deterministic: the same input position against the same chain history always yields
-the same row, so an analysis can be regenerated from the chain rather than from a
-snapshot of somebody else's database. The package has been used to construct the datasets
-in @hansson2024.
+`dexamine` provides these transformations in a reusable library. Given a block number
+and transaction index, it retrieves the corresponding transaction, receipt, and block,
+then produces an observation for each supported event. Its scope is Uniswap v2 and v3
+on Ethereum mainnet, with support for swaps and liquidity additions and removals
+represented by mint and burn events. Transaction discovery, data storage, and statistical
+analysis remain separate stages of the research workflow.
 
 # State of the field
 
-`web3.py` [@web3py] provides the Python bindings to an Ethereum node that `dexamine` also
-uses internally, but it stops at generic contract and RPC access; it has no notion of a
-Uniswap swap, of token decimals, or of a pool's post-trade state. `Ethereum ETL`
-[@ethereumetl] and `cryo` [@cryo2023] extract blocks, transactions and logs at scale into
-columnar files, and are excellent at that, but they deliberately remain
-protocol-agnostic: log payloads arrive as undecoded hexadecimal. `Graph Node`
-[@graphnode] and hosted query platforms do encode protocol semantics, but as a
-server-side indexing service whose outputs depend on a deployed subgraph and a hosted
-endpoint, which is a poor fit for archival reproducibility. `TrueBlocks` [@trueblocks]
-solves a complementary problem -- it indexes which transactions touched a given address,
-and its output is a natural input to `dexamine`, which then parses those transactions.
+Several existing tools provide components of this workflow. `web3.py` [@web3py] offers
+Ethereum RPC access, contract calls, and ABI-based event decoding; `dexamine` uses it
+for contract metadata queries. Ethereum ETL [@ethereumetl] exports blockchain records
+and selected token data. `cryo` [@cryo2023] supports bulk extraction into tabular formats
+and event decoding from supplied signatures. These tools provide general extraction
+capabilities, while constructing the Uniswap event representation described here still
+requires protocol-specific transformations and joins.
 
-`dexamine` occupies the remaining position: a local, versioned, protocol-aware parser
-that produces a joined event-and-metadata table for Uniswap, with no hosted dependency.
+Graph Node [@graphnode] supports application-specific indexing and GraphQL queries
+through subgraphs. It can be operated locally, and the information retained depends on
+the subgraph schema and mappings. It is therefore an alternative for persistent indexed
+queries, although it requires maintaining an indexing service. TrueBlocks [@trueblocks]
+provides address-based transaction indexing and can supply transaction positions for
+subsequent parsing by `dexamine`.
 
-# Functionality
+The reason for a separate library is the combination of Uniswap event semantics and
+transaction metadata in a common research schema. Extending a generic RPC client with
+this schema would introduce assumptions specific to one application, while a subgraph
+would couple the transformations to an indexing service. `dexamine` instead reuses
+existing RPC and contract-access facilities and implements the protocol interpretation
+as a Python library that researchers can incorporate into their own data pipelines.
 
-The public API is deliberately small. `parse_position` parses a single position;
-`DexamineSession` amortizes ABI loading, pool and token metadata across many calls and
-is the entry point for large workloads:
+# Software design
 
-```python
-from dexamine import DexamineSession
+The implementation separates JSON-RPC retrieval, cached contract metadata, protocol
+parsers, and output construction. A reusable session batches requests and retains pool
+and token metadata across calls. Results are yielded incrementally, so event records
+need not accumulate in memory; the metadata cache grows with the number of distinct
+contracts encountered. This design supports processing transaction samples as well as
+larger datasets without requiring a database service.
 
-session = DexamineSession.from_node_url("http://localhost:8545")
+The parsers account for differences in how the protocols report pool state. Uniswap v2
+emits reserve updates in a preceding `Sync` event. The parser checks that the immediately
+preceding log is a `Sync` from the same pool and skips the associated event if this
+condition fails. Uniswap v3 swap logs report price, tick, and active liquidity directly.
+The parser derives virtual reserves from these quantities and reports them as missing
+when active liquidity is zero. Virtual reserves describe the local trading curve;
+they are not the pool's total token balances.
 
-for row in session.parse_positions(
-    positions=[(12376729, 59), (12376729, 60)],
-    protocol="uniswap_v3",
-    exchange_pair_address=None,   # or a pool address to filter on
-    batch_size=2000,
-    output_format="flat",
-):
-    # row is one dict per parsed event, ready for csv.DictWriter
-    ...
-```
+The output can retain the original node payloads alongside parsed events or provide
+one flat row per event. Flat records retain block, transaction, and log indices, as
+well as transaction hashes, to preserve the link to source records. Token amounts are
+scaled by their decimal precision. Derived quantities use floating-point arithmetic,
+so the normalized output is intended for empirical analysis rather than exact integer
+accounting. Gas consumption and fee fields describe the whole transaction and are
+repeated across its events; they do not allocate execution costs to individual trades.
 
-Parsing proceeds in four steps. The receipt logs are scanned for the Uniswap event
-signatures; each matching log's payload is decoded from its 32-byte words, with signed
-quantities such as v3 amounts and ticks read as two's complement; token symbols and
-decimals, and the pool's token pair, are resolved from the chain and cached per session;
-and the decoded values are converted to base units and assembled into a record. Uniswap
-v2 additionally requires the `Sync` event that precedes each `swap`, `mint` or `burn`
-from the same pool, since that is where post-event reserves are published; `dexamine`
-verifies this ordering and skips events for which it does not hold rather than reporting
-an unverified state.
+Transaction destination labels use a bundled list of Uniswap router and periphery
+addresses. Other destinations and contract creation receive separate labels. This
+identifies the top-level destination, without reconstructing internal call paths or
+inferring trader identity, arbitrage, or maximal extractable value. Such attribution
+requires additional evidence and remains part of the researcher's analysis.
 
-Two output formats are offered. `raw` returns the node payloads together with the parsed
-events, for users who want everything. `flat` returns one row per event with a fixed
-column order, missing numeric values represented as `None` rather than zero, and every
-row carrying its block number, transaction index and log index, so rows remain uniquely
-addressable after being written to CSV and re-sorted. Requests are batched over JSON-RPC
-and results are yielded as a generator, so millions of positions can be streamed through a
-process without accumulating in memory; sharding positions across worker processes, one
-session each, is the documented path to scale.
+Reproducibility depends on the software version, source responses, and metadata.
+Pool and token metadata are queried at the latest block and cached, rather than resolved
+historically. Consequently, changes to token metadata can affect repeated runs even
+when historical event logs are unchanged. Retaining input responses and resolved
+metadata is advisable for replication. Historical state access is not required by this
+design, but the endpoint must serve the requested historical blocks and receipts and
+support the contract calls used for metadata resolution.
 
-## Transaction routing
+# Research impact statement
 
-`dexamine` also records how each transaction reached the pool, as the `tx_to_type` field.
-The classification uses one input: the transaction's `to` address, matched against the
-canonical Uniswap router and periphery deployments that ship with the package. This
-yields the two routed cases of \autoref{fig:route} -- `uniswap_router` for a transaction
-sent directly to Uniswap, `other_contract` for one routed through any other contract,
-such as an aggregator, an arbitrage bot or another DeFi protocol -- plus
-`contract_creation` when there is no `to` address.
+`dexamine` has been used to construct datasets for *Price Discovery in Constant Product
+Markets* [@hansson2024], which studies trading and liquidity provision on Uniswap.
+This application motivates preserving execution order and pool state alongside trades
+and liquidity events. The package supplies data preparation; trader classification
+and econometric estimation belong to the associated research workflow.
 
-![Transaction routing classification.\label{fig:route}](./tikz/event_classification/event_classification.png){ width=100% }
+The repository contains installation instructions, worked parsing examples, descriptions
+of output fields and limitations, and contribution and support guidance. Recorded
+JSON-RPC fixtures support offline tests of event decoding, signed quantities, reserve
+ordering, pool filtering, and missing values. An optional integration suite checks
+parsing against a live endpoint. Continuous integration runs the offline tests,
+formatting, linting, and strict type checking on Python 3.10 through 3.13. These materials
+allow prospective users to inspect the transformations and evaluate their suitability
+for other studies. The source and development history are maintained in the
+[software repository](https://github.com/HanssonMagnus/dexamine).
 
-This is a deliberately coarse and deliberately stable classification. A finer
-attribution, in particular labelling maximal-extractable-value activity, would require a
-curated list of bot addresses, and such lists both decay and disagree with one another.
-Software that embedded one would silently change its output as the list aged, and results
-published with one version could not be reproduced with another. `dexamine` therefore
-derives routing only from protocol constants, and leaves finer attribution -- for which
-`other_contract` is the natural starting point -- to the user, who can then state and
-version the labelling their analysis depends on.
+# AI usage disclosure
 
-# Quality control
-
-The package is type-annotated and checked with `mypy` in strict mode, formatted with
-`black` and linted with `pylint`. The test suite runs offline: it replays recorded
-JSON-RPC responses and pre-populates the metadata cache, so the log-decoding paths --
-word-level decoding, two's-complement handling, the v2 `Sync` ordering rule, mint and
-burn sign conventions, pool filtering, and the v3 zero-liquidity boundary case -- are
-exercised without network access and without a node. A separate, opt-in integration suite
-runs the same code against a live endpoint when one is supplied. Continuous integration
-runs formatting, linting, type checking and the offline tests on every supported Python
-version.
-
-# Workflow and data requirements
-
-\autoref{fig:workflow} shows how `dexamine` sits in a research pipeline. `dexamine`
-parses positions; it does not discover them. Finding every transaction that touched a
-given pool is an indexing problem, solved well by existing tools such as `TrueBlocks`
-[@trueblocks], and `dexamine` is agnostic to which indexer and which client are used, so
-long as it receives `(block_number, tx_index)` pairs and a JSON-RPC endpoint.
-
-![Example workflow.\label{fig:workflow}](./tikz/flow_chart/flow_chart.png){ width=72% }
-
-Pool and token metadata are read at the latest block, so an archive node, which retains
-historical state, is not required. What is required is an endpoint that still serves the
-blocks and receipts being parsed: a full node with complete history, or a provider that
-has not pruned it. Recent blocks are available from ordinary public endpoints, which
-makes the package usable without operating any infrastructure.
+OpenAI Codex (GPT-6) assisted with restructuring and editing this manuscript, checking
+claims against the implementation and cited sources, and preparing a submission
+readiness review. Verification during this revision included the offline test suite
+and compilation of the manuscript. This disclosure covers the present revision;
+prior AI use and the author's review of AI-assisted material require confirmation
+before submission.
 
 # Acknowledgements
 
-I thank the teams at `TrueBlocks` [@trueblocks] and `Erigon` [@erigon] for their support
-on node operation and indexing, and community members of Flashbots and Uniswap for their
-help in understanding the protocols.
+I thank the TrueBlocks and Erigon [@erigon] teams for assistance with node operation
+and indexing, and members of the Flashbots and Uniswap communities for discussions
+of the protocols.
 
 # References

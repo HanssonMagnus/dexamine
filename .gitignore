@@ -172,3 +172,6 @@ cython_debug/
 *.out
 *.synctex.gz
 *.toc
+
+# Generated JOSS XML output
+paper/jats/

@@ -7,7 +7,8 @@ This directory holds the JOSS paper for `dexamine`.
 ├── paper.md                 # the paper (JOSS markdown + YAML frontmatter)
 ├── paper.bib                # references
 ├── paper.pdf                # built output
-└── tikz/                    # figure sources
+├── REVIEW.md                # submission readiness review
+└── tikz/                    # retained figure sources (not used in the paper)
     ├── event_classification/
     └── flow_chart/
 ```
@@ -22,9 +23,12 @@ To build it locally with the same toolchain JOSS uses, run the Open Journals `in
 image from the repository root:
 
 ```bash
-docker run --rm -v "$PWD":/data -u $(id -u):$(id -g) \
-    openjournals/inara -o pdf -p paper/paper.md
+docker run --rm -v "$PWD/paper":/data -u $(id -u):$(id -g) \
+    -e JOURNAL=joss openjournals/inara
 ```
+
+The workflow builds from the checked-out sources without restoring the paper directory
+from a cache, so bibliography and figure changes cannot reuse a stale PDF.
 
 A plain `pandoc` build is also possible, but it will not apply the JOSS template:
 
