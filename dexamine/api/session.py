@@ -13,8 +13,14 @@ from typing import Iterable, Iterator, Literal
 from dexamine.api.flat_output import FlatRow, iter_flat_rows
 from dexamine.parsers import uniswap_v2_parser, uniswap_v3_parser
 from dexamine.metadata.resolver import MetadataResolver
-from dexamine.rpc.json_rpc_client import JsonObject, JsonRpcClient, to_hex_quantity
+from dexamine.rpc.json_rpc_client import (
+    JsonArray,
+    JsonObject,
+    JsonRpcClient,
+    to_hex_quantity,
+)
 from dexamine.shared import general_helpers
+from dexamine.shared.general_helpers import Abi
 
 Protocol = Literal["uniswap_v2", "uniswap_v3"]
 OutputFormat = Literal["raw", "flat"]
@@ -42,10 +48,10 @@ def _chunked_positions(
 class DexamineSession:
     node_url: str
     rpc: JsonRpcClient
-    erc20_abi: dict
-    erc20_bytes32_abi: dict
-    uniswap_v2_pair_abi: dict
-    uniswap_v3_pair_abi: dict
+    erc20_abi: Abi
+    erc20_bytes32_abi: Abi
+    uniswap_v2_pair_abi: Abi
+    uniswap_v3_pair_abi: Abi
     metadata: MetadataResolver
 
     @classmethod
@@ -184,7 +190,7 @@ class DexamineSession:
         """
         for chunk in _chunked_positions(positions=positions, chunk_size=batch_size):
             # 1) Fetch transactions by (block_number, tx_index)
-            tx_calls: list[tuple[str, list[object], int]] = []
+            tx_calls: list[tuple[str, JsonArray, int]] = []
             for i, (block_number, tx_index) in enumerate(chunk, start=1):
                 tx_calls.append(
                     (
@@ -197,7 +203,7 @@ class DexamineSession:
             tx_results = self.rpc.batch_call(tx_calls)
 
             # 2) Fetch receipts by tx hash
-            receipt_calls: list[tuple[str, list[object], int]] = []
+            receipt_calls: list[tuple[str, JsonArray, int]] = []
             tx_by_pos: dict[tuple[int, int], JsonObject] = {}
             tx_hash_by_pos: dict[tuple[int, int], str] = {}
 
@@ -224,7 +230,7 @@ class DexamineSession:
                 {block_number for block_number, _ in chunk}
             )
             block_id_by_number: dict[int, int] = {}
-            block_calls: list[tuple[str, list[object], int]] = []
+            block_calls: list[tuple[str, JsonArray, int]] = []
             for i, block_number in enumerate(unique_blocks, start=1):
                 block_id_by_number[block_number] = i
                 block_calls.append(
@@ -243,7 +249,7 @@ class DexamineSession:
                     raise TypeError(
                         f"Block result must be an object, got {type(block_value)}"
                     )
-                block_by_number[block_number] = block_value  # type: ignore[assignment]
+                block_by_number[block_number] = block_value
 
             # 4) Parse logs for each position
             for i, pos in enumerate(chunk, start=1):

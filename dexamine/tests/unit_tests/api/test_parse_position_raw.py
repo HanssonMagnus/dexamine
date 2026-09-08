@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from unittest.mock import patch
 
 import pytest
@@ -9,7 +11,7 @@ from dexamine.api.parse import parse_position_raw
 
 def test_parse_position_raw_happy_path() -> None:
     tx_result = {"hash": "0xabc"}
-    receipt_result = {"logs": []}
+    receipt_result: dict[str, Any] = {"logs": []}
     block_result = {"timestamp": "0x1"}
 
     def side_effect(*_args, **_kwargs):

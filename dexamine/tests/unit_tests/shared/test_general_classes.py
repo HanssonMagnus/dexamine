@@ -42,7 +42,7 @@ def test_transform_to_base_zero_decimals():
 # Test for transform_to_base with None amount
 def test_transform_to_base_none_amount():
     with pytest.raises(ValueError):
-        DexEvent.transform_to_base(None, 2)
+        DexEvent.transform_to_base(None, 2)  # type: ignore[arg-type]
 
 
 # Test for transform_to_base with boundary conditions

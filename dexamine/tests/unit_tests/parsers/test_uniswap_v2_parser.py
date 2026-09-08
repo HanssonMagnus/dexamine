@@ -65,7 +65,9 @@ def test_uniswap_v2_swap_valid():
 def test_uniswap_v2_swap_invalid_amounts():
     """Test for invalid UniswapV2Swap."""
     with pytest.raises(ValueError):
-        UniswapV2Swap("UNI", "ETH", "USDT", 18, 6, 10, 1000, 2000, None, 100, 200, None)
+        UniswapV2Swap(
+            "UNI", "ETH", "USDT", 18, 6, 10, 1000, 2000, None, 100, 200, None  # type: ignore[arg-type]
+        )
 
 
 ########################################################################################

@@ -9,10 +9,13 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
+from typing import cast
 
+from eth_typing import ABI, ChecksumAddress
 from web3 import Web3
 
 from dexamine.shared import constants, general_helpers
+from dexamine.shared.general_helpers import Abi
 
 logger = logging.getLogger(__name__)
 
@@ -40,10 +43,10 @@ class V3PoolMetadata:
 @dataclass
 class MetadataResolver:
     node_url: str
-    erc20_abi: dict
-    erc20_bytes32_abi: dict
-    uniswap_v2_pair_abi: dict
-    uniswap_v3_pair_abi: dict
+    erc20_abi: Abi
+    erc20_bytes32_abi: Abi
+    uniswap_v2_pair_abi: Abi
+    uniswap_v3_pair_abi: Abi
     _w3: Web3 = field(init=False, repr=False)
     _erc20_cache: dict[str, Erc20Metadata] = field(default_factory=dict, repr=False)
     _v2_pair_cache: dict[str, V2PairMetadata] = field(default_factory=dict, repr=False)
@@ -52,7 +55,7 @@ class MetadataResolver:
     def __post_init__(self) -> None:
         self._w3 = Web3(Web3.HTTPProvider(self.node_url))
 
-    def _checksum(self, address: str) -> str:
+    def _checksum(self, address: str) -> ChecksumAddress:
         return Web3.to_checksum_address(address)
 
     def get_erc20(self, token_address: str) -> Erc20Metadata:
@@ -78,12 +81,14 @@ class MetadataResolver:
         if cached is not None:
             return cached
 
-        pair_contract = self._w3.eth.contract(address=key, abi=self.uniswap_v2_pair_abi)
+        pair_contract = self._w3.eth.contract(
+            address=key, abi=cast(ABI, self.uniswap_v2_pair_abi)
+        )
         token0 = pair_contract.functions.token0().call()
         token1 = pair_contract.functions.token1().call()
 
         # V2 pairs are ERC-20 LP tokens, so symbol() exists.
-        dex_contract = self._w3.eth.contract(address=key, abi=self.erc20_abi)
+        dex_contract = self._w3.eth.contract(address=key, abi=cast(ABI, self.erc20_abi))
         dex_symbol = dex_contract.functions.symbol().call()
 
         meta = V2PairMetadata(token0=token0, token1=token1, dex_symbol=dex_symbol)
@@ -96,7 +101,9 @@ class MetadataResolver:
         if cached is not None:
             return cached
 
-        pool_contract = self._w3.eth.contract(address=key, abi=self.uniswap_v3_pair_abi)
+        pool_contract = self._w3.eth.contract(
+            address=key, abi=cast(ABI, self.uniswap_v3_pair_abi)
+        )
         token0 = pool_contract.functions.token0().call()
         token1 = pool_contract.functions.token1().call()
 

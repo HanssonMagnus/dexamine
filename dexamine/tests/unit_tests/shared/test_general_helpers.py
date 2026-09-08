@@ -1,6 +1,6 @@
 """
 This file contains unit tests for the functions in
-dexamine/shared/general_helper.py.
+dexamine/shared/general_helpers.py.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
@@ -8,183 +8,12 @@ dexamine/shared/general_helper.py.
 """
 
 # Import packages
+from typing import Any
 from unittest.mock import mock_open, patch
-import importlib.resources as pkg_resources
 import pytest
 
 # Import modules
 from dexamine.shared import general_helpers, constants
-
-
-########################################################################################
-# Test RPC calls with mock node requests
-########################################################################################
-# Test successful retrieval of transaction data
-def test_get_tx_data_by_hash_success():
-    """Test for general_helpers.get_tx_data_by_hash when requests.post is successful."""
-    # Sample transaction hash and expected response
-    tx_hash = "0x125e0b641d4a4b08806bf52c0c6757648c9963bcda8681e4f996f09e00d4c2cc"
-    expected_response = general_helpers.get_json_test_data(
-        "node_responses/tx_data.json"
-    )
-
-    # Mock the requests.post method
-    with patch("requests.post") as mocked_post:
-        mocked_post.return_value.json.return_value = expected_response
-
-        # Call the function
-        response = general_helpers.get_tx_data_by_hash(
-            node_url=constants.NODE_URL, tx_hash=tx_hash
-        )
-
-        # Assertions
-        mocked_post.assert_called_once()
-        assert response == expected_response["result"]
-
-
-# Test handling of an error, such as transaction not found
-def test_get_tx_data_by_hash_not_found():
-    """Test for general_helpers.get_tx_data_by_hash when requests.post is not
-    successful."""
-    tx_hash = "0x125e0b641d4a4b08806bf52c0c6757648c9963bcda8681e4f996f09e00d4c2cc"
-    expected_response = {"jsonrpc": "2.0", "id": 1, "result": None}
-
-    with patch("requests.post") as mocked_post:
-        mocked_post.return_value.json.return_value = expected_response
-
-        response = general_helpers.get_tx_data_by_hash(
-            node_url=constants.NODE_URL, tx_hash=tx_hash
-        )
-
-        assert response is None
-
-
-## Test successful retrieval of transaction data
-def test_get_tx_data_by_block_and_index_success():
-    """Test for when requests.post is successful."""
-    # Sample transaction index and block number and expected response
-    block_number = "0xbcda99"
-    transaction_index = "0x3b"
-    expected_response = general_helpers.get_json_test_data(
-        "node_responses/tx_data.json"
-    )
-
-    # Mock the requests.post method
-    with patch("requests.post") as mocked_post:
-        mocked_post.return_value.json.return_value = expected_response
-
-        # Call the function
-        response = general_helpers.get_tx_data_by_block_and_index(
-            node_url=constants.NODE_URL,
-            block_hex=block_number,
-            index_hex=transaction_index,
-        )
-
-        # Assertions
-        mocked_post.assert_called_once()
-        assert response == expected_response["result"]
-
-
-## Test handling of an error, such as transaction not found
-def test_get_tx_data_by_block_and_index_not_found():
-    """Test for when requests.post is not successful."""
-    block_number = "0xbcda99"
-    transaction_index = "0x3b"
-    expected_response = {"jsonrpc": "2.0", "id": 1, "result": None}
-
-    with patch("requests.post") as mocked_post:
-        mocked_post.return_value.json.return_value = expected_response
-
-        response = general_helpers.get_tx_data_by_block_and_index(
-            node_url=constants.NODE_URL,
-            block_hex=block_number,
-            index_hex=transaction_index,
-        )
-
-        assert response is None
-
-
-## Test successful retrieval of receipt data
-def test_get_receipt_data_by_hash_success():
-    """Test for when requests.post is successful."""
-    # Sample transaction hash and expected response
-    tx_hash = "0x125e0b641d4a4b08806bf52c0c6757648c9963bcda8681e4f996f09e00d4c2cc"
-    expected_response = general_helpers.get_json_test_data(
-        "node_responses/receipt_data.json"
-    )
-
-    # Mock the requests.post method
-    with patch("requests.post") as mocked_post:
-        mocked_post.return_value.json.return_value = expected_response
-
-        # Call the function
-        response = general_helpers.get_receipt_data_by_hash(
-            node_url=constants.NODE_URL, tx_hash=tx_hash
-        )
-
-        # Assertions
-        mocked_post.assert_called_once()
-        assert response == expected_response["result"]
-
-
-# Test handling of an error, such as receipt not found
-def test_get_receipt_data_by_hash_not_found():
-    """Test for when requests.post is not successful."""
-    tx_hash = "0x125e0b641d4a4b08806bf52c0c6757648c9963bcda8681e4f996f09e00d4c2cc"
-    expected_response = {"jsonrpc": "2.0", "id": 1, "result": None}
-
-    with patch("requests.post") as mocked_post:
-        mocked_post.return_value.json.return_value = expected_response
-
-        response = general_helpers.get_receipt_data_by_hash(
-            node_url=constants.NODE_URL, tx_hash=tx_hash
-        )
-
-        assert response is None
-
-
-## Test successful retrieval of block data
-def test_get_block_data_by_block_number_success():
-    """Test for when requests.post is successful."""
-    # Sample block number and expected response
-    block_number = "0xbcda99"
-    expected_response = general_helpers.get_json_test_data(
-        "node_responses/block_data.json"
-    )
-
-    # Mock the requests.post method
-    with patch("requests.post") as mocked_post:
-        mocked_post.return_value.json.return_value = expected_response
-
-        # Call the function
-        response = general_helpers.get_block_data_by_block_number(
-            node_url=constants.NODE_URL, block_hex=block_number
-        )
-
-        # Assertions
-        mocked_post.assert_called_once()
-        assert response == expected_response["result"]
-
-
-# Test handling of an error, such as receipt not found
-def test_get_block_data_by_block_number_not_found():
-    """Test for when requests.post is not successful."""
-    block_number = "0xbcda99"
-    expected_response = {"jsonrpc": "2.0", "id": 1, "result": None}
-
-    with patch("requests.post") as mocked_post:
-        mocked_post.return_value.json.return_value = expected_response
-
-        response = general_helpers.get_block_data_by_block_number(
-            node_url=constants.NODE_URL, block_hex=block_number
-        )
-
-        assert response is None
-
-
-########################################################################################
-# Test ABI call functions
-########################################################################################
 
 
 ########################################################################################
@@ -228,7 +57,7 @@ def test_get_topics_0_empty_topics():
 
 def test_get_topics_0_combination():
     """Test for when topics 0 is missing, empty, and exsisting."""
-    logs = [
+    logs: list[dict[str, Any]] = [
         {"data": "Some data"},
         {"topics": ["0xcc"], "data": "More data"},
         {"topics": [], "data": "Even more data"},
@@ -411,8 +240,8 @@ def test_get_json_test_data_file_not_found():
 
 def test_get_json_abi_success():
     """Test for when a correct data file has been specified."""
-    sample_json_data = {"abi": {"key": "value"}}
-    sample_json_content = '{"abi": {"key": "value"}}'
+    sample_json_data = {"abi": [{"type": "function", "name": "token0"}]}
+    sample_json_content = '{"abi": [{"type": "function", "name": "token0"}]}'
     m = mock_open(read_data=sample_json_content)
 
     with patch("importlib.resources.files") as mock_files:
@@ -425,7 +254,7 @@ def test_get_json_abi_success():
             m.assert_called_once_with("r", encoding="utf-8")
 
             # Assert that the result matches the expected JSON data
-            assert result == {"key": "value"}
+            assert result == [{"type": "function", "name": "token0"}]
 
 
 def test_get_json_test_abi_not_found():

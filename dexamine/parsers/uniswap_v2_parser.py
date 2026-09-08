@@ -16,6 +16,7 @@ from web3 import Web3
 # Import modules
 from dexamine.shared import constants, general_helpers, uniswap_v2_parsing
 from dexamine.shared.general_classes import DexEvent, DexEventType
+from dexamine.shared.general_helpers import Abi
 from dexamine.metadata.resolver import MetadataResolver
 
 # Get a logger
@@ -221,9 +222,9 @@ def parse_all_uniswap_v2_events(
     node_url: str,
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v2_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v2_pair_abi: Abi,
     exchange_pair_address: str = "",
 ) -> list[dict[str, float | int | str | None]]:
     """Parse all swaps, mints, and burns from a tx.
@@ -274,8 +275,8 @@ def parse_all_uniswap_v2_events(
                     events.append(swap)
         else:
             for swap_index in swap_indexes:
-                smart_contract = Web3.to_checksum_address(logs[swap_index]["address"])
-                if smart_contract == exchange_pair_address:
+                pool_address = Web3.to_checksum_address(logs[swap_index]["address"])
+                if pool_address == exchange_pair_address:
                     swap = parse_uniswap_v2_swap(
                         node_url,
                         metadata_resolver,
@@ -305,8 +306,8 @@ def parse_all_uniswap_v2_events(
                     events.append(lp)
         else:
             for lp_index in lp_indexes:
-                smart_contract = Web3.to_checksum_address(logs[lp_index]["address"])
-                if smart_contract == exchange_pair_address:
+                pool_address = Web3.to_checksum_address(logs[lp_index]["address"])
+                if pool_address == exchange_pair_address:
                     lp = parse_uniswap_v2_lp(
                         node_url,
                         metadata_resolver,
@@ -330,9 +331,9 @@ def parse_uniswap_v2_swaps(
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     swap_indexes: list[int],
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v2_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v2_pair_abi: Abi,
 ) -> list[dict[str, float | int | str | None] | None]:
     """
     Parse all v2 trades of the tx by identifying all swap events and parse them.
@@ -362,9 +363,9 @@ def parse_uniswap_v2_swap(
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     swap_index: int,
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v2_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v2_pair_abi: Abi,
 ) -> dict[str, float | int | str | None] | None:
     """
     Parse a Uniswap v2 swap event.
@@ -461,9 +462,9 @@ def parse_uniswap_v2_lps(
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     lp_indexes: list[int],
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v2_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v2_pair_abi: Abi,
 ) -> list[dict[str, float | int | str | None] | None]:
     """
     Parse all Uniswap v2 LP events (mints and burns) in the transaction logs.
@@ -496,9 +497,9 @@ def parse_uniswap_v2_lp(
     metadata_resolver: MetadataResolver | None,
     logs: list[dict[str, Any]],
     lp_index: int,
-    erc20_abi: dict[str, Any],
-    erc20_bytes32_abi: dict[str, Any],
-    uniswap_v2_pair_abi: dict[str, Any],
+    erc20_abi: Abi,
+    erc20_bytes32_abi: Abi,
+    uniswap_v2_pair_abi: Abi,
 ) -> dict[str, float | int | str | None] | None:
     """
     Parse a Uniswap v2 lp event (mint or burn).

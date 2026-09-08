@@ -13,6 +13,7 @@ from web3 import Web3
 
 # Import modules
 from dexamine.shared import constants
+from dexamine.shared.general_helpers import Abi
 
 # Get a logger
 logger = logging.getLogger(__name__)
@@ -22,37 +23,35 @@ logger = logging.getLogger(__name__)
 # Uniswap v2 ABI call node functions
 ########################################################################################
 def get_v2_pair(
-    *, node_url: str, v2_pair_address: str, uniswap_v2_pair_abi: dict[str, Any]
+    *, node_url: str, v2_pair_address: str, uniswap_v2_pair_abi: Abi
 ) -> tuple[str, str]:
     """Get meta data for an v2 pair from node."""
     w3 = Web3(Web3.HTTPProvider(node_url))
     v2_pair_address = Web3.to_checksum_address(v2_pair_address)
     swap_contract = w3.eth.contract(address=v2_pair_address, abi=uniswap_v2_pair_abi)
-    token0 = swap_contract.functions.token0().call()
-    token1 = swap_contract.functions.token1().call()
+    token0 = str(swap_contract.functions.token0().call())
+    token1 = str(swap_contract.functions.token1().call())
     return token0, token1
 
 
-def get_v2_dex(
-    *, node_url: str, v2_pair_address: str, erc20_abi: dict[str, Any]
-) -> str:
+def get_v2_dex(*, node_url: str, v2_pair_address: str, erc20_abi: Abi) -> str:
     """Get meta data for an v2 DEX from node."""
     w3 = Web3(Web3.HTTPProvider(node_url))
     v2_pair_address = Web3.to_checksum_address(v2_pair_address)
     dex_contract = w3.eth.contract(address=v2_pair_address, abi=erc20_abi)
-    dex_symbol = dex_contract.functions.symbol().call()
+    dex_symbol = str(dex_contract.functions.symbol().call())
     return dex_symbol
 
 
 ########################################################################################
-# Uniswp v2 check functions
+# Uniswap v2 check functions
 ########################################################################################
-def has_uniswap_v2_swap_event(topics_0):
+def has_uniswap_v2_swap_event(topics_0: list[str]) -> bool:
     """
     Check if the transaction has a Uniswap v2 swap event.
 
     Args:
-        topics_0 (list): List of topics 0s.
+        topics_0 (list[str]): List of topic 0s (see `general_helpers.get_topics_0`).
 
     Returns:
         bool: True if the Uniswap v2 swap event is present, False otherwise.
@@ -61,12 +60,12 @@ def has_uniswap_v2_swap_event(topics_0):
     return uniswap_v2_swap_event in topics_0
 
 
-def has_uniswap_v2_burn_event(topics_0):
+def has_uniswap_v2_burn_event(topics_0: list[str]) -> bool:
     """
     Check if the transaction has a Uniswap v2 burn event for removing liquidity.
 
     Args:
-        topics_0 (list): List of topics 0s.
+        topics_0 (list[str]): List of topic 0s (see `general_helpers.get_topics_0`).
 
     Returns:
         bool: True if the Uniswap v2 burn event is present, False otherwise.
@@ -75,12 +74,12 @@ def has_uniswap_v2_burn_event(topics_0):
     return uniswap_v2_burn_event in topics_0
 
 
-def has_uniswap_v2_mint_event(topics_0):
+def has_uniswap_v2_mint_event(topics_0: list[str]) -> bool:
     """
     Check if the tx has a Uniswap v2 mint event for liquidity provision.
 
     Args:
-        topics_0 (list): List of topics 0s.
+        topics_0 (list[str]): List of topic 0s (see `general_helpers.get_topics_0`).
 
     Returns:
         bool: True if the Uniswap v2 mint event is present, False otherwise.

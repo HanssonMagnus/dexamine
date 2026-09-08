@@ -77,7 +77,7 @@ class JsonRpcClient:
             raise JsonRpcResponseFormatError(
                 f"JSON-RPC response must be an object, got {type(data)}"
             )
-        return data  # type: ignore[return-value]
+        return data
 
     def _post_batch(self, payload: list[JsonObject]) -> list[JsonObject]:
         headers: dict[str, str] = {"Content-Type": "application/json"}
@@ -120,7 +120,7 @@ class JsonRpcClient:
                 raise JsonRpcResponseFormatError(
                     f"JSON-RPC batch response items must be objects, got {type(item)}"
                 )
-            out.append(item)  # type: ignore[arg-type]
+            out.append(item)
 
         return out
 
@@ -206,7 +206,7 @@ class JsonRpcClient:
             raise JsonRpcResponseFormatError(
                 f"Transaction result must be an object, got {type(result)}"
             )
-        return result  # type: ignore[return-value]
+        return result
 
     def get_transaction_receipt(self, tx_hash: str, request_id: int) -> JsonObject:
         result = self.call(
@@ -218,7 +218,7 @@ class JsonRpcClient:
             raise JsonRpcResponseFormatError(
                 f"Receipt result must be an object, got {type(result)}"
             )
-        return result  # type: ignore[return-value]
+        return result
 
     def get_block_by_number(
         self, block_number: int, include_transactions: bool, request_id: int
@@ -237,4 +237,4 @@ class JsonRpcClient:
             raise JsonRpcResponseFormatError(
                 f"Block result must be an object, got {type(result)}"
             )
-        return result  # type: ignore[return-value]
+        return result
