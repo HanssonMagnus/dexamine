@@ -23,9 +23,12 @@ See also [Installation](./installation.md) and
   means the position does not exist, or the endpoint has pruned that history.
 - `JsonRpcError` — the node returned an error object (rate limits, pruned history).
 - `JsonRpcResponseFormatError` — the response was not in the expected shape.
-- `ValueError` — an unsupported `protocol`, or a non-positive `batch_size`.
+The three above are importable from `dexamine.rpc.json_rpc_client`;
+`JsonRpcResultNotFoundError` subclasses `LookupError`, `JsonRpcError` subclasses
+`RuntimeError`, and `JsonRpcResponseFormatError` subclasses `ValueError`.
 
-All are importable from `dexamine.rpc.json_rpc_client`.
+A plain `ValueError` is raised for an unsupported `protocol`, a non-positive
+`batch_size`, or a transaction the node returned without a usable `hash`.
 
 ## Parse a single transaction position
 
