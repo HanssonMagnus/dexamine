@@ -1,33 +1,48 @@
 # Paper
 
-## Compile the paper locally
-You can compile your JOSS paper locally before submitting it to GitHub. JOSS uses a
-lightweight markdown-based system for the paper, and you can build it locally using a
-simple LaTeX environment.
+This directory holds the JOSS paper for `dexamine`.
 
-JOSS uses pandoc to convert markdown into LaTeX and then PDF. Therefore you'll need both
-`pandoc` and a LaTeX distribution like TeX Live. If you are using apt install `pandoc`
-from their website instead, since the apt version does not have `citeproc`.
-
-To compile the paper you need `paper.md` and `paper.bib` in a directory.
-
-```bash
+```text
 .
-├── paper.md
-├── paper.bib
-└── paper.pdf   (this will be created after running `make` or `pandoc`)
+├── paper.md                 # the paper (JOSS markdown + YAML frontmatter)
+├── paper.bib                # references
+├── paper.pdf                # built output
+└── tikz/                    # figure sources
+    ├── event_classification/
+    └── flow_chart/
 ```
 
-To compile, run the following command:
+## Build the paper
+
+The paper is built on every push by
+[`.github/workflows/draft-pdf.yml`](../.github/workflows/draft-pdf.yml), which uploads
+`paper.pdf` as a workflow artifact.
+
+To build it locally with the same toolchain JOSS uses, run the Open Journals `inara`
+image from the repository root:
 
 ```bash
-pandoc paper.md --citeproc --bibliography=bibliography.bib -o paper.pdf
+docker run --rm -v "$PWD":/data -u $(id -u):$(id -g) \
+    openjournals/inara -o pdf -p paper/paper.md
 ```
 
-## Convert tikz pdfs to png
+A plain `pandoc` build is also possible, but it will not apply the JOSS template:
 
-E.g., run the following command to create a `png` from the `pdf` for the event
-classification flow chart,
+```bash
+pandoc paper/paper.md --citeproc --bibliography=paper/paper.bib -o paper/paper.pdf
 ```
-convert -density 1000 event_classification.pdf -strip -quality 100 event_classification.png
+
+## Rebuild a figure
+
+Each figure is a standalone TikZ document. To rebuild the routing figure and export the
+PNG that `paper.md` embeds:
+
+```bash
+cd tikz/event_classification
+pdflatex event_classification.tex
+convert -density 600 event_classification.pdf -strip -quality 100 \
+    event_classification.png
 ```
+
+The same applies to `tikz/flow_chart`. LaTeX build artifacts (`.aux`, `.log`, ...) are
+gitignored; the `.tex`, `.pdf` and `.png` files are tracked.

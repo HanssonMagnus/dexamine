@@ -1,4 +1,6 @@
-\documentclass[border=5pt]{standalone} % Adds a white border around the entire image
+% How dexamine fits into a research pipeline: an indexer supplies the transaction
+% positions that touched a pool, and dexamine parses each of them.
+\documentclass[border=5pt]{standalone}
 \usepackage{tikz}
 \usepackage{amsmath}
 \usetikzlibrary{positioning, arrows.meta, shapes.geometric}
@@ -6,32 +8,32 @@
 \begin{document}
 
 \begin{tikzpicture}[
-    node distance=0.5cm and -0.5cm,
-    software/.style = {ellipse, draw, align=center, minimum width=3.5cm, minimum height=1cm, font=\small},
-    output/.style = {rectangle, draw, align=center, minimum width=3.5cm, minimum height=1cm, font=\small},
+    node distance = 0.7cm and 1.2cm,
+    software/.style = {ellipse, draw, align=center, minimum width=4cm,
+                       minimum height=1.1cm, font=\large},
+    output/.style = {rectangle, draw, align=center, minimum width=4cm,
+                     minimum height=1.1cm, font=\large},
     arrow/.style = {->, thick, >=Stealth},
     bidirarrow/.style = {<->, thick, >=Stealth}
 ]
 
-% Nodes arranged in a vertical layout
-\node[software] (user) {DEX Pair Address \\ \texttt{0x88e6...}};
+\node[output] (user) {Input: Uniswap pool address \\ \texttt{0x88e6...}};
 \node[software, below=of user] (indexer) {Indexer};
-\node[output, below=of indexer] (tx_positions) {Output: All Tx Interactions \\ \{\texttt{block\_number}, \texttt{block\_position}\}};
-\node[software, below=of tx_positions] (dexamine) {Dexamine \\ (Parses DEX Events)};
+\node[output, below=of indexer] (tx_positions)
+    {Transaction positions \\ \{\texttt{block\_number}, \texttt{tx\_index}\}};
+\node[software, below=of tx_positions] (dexamine)
+    {\texttt{dexamine} \\ (parses Uniswap events)};
+\node[output, below=of dexamine] (output)
+    {Output: time series \\ of Uniswap events};
 
-% Centering the Archive Node
-\node[software, right=of tx_positions, xshift=1cm] (node) {Ethereum \\ Archive Node};
+\node[software, right=of tx_positions, xshift=1cm] (node)
+    {Ethereum node \\ (JSON-RPC)};
 
-% Final output
-\node[output, below=of dexamine] (output) {Output: Time Series \\ of DEX Events};
-
-% Arrows
 \draw[arrow] (user) -- (indexer);
 \draw[arrow] (indexer) -- (tx_positions);
 \draw[arrow] (tx_positions) -- (dexamine);
 \draw[arrow] (dexamine) -- (output);
 
-% Bi-directional Arrows for Archive Node
 \draw[bidirarrow] (indexer) -- (node);
 \draw[bidirarrow] (dexamine) -- (node);
 
