@@ -54,6 +54,9 @@ stable and will follow semantic versioning.
 
 - `mypy` is configured in strict mode but was never run and did not pass. The library
   now passes strict `mypy`, which runs in pre-commit and in continuous integration.
+- Development tooling (`black`, `mypy`, `pylint`, `pytest`, `pre-commit`) is pinned to
+  compatible releases. The previous open-ended lower bounds meant a new `black` release
+  could fail continuous integration on code nobody had touched.
 - Continuous integration now tests Python 3.10 through 3.13, not 3.10 alone.
 - Removed the hardcoded personal log path `constants.PATH_LOGS` and the dead
   `PATH_UNISWAP_V*_TEST_DATA_DIR` constants, which pointed at a directory that no longer

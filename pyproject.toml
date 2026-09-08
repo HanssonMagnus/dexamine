@@ -46,13 +46,17 @@ Issues = "https://github.com/HanssonMagnus/dexamine/issues"
 Changelog = "https://github.com/HanssonMagnus/dexamine/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
+# Development tooling is pinned to compatible releases. Formatters and linters change
+# their output and add new checks between minor versions, so an unpinned range makes CI
+# results depend on when they run rather than on what the code says. Bump these
+# deliberately, in their own commit, so any resulting churn is reviewable.
 dev = [
-  "black>=24.1.1",
-  "mypy>=1.8.0",
-  "pylint>=3.0.3",
-  "pytest>=8.0.0",
-  "types-requests>=2.31.0.20240125",
-  "pre-commit>=3.6.0",
+  "black~=26.5.1",
+  "mypy~=2.3.1",
+  "pylint~=4.0.8",
+  "pytest~=9.1.0",
+  "types-requests~=2.32.0",
+  "pre-commit~=4.4.0",
 ]
 
 [tool.setuptools]

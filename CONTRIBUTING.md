@@ -72,6 +72,15 @@ DEXAMINE_NODE_URL=https://ethereum-rpc.publicnode.com \
     python -m pytest dexamine/ -m integration
 ```
 
+## Tool versions
+
+The formatter, linter and type checker are pinned to compatible releases in
+`pyproject.toml`. This is deliberate: `black` changes its output and `pylint` and `mypy`
+add new checks between minor versions, so an unpinned range would make continuous
+integration fail on untouched code the day a new release lands. Bump them intentionally,
+in a commit of their own, so the resulting reformatting or new warnings are reviewable
+separately from the change that prompted them.
+
 ## Coding standards
 
 - **Formatting**: `black`, line length 88. Do not hand-format around it.
