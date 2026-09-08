@@ -144,7 +144,7 @@ Two behaviours are worth knowing before you rely on the numbers:
   - [`resources/`](./dexamine/resources/) — ABIs.
   - [`tests/`](./dexamine/tests/) — offline unit tests and opt-in integration tests.
 - [`docs/`](./docs/docs.md) — documentation.
-- [`paper/`](./paper/) — the accompanying JOSS paper.
+- [`paper/`](./paper/) — the accompanying SoftwareX manuscript.
 
 ## Development
 
@@ -172,7 +172,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution guidelines and
 
 If you use this package, or data parsed with it, please cite it. Citation metadata is in
 [`CITATION.cff`](./CITATION.cff); GitHub renders it as a "Cite this repository" button.
-The accompanying paper is in [`paper/paper.md`](./paper/paper.md).
+The accompanying paper is in [`paper/paper.tex`](./paper/paper.tex).
 
 ## FAQ
 

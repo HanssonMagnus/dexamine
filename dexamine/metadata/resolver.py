@@ -8,7 +8,8 @@ per-process (e.g. inside each multiprocessing worker).
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from collections.abc import Mapping
+from dataclasses import dataclass, field, replace
 from typing import cast
 
 from eth_typing import ABI, ChecksumAddress
@@ -57,6 +58,48 @@ class MetadataResolver:
 
     def _checksum(self, address: str) -> ChecksumAddress:
         return Web3.to_checksum_address(address)
+
+    def seed(
+        self,
+        *,
+        erc20: Mapping[str, Erc20Metadata] | None = None,
+        v2_pairs: Mapping[str, V2PairMetadata] | None = None,
+        v3_pools: Mapping[str, V3PoolMetadata] | None = None,
+    ) -> None:
+        """Cache caller-supplied metadata without making network requests.
+
+        Keys and pool token addresses are normalized to checksum form. Supplied
+        entries replace existing values; other cached entries are retained. The
+        input mappings are copied, and metadata values are immutable. All addresses
+        are validated before any cache is changed; invalid addresses raise ValueError.
+
+        This does not enable an offline-only mode: a subsequent cache miss queries
+        the configured endpoint as usual. Callers are responsible for the accuracy
+        and historical provenance of the metadata they supply.
+        """
+        tokens: dict[str, Erc20Metadata] = {
+            self._checksum(address): metadata
+            for address, metadata in (erc20 or {}).items()
+        }
+        pairs: dict[str, V2PairMetadata] = {
+            self._checksum(address): replace(
+                metadata,
+                token0=self._checksum(metadata.token0),
+                token1=self._checksum(metadata.token1),
+            )
+            for address, metadata in (v2_pairs or {}).items()
+        }
+        pools: dict[str, V3PoolMetadata] = {
+            self._checksum(address): replace(
+                metadata,
+                token0=self._checksum(metadata.token0),
+                token1=self._checksum(metadata.token1),
+            )
+            for address, metadata in (v3_pools or {}).items()
+        }
+        self._erc20_cache.update(tokens)
+        self._v2_pair_cache.update(pairs)
+        self._v3_pool_cache.update(pools)
 
     def get_erc20(self, token_address: str) -> Erc20Metadata:
         key = self._checksum(token_address)

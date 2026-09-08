@@ -5,6 +5,23 @@ All notable changes to `dexamine` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-09-08
+
+### Added
+
+- `MetadataResolver.seed` accepts recorded ERC-20, Uniswap v2 pair, and Uniswap v3
+  pool metadata through a public API. It normalizes addresses, copies input mappings,
+  and validates addresses before changing the cache. Unseeded lookups still use the
+  configured endpoint.
+- Metadata value classes are exported from `dexamine.metadata`.
+
+### Changed
+
+- The SoftwareX example seeds metadata through the public API and replays the public
+  RPC client interface without importing test helpers or accessing private caches.
+- The manuscript includes architecture and destination-label figures, documents
+  validation on Python 3.10 through 3.13, and follows the current SoftwareX template.
+
 ## [1.0.0] - 2026-09-08
 
 First stable release. The public API and the flat output schema are now considered
@@ -77,5 +94,6 @@ Initial release with support for Uniswap v2 and Uniswap v3 on Ethereum mainnet.
 - `output_format="flat"`, emitting one CSV-ready row per parsed event.
 - A batching JSON-RPC client and a cached metadata resolver.
 
+[1.1.0]: https://github.com/HanssonMagnus/dexamine/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/HanssonMagnus/dexamine/releases/tag/v1.0.0
 [0.1.0]: https://github.com/HanssonMagnus/dexamine/releases/tag/v0.1.0

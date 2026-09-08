@@ -1,42 +1,39 @@
-% How dexamine fits into a research pipeline: an indexer supplies the transaction
-% positions that touched a pool, and dexamine parses each of them.
-\documentclass[border=5pt]{standalone}
+% Architecture of the session API; arrows show data flow.
+\documentclass[border=6pt]{standalone}
 \usepackage{tikz}
-\usepackage{amsmath}
-\usetikzlibrary{positioning, arrows.meta, shapes.geometric}
-
+\usetikzlibrary{arrows.meta,fit,backgrounds}
 \begin{document}
-
 \begin{tikzpicture}[
-    node distance = 0.7cm and 1.2cm,
-    software/.style = {ellipse, draw, align=center, minimum width=4cm,
-                       minimum height=1.1cm, font=\large},
-    output/.style = {rectangle, draw, align=center, minimum width=4cm,
-                     minimum height=1.1cm, font=\large},
-    arrow/.style = {->, thick, >=Stealth},
-    bidirarrow/.style = {<->, thick, >=Stealth}
+  box/.style={draw, rounded corners=2pt, align=center, text width=4.4cm,
+    minimum height=1.15cm, inner sep=5pt, font=\small},
+  stage/.style={box, text width=5.2cm},
+  arrow/.style={-Stealth, semithick},
+  label/.style={font=\footnotesize, fill=white, inner sep=2pt}
 ]
-
-\node[output] (user) {Input: Uniswap pool address \\ \texttt{0x88e6...}};
-\node[software, below=of user] (indexer) {Indexer};
-\node[output, below=of indexer] (tx_positions)
-    {Transaction positions \\ \{\texttt{block\_number}, \texttt{tx\_index}\}};
-\node[software, below=of tx_positions] (dexamine)
-    {\texttt{dexamine} \\ (parses Uniswap events)};
-\node[output, below=of dexamine] (output)
-    {Output: time series \\ of Uniswap events};
-
-\node[software, right=of tx_positions, xshift=1cm] (node)
-    {Ethereum node \\ (JSON-RPC)};
-
-\draw[arrow] (user) -- (indexer);
-\draw[arrow] (indexer) -- (tx_positions);
-\draw[arrow] (tx_positions) -- (dexamine);
-\draw[arrow] (dexamine) -- (output);
-
-\draw[bidirarrow] (indexer) -- (node);
-\draw[bidirarrow] (dexamine) -- (node);
-
+\node[box] (positions) at (0,0)
+  {Researcher supplies transaction positions\\(block number, transaction index)};
+\node[box] (endpoint) at (6.4,0)
+  {Ethereum JSON-RPC endpoint\\Live retrieval};
+\node[box] (rpc) at (0,-2.3)
+  {\textbf{JSON-RPC client}\\Requests\\Transactions, receipts, blocks};
+\node[box] (metadata) at (6.4,-2.3)
+  {\textbf{Metadata resolver}\\web3.py calls or supplied metadata\\Pool and token caches};
+\node[stage] (parsers) at (3.2,-4.6)
+  {\textbf{Protocol parsers}\\Uniswap v2 and v3\\Event fields, token units, pool state};
+\node[stage] (output) at (3.2,-6.8)
+  {\textbf{Output construction}\\Join events to execution metadata\\Raw results or one flat row per event};
+\draw[arrow] (positions) -- (rpc);
+\draw[arrow] (endpoint.south) -- (metadata.north);
+\draw[arrow] (endpoint.south west) -- (rpc.north east);
+\draw[arrow] (rpc.south) -- (parsers.north west);
+\draw[arrow] (metadata.south) -- (parsers.north east);
+\draw[arrow] (parsers) -- (output);
+\draw[arrow] (rpc.south west) -- (-2.5,-3.3) -- (-2.5,-6.8)
+  -- node[label,above] {Execution metadata} (output.west);
+\begin{scope}[on background layer]
+\node[draw, dashed, rounded corners=4pt, inner sep=13pt,
+  fit=(rpc)(metadata)(parsers)(output)] {};
+\end{scope}
+\node[font=\small,anchor=south east] at (8.9,-7.8) {\texttt{DexamineSession}};
 \end{tikzpicture}
-
 \end{document}

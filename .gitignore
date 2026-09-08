@@ -172,3 +172,10 @@ cython_debug/
 *.out
 *.synctex.gz
 *.toc
+
+# Legacy manuscript XML output
+paper/jats/
+
+# SoftwareX build and submission outputs
+*.spl
+paper/submission/

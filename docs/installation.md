@@ -13,11 +13,23 @@ python -m pip install --upgrade pip
 python -m pip install git+https://github.com/HanssonMagnus/dexamine.git
 ```
 
-To pin a specific release, append a tag:
+The SoftwareX example requires version 1.1.0, which adds `MetadataResolver.seed`.
+Once the release tag is published, install that version with:
 
 ```bash
-python -m pip install git+https://github.com/HanssonMagnus/dexamine.git@v1.0.0
+python -m pip install git+https://github.com/HanssonMagnus/dexamine.git@v1.1.0
 ```
+
+Until then, this permanent commit contains the same metadata-seeding API and runs
+the recorded example:
+
+```bash
+python -m pip install git+https://github.com/HanssonMagnus/dexamine.git@d62095ab0544618f134cc25684b1203ffb476e53
+```
+
+The [example instructions](../paper/examples/README.md) explain the required
+repository data and how to check the output offline. Version 1.0.0 does not provide
+the metadata-seeding API.
 
 Verify the install:
 

@@ -1,0 +1,23 @@
+Dear Editors,
+
+Please consider "dexamine: A Python package for Uniswap event data on Ethereum"
+for publication as an Original Software Publication in SoftwareX.
+
+The manuscript describes a Python library that converts Uniswap v2 and v3 receipt
+logs into event records joined to Ethereum transaction metadata. It explains the
+protocol-specific interpretation, numerical conventions, software architecture and
+limits of the output. Version 1 was used to construct data for two studies:
+"Price Discovery in Constant Product Markets" (SSRN 4582649) and "Measuring DeFi
+Price Impact and A New Empirical Market Microstructure Model" (SSRN 5261306).
+These working papers are cited as research applications; this submission describes
+the reusable software and its verification.
+
+The software is publicly available at https://github.com/HanssonMagnus/dexamine
+under the GNU General Public License v3.0 or later. The manuscript identifies the
+1.1.0 code version and supplies a worked example based on recorded Ethereum
+responses. The example can be reproduced without a live node, and the repository
+provides installation instructions, tests, documentation and contribution guidance.
+
+Sincerely,
+Magnus Hansson
+hansson.carl.magnus@gmail.com

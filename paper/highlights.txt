@@ -1,0 +1,4 @@
+- Parses Uniswap v2 and v3 trading and liquidity events from Ethereum.
+- Joins token quantities and pool information to transaction execution metadata.
+- Provides a recorded transaction example that runs without a live node.
+- Version 1 supported data construction for two market microstructure studies.

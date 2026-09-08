@@ -28,5 +28,5 @@ receipt metadata of the transaction that emitted them.
   how to report bugs or ask questions.
 - [Code of Conduct](../CODE_OF_CONDUCT.md)
 - [Changelog](../CHANGELOG.md)
-- [Paper](../paper/paper.md) — the accompanying JOSS paper, including the design
-  rationale for the transaction routing classification.
+- [Paper](../paper/paper.tex) — the accompanying SoftwareX manuscript, describing
+  the software architecture, event interpretation, and a reproducible example.

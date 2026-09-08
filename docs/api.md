@@ -1,7 +1,6 @@
 # API
 
-`dexamine` exposes a small public API. Everything below is importable from the top-level
-package:
+`dexamine` exposes session and parsing entrypoints from the top-level package:
 
 ```python
 from dexamine import DexamineSession, parse_position, parse_position_raw, parse_positions
@@ -15,6 +14,38 @@ from dexamine import DexamineSession, parse_position, parse_position_raw, parse_
 
 See also [Installation](./installation.md) and
 [Scope and limitations](./limitations.md).
+
+## Supply recorded metadata
+
+Starting with version 1.1.0, `MetadataResolver.seed` accepts mappings of token or pool
+addresses to immutable metadata objects. For example:
+
+```python
+from dexamine import DexamineSession
+from dexamine.metadata import Erc20Metadata, V3PoolMetadata
+
+session = DexamineSession.from_node_url("http://localhost:8545")
+usdc = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+pool = "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640"
+session.metadata.seed(
+    erc20={usdc: Erc20Metadata("USDC", 6), weth: Erc20Metadata("WETH", 18)},
+    v3_pools={pool: V3PoolMetadata(usdc, weth, "UniV3")},
+)
+```
+
+For Uniswap v2, use `v2_pairs={address: V2PairMetadata(token0, token1, dex_symbol)}`;
+`V2PairMetadata` and `MetadataResolver` are also exported from `dexamine.metadata`.
+
+Seeding makes no network requests. It normalizes cache keys and pool token addresses
+to checksum form and copies the supplied mappings. Supplied entries overwrite
+existing values; omitted entries are retained. Invalid addresses raise `ValueError`
+before any cache is changed. The caller is responsible for metadata accuracy and for
+retaining its source and date or block context.
+
+A cache miss still queries the configured endpoint. Seeding metadata alone does not
+make transaction retrieval work offline. The [recorded example](../paper/examples/README.md)
+also replays RPC results and rejects unexpected HTTP access.
 
 ## Errors
 

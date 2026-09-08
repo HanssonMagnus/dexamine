@@ -1,48 +1,68 @@
-# Paper
+# SoftwareX manuscript
 
-This directory holds the JOSS paper for `dexamine`.
+`paper.tex` is the editable manuscript source for an **Original Software Publication**
+in SoftwareX. `paper.pdf` is the compiled manuscript, and `paper.bib` holds its references.
+The source follows Elsevier's [official LaTeX template](https://legacyfileshare.elsevier.com/promis_misc/softwarex-osp-template.tex)
+and [Word template, version 6, March 2026](https://legacyfileshare.elsevier.com/promis_misc/softwarex-osp-template.docx).
+The template specifies five main sections, a code metadata table, about 100 abstract
+words, at most six keywords, a 4,000-word limit and at most six figures. Its main-text
+page target is six pages, excluding metadata, tables, figures and references.
 
-```text
-.
-├── paper.md                 # the paper (JOSS markdown + YAML frontmatter)
-├── paper.bib                # references
-├── paper.pdf                # built output
-└── tikz/                    # figure sources
-    ├── event_classification/
-    └── flow_chart/
-```
+Both official templates, checked on 8 September 2026, use metadata rows **C1–C8**
+and do not include a reproducible-capsule row. This manuscript
+preserves that numbering. Its offline example is documented below; it is not a
+separately hosted reproducible capsule.
 
-## Build the paper
+The root `Licence.txt` duplicates `LICENSE` because the SoftwareX template explicitly
+requires that filename. `LICENSE` is authoritative; keep `Licence.txt` byte-identical
+when updating it (`cp LICENSE Licence.txt`).
 
-The paper is built on every push by
-[`.github/workflows/draft-pdf.yml`](../.github/workflows/draft-pdf.yml), which uploads
-`paper.pdf` as a workflow artifact.
+## Build
 
-To build it locally with the same toolchain JOSS uses, run the Open Journals `inara`
-image from the repository root:
-
-```bash
-docker run --rm -v "$PWD":/data -u $(id -u):$(id -g) \
-    openjournals/inara -o pdf -p paper/paper.md
-```
-
-A plain `pandoc` build is also possible, but it will not apply the JOSS template:
+Install a TeX distribution with `elsarticle`, `latexmk`, `xurl`, `microtype`, `listings`,
+`tabularx`, `booktabs`, `standalone` and TikZ. On Ubuntu:
 
 ```bash
-pandoc paper/paper.md --citeproc --bibliography=paper/paper.bib -o paper/paper.pdf
+sudo apt-get install latexmk texlive-publishers texlive-latex-extra texlive-fonts-recommended texlive-extra-utils
+make -C paper
+make -C paper count
 ```
 
-## Rebuild a figure
+The PDF uses the template's preprint layout and numbered references. The word count
+excludes the code metadata table and bibliography; inspect the abstract, captions and
+code listing as well when evaluating the journal's limit.
 
-Each figure is a standalone TikZ document. To rebuild the routing figure and export the
-PNG that `paper.md` embeds:
+## Reproduce the example
+
+Install the package following the repository README, then run:
 
 ```bash
-cd tikz/event_classification
-pdflatex event_classification.tex
-convert -density 600 event_classification.pdf -strip -quality 100 \
-    event_classification.png
+python paper/examples/parse_recorded_transaction.py --check
 ```
 
-The same applies to `tikz/flow_chart`. LaTeX build artifacts (`.aux`, `.log`, ...) are
-gitignored; the `.tex`, `.pdf` and `.png` files are tracked.
+See [examples/README.md](examples/README.md) for the recorded transaction, transport
+replay, supplied metadata and optional live-node execution. The expected output is
+tracked, and CI checks it on every paper build. No live node is needed for the default
+example. The code metadata table identifies version 1.1.0; version 1.0.0 does not
+provide `MetadataResolver.seed`. The v1.1.0 tag must point to this PR's merge commit
+before submission. Until that tag is published, use the working commit-pinned
+command in [installation instructions](../docs/installation.md). The citation and
+changelog dates must match the actual release date if publication of the tag is delayed.
+The example and manuscript are maintained in this directory.
+
+## Assemble submission files
+
+```bash
+make -C paper bundle
+```
+
+This creates `paper/submission/paper.pdf`, `highlights.txt`, `cover-letter.txt` and `latex-source.zip`.
+The source archive includes the manuscript, bibliography, generated reference list,
+and Elsevier class and bibliography style. Other TeX packages come from the TeX
+distribution. Both figure PDFs and their TikZ sources are included. Generated
+submission files are ignored by Git.
+
+[The paper workflow](../.github/workflows/draft-pdf.yml) checks the example, builds
+the manuscript, and uploads these files as an artifact. The two figures in `tikz/`
+show the session architecture and destination-label decision rules. `make` rebuilds
+their PDFs when their sources change; the adjacent PNGs are preview exports.
