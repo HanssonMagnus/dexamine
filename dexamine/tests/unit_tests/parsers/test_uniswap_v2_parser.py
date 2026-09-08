@@ -21,7 +21,7 @@ from dexamine.parsers import uniswap_v2_parser
 
 
 ########################################################################################
-# Test for class UnsiwapV2Event
+# Test for class UniswapV2Event
 ########################################################################################
 def test_uniswap_v2_event_positive_reserves():
     """Test for UniswapV2Event class."""
@@ -38,7 +38,7 @@ def test_uniswap_v2_event_negative_reserves():
 
 
 ########################################################################################
-# Test for class UnsiwapV2Swap
+# Test for class UniswapV2Swap
 ########################################################################################
 def test_uniswap_v2_swap_valid():
     """Test for UniswapV2Event class with 500 USDC and 1 ETH."""

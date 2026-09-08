@@ -1,5 +1,5 @@
 """
-This file contains the parser for Unsiwap v3 events.
+This file contains the parser for Uniswap v3 events.
 
 * Author: Magnus Hansson (https://magnushansson.xyz, https://github.com/HanssonMagnus).
 * License: GPL-3.0.
@@ -280,7 +280,7 @@ def parse_all_v3_events(
     exchange_pair_address: str = "",
 ) -> list[dict[str, float | int | str | None]]:
     """
-    Parse all Unsiwap v3 swaps, mints, and burns from a tx.
+    Parse all Uniswap v3 swaps, mints, and burns from a tx.
 
     Args:
         logs (dict): Logs from a transaction's receipt.

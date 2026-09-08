@@ -1,5 +1,32 @@
 # API
 
+`dexamine` exposes a small public API. Everything below is importable from the top-level
+package:
+
+```python
+from dexamine import DexamineSession, parse_position, parse_position_raw, parse_positions
+```
+
+- `parse_position` — parse one `(block_number, tx_index)` position.
+- `parse_positions` — parse many positions (a convenience wrapper that materializes a
+  list; prefer `DexamineSession` for large workloads).
+- `parse_position_raw` — fetch the transaction, receipt and block without parsing.
+- `DexamineSession` — reuses ABIs and caches pool and token metadata across calls.
+
+See also [Installation](./installation.md) and
+[Scope and limitations](./limitations.md).
+
+## Errors
+
+- `JsonRpcResultNotFoundError` — the node answered with `null` for a transaction,
+  receipt or block. The message names the position that could not be fetched. Usually
+  means the position does not exist, or the endpoint has pruned that history.
+- `JsonRpcError` — the node returned an error object (rate limits, pruned history).
+- `JsonRpcResponseFormatError` — the response was not in the expected shape.
+- `ValueError` — an unsupported `protocol`, or a non-positive `batch_size`.
+
+All are importable from `dexamine.rpc.json_rpc_client`.
+
 ## Parse a single transaction position
 
 ```python
@@ -21,7 +48,7 @@ events = result["events"]
 For high throughput, use a session and stream results:
 
 ```python
-from dexamine.api.session import DexamineSession
+from dexamine import DexamineSession
 
 session = DexamineSession.from_node_url("http://localhost:8545")
 
@@ -46,7 +73,7 @@ Also note that `DexamineSession.parse_positions(...)` is a generator; it is inte
 be consumed as a stream for large workloads.
 
 ```python
-from dexamine.api.session import DexamineSession
+from dexamine import DexamineSession
 
 session = DexamineSession.from_node_url("http://localhost:8545")
 rows = session.parse_positions(

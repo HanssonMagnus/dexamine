@@ -21,7 +21,7 @@ from dexamine.parsers import uniswap_v3_parser
 
 
 ########################################################################################
-# Define fixtures for the UniswapV3Swap, UnsiwapV3Mint, and UniswapV3Burn instances
+# Define fixtures for the UniswapV3Swap, UniswapV3Mint, and UniswapV3Burn instances
 ########################################################################################
 @pytest.fixture
 def swap_event():
@@ -87,7 +87,7 @@ def burn_event():
 
 
 ########################################################################################
-# Test for class UnsiwapV3Swap
+# Test for class UniswapV3Swap
 ########################################################################################
 def test_swap_event(swap_event):
     """Test values of Uniswap v3 swap event."""
@@ -119,7 +119,7 @@ def test_swap_event(swap_event):
 
 
 ########################################################################################
-# Test for class UnsiwapV3Mint
+# Test for class UniswapV3Mint
 ########################################################################################
 def test_mint_event(mint_event):
     """Test values of Unimint v3 mint event."""
@@ -168,7 +168,7 @@ def test_uniswap_v3_mint_invalid_amounts():
 
 
 ########################################################################################
-# Test for class UnsiwapV3Burn
+# Test for class UniswapV3Burn
 ########################################################################################
 def test_burn_event(burn_event):
     """Test values of Uniburn v3 burn event."""

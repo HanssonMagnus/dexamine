@@ -1,14 +1,12 @@
-# Parsers Documentation - `dexamine` Project
+# Uniswap v3 parser
 
-## Uniswap v3
-
-### Recommended usage (public API)
+## Recommended usage (public API)
 
 For Uniswap v3 parsing, prefer the public position-based API (this keeps node access,
 batching, and caching consistent):
 
 ```python
-from dexamine.api.session import DexamineSession
+from dexamine import DexamineSession
 
 session = DexamineSession.from_node_url("http://localhost:8545")
 result = session.parse_position(
@@ -20,7 +18,7 @@ result = session.parse_position(
 events = result["events"]
 ```
 
-### Flat output (`output_format="flat"`) for CSV export
+## Flat output (`output_format="flat"`) for CSV export
 
 For a CSV-friendly output, use `output_format="flat"`. This returns **one row per parsed
 event** (so a transaction with multiple events becomes multiple rows).
@@ -32,7 +30,7 @@ designed for analysis and direct CSV export.
 For large workloads, prefer the session generator to stream rows:
 
 ```python
-from dexamine.api.session import DexamineSession
+from dexamine import DexamineSession
 
 session = DexamineSession.from_node_url("http://localhost:8545")
 for row in session.parse_positions(
@@ -66,7 +64,7 @@ for parsed in session.parse_positions(
     pass
 ```
 
-### Internal parser module (advanced use)
+## Internal parser module (advanced use)
 
 The internal parser lives in `dexamine/parsers/uniswap_v3_parser.py`. If you already have
 receipt logs and want to call the parser directly, use:
@@ -75,7 +73,7 @@ receipt logs and want to call the parser directly, use:
 
 #### `parse_all_v3_events(...)`
 
-Parse all Unsiwap v3 swaps, mints, and burns from a tx.
+Parse all Uniswap v3 swaps, mints, and burns from a tx.
 
 Inputs:
 
@@ -101,7 +99,7 @@ Meta data from the transaction:
 - `tx_from`: The Ethereum address of the transaction initiator.
 - `tx_to`: The Ethereum address of the transaction recipient.
 - `tx_value`: The amount of Ether transferred in the transaction (is usually 0 for smart
-        contract interactions, e.g., Unsiwap).
+        contract interactions, e.g., Uniswap).
 - `tx_gas`: The gas limit of the transaction (from `tx.gas`).
 - `tx_gas_price`: Gas price as specified on the transaction (from `tx.gasPrice`), if available.
 - `receipt_gas_used`: Gas used by the transaction (from `receipt.gasUsed`), if available.
@@ -126,7 +124,7 @@ Variables from the event:
 - `event_owner`: The owner of the position and recipient of any minted/burned liquidity.
 - `event_amount`: The amount of liquidity minted/burned to the position range.
 - `event_amount_0`: How much token0 was required for the minted/burned liquidity.
-- `event_amount_1`: How much token0 was required for the minted/burned liquidity.
+- `event_amount_1`: How much token1 was required for the minted/burned liquidity.
 - `event_virtual_liquidity`: The virtual liquidity of the pool after the swap.
 - `event_tick`: The log base 1.0001 of price of the pool after the swap.
 - `event_sqrt_price_x96`: The sqrt(mid-price) of the pool after the swap, as a Q64.96.
@@ -134,7 +132,12 @@ Variables from the event:
 - `event_tick_lower`: The lower tick of the LP position.
 - `event_tick_upper`: The upper tick of the LP position.
 - `event_virtual_reserve_0`: The virtual reserve of token0 after the swap in base units.
-- `event_virtual_reserve_1`: The virtual reserve of token0 after the swap in base units.
+- `event_virtual_reserve_1`: The virtual reserve of token1 after the swap in base units.
+
+Note: `event_virtual_liquidity` can legitimately be `0` at a tick boundary, in which
+case virtual reserves are not meaningful and both `event_virtual_reserve_0` and
+`event_virtual_reserve_1` are `None` rather than `0`. The rest of the row is
+unaffected. See [Scope and limitations](../limitations.md).
 
 #### `parse_v3_swap(...)`
 
@@ -157,14 +160,14 @@ The functions parses out the following variables:
 - `amount_0`: The amount of the first token in the transaction.
 - `amount_1`: The amount of the second token in the transaction.
 - `liquidity`: The liquidity of the pool after the swap.
-- `tick`: The tick after the swap was executed (`NA` for mints and burns).
-- `sqrtPriceX96`: The square root of the mid-price after the swap in X96 format (`NA` for mints and
-  burns).
-- `price`: The transformed mid-price after the swap in base units (`NA` for mints and burns).
-- `tick_lower`: The lower tick of the price range at which to provide liquidity (`NA` for swaps).
-- `tick_upper`: The upper tick of the price range at which to provide liquidity (`NA` for swaps).
+- `tick`: The tick after the swap was executed (`None` for mints and burns).
+- `sqrtPriceX96`: The square root of the mid-price after the swap in X96 format (`None`
+  for mints and burns).
+- `price`: The transformed mid-price after the swap in base units (`None` for mints and burns).
+- `tick_lower`: The lower tick of the price range at which to provide liquidity (`None` for swaps).
+- `tick_upper`: The upper tick of the price range at which to provide liquidity (`None` for swaps).
 
-## Appendix Events
+## Appendix: events
 
 This appendix contains all events emitted by the Uniswap v3 pool contract.
 
@@ -181,7 +184,7 @@ observations that can be stored.
 - SetFeeProtocol: Emitted when the protocol fee is changed by the pool.
 - CollectProtocol: Emitted when the collected protocol fees are withdrawn by the factory owner.
 
-## Appendix Glossary
+## Appendix: glossary
 
 This appendix is based on the following resources:
 
