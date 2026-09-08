@@ -94,7 +94,18 @@ fee-related fields are in **wei** and timestamps are Unix seconds.
 - `tx_max_priority_fee_per_gas`: from `tx.maxPriorityFeePerGas` (`None` if missing)
 - `tx_max_fee_per_gas`: from `tx.maxFeePerGas` (`None` if missing)
 - `tx_type`: from `tx.type` (EIP-2718; `None` if missing)
-- `tx_to_type`: derived from `tx_to` (see `dexamine/shared/general_helpers.py:parse_to_type`)
+- `tx_to_type`: routing classification derived from `tx_to`
+  (see `dexamine/shared/general_helpers.py:parse_to_type`). One of:
+  - `uniswap_router`: sent directly to a canonical Uniswap router or periphery contract
+    (the deployments listed in `dexamine/shared/constants.py:uniswap_address_list`)
+  - `other_contract`: routed through any other contract (aggregator, arbitrage bot, or
+    another DeFi protocol)
+  - `contract_creation`: `tx_to` is `None`
+
+  The classification uses protocol constants only. It deliberately does not depend on
+  curated third-party label sets (for example Etherscan account labels), so the output
+  is deterministic and stable over time. Finer attribution of `other_contract`
+  transactions is left to the user.
 
 ### Protocol-specific `event_*` columns
 

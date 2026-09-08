@@ -278,18 +278,28 @@ def parse_signed_int(hex_str: str) -> int:
 ########################################################################################
 def parse_to_type(to_address: str | None) -> str:
     """
-    Parse the transaction to_address.
+    Classify the route a transaction took before reaching a Uniswap pool.
+
+    The classification uses one input only: the transaction `to` address, matched
+    against the canonical Uniswap deployments in `constants.uniswap_address_list`.
+    No curated third-party label data (for example Etherscan account labels) is
+    used, so the output is deterministic and does not decay over time.
 
     Parameters:
-    to_address (str): Ethereum transaction to address.
+    to_address (str | None): Ethereum transaction `to` address, or None.
 
     Returns:
-    str: 'dex_router', 'smart_contract', or 'contract_creation'
+    str: one of
+        - 'uniswap_router': sent directly to a canonical Uniswap router or
+          periphery contract,
+        - 'other_contract': routed through any other contract (aggregator,
+          arbitrage bot, or other DeFi protocol),
+        - 'contract_creation': `to_address` is None.
 
     Note:
-    If to_address is None I set it to 'contract_creation' in the multiprocessing parse
-    script. Ensure that 'contract_creation' strings will not raise ValueError as it is
-    not a HEX string.
+    A `to_address` that is not a valid hexadecimal address is logged and falls
+    through to 'other_contract' rather than raising, so that callers can pass
+    values straight from a node response without pre-validation.
     """
     if to_address is None:
         return EthereumToType.CONTRACT_CREATION.value
@@ -302,9 +312,9 @@ def parse_to_type(to_address: str | None) -> str:
 
     # Assign which route the transaction took to execution.
     if to_address in constants.uniswap_address_list:
-        to_type = EthereumToType.DEX_ROUTER.value
+        to_type = EthereumToType.UNISWAP_ROUTER.value
     else:
-        to_type = EthereumToType.SMART_CONTRACT.value
+        to_type = EthereumToType.OTHER_CONTRACT.value
 
     return to_type
 

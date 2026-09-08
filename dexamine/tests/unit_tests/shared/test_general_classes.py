@@ -71,6 +71,6 @@ def test_dex_event_type_values():
 # Test for EthereumToType
 ########################################################################################
 def test_ethereum_to_type_values():
-    assert EthereumToType.DEX_ROUTER.value == "dex_router"
-    assert EthereumToType.SMART_CONTRACT.value == "smart_contract"
+    assert EthereumToType.UNISWAP_ROUTER.value == "uniswap_router"
+    assert EthereumToType.OTHER_CONTRACT.value == "other_contract"
     assert EthereumToType.CONTRACT_CREATION.value == "contract_creation"

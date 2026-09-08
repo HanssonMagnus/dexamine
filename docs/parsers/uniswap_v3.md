@@ -110,8 +110,8 @@ Meta data from the transaction:
                         the transaction.
 - `tx_max_fee_per_gas`: The maximum fee per unit of gas (in wei) the sender is willing to pay.
 - `tx_type`: Transaction type (EIP-2718), if available.
-- `tx_to_type`: Type of agent: uni (manual), defi (algorithmic), mev (arbitrage), or
-             contract_creation.
+- `tx_to_type`: Routing classification: `uniswap_router`, `other_contract`, or
+             `contract_creation`. See `docs/api.md` for the full definition.
 
 Variables from the event:
 

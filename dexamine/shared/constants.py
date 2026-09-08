@@ -17,9 +17,6 @@ NODE_URL = "http://localhost:8545"
 ########################################################################################
 # General paths
 ########################################################################################
-# Set path for logging
-PATH_LOGS = "/media/m2_front/research/logs/dexamine/"
-
 # Absolute path of the directory where constants.py is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -50,15 +47,7 @@ PATH_UNISWAP_V2_PAIR_ABI = os.path.join(
     BASE_DIR, "../resources/abis/uniswap_v2/IUniswapV2Pair.json"
 )
 
-# Path to Uniswap v2 test data
-PATH_UNISWAP_V2_TEST_DATA_DIR = os.path.join(
-    BASE_DIR, "../resources/test_data/uniswap_v2/"
-)
-PATH_UNISWAP_V2_BY_POSITIONS = os.path.join(
-    BASE_DIR, "../resources/test_data/uniswap_v2/uniswap_v2_by_positions.json"
-)
-
-# Unsiwp v2 events
+# Uniswap v2 events
 UNISWAP_V2_SWAP_EVENT = (
     "0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822"
 )
@@ -97,14 +86,6 @@ PATH_UNISWAP_V3_PAIR_ABI = os.path.join(
     BASE_DIR, "../resources/abis/uniswap_v3/UniswapV3PoolABI.json"
 )
 
-# Path to Uniswap v3 test data
-PATH_UNISWAP_V3_TEST_DATA_DIR = os.path.join(
-    BASE_DIR, "../resources/test_data/uniswap_v3/"
-)
-PATH_UNISWAP_V3_BY_POSITIONS = os.path.join(
-    BASE_DIR, "../resources/test_data/uniswap_v3/uniswap_v3_by_positions.json"
-)
-
 # Uniswap v3 events
 UNISWAP_V3_SWAP_EVENT = (
     "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67"
@@ -123,12 +104,24 @@ UNISWAP_V3_DECREASE_LIQUIDITY_EVENT = (
     "0x26f6a048ee9138f2c0ce266f322cb99228e8d619ae2bff30c67f8dcf9d2377b4"
 )
 
-# Unsiwap v3 pools
+# Uniswap v3 pools
 UNISWAP_V3_USDC_WETH_5BPS_ADDRESS = "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640"
 
 ########################################################################################
 # Lists
 ########################################################################################
+# Canonical Uniswap router and periphery deployments on Ethereum mainnet.
+#
+# This is a set of *protocol constants*, not a curated behavioural list: each entry is
+# an official Uniswap deployment documented at
+# https://docs.uniswap.org/contracts/v2/reference/smart-contracts/ and
+# https://docs.uniswap.org/contracts/v3/reference/deployments. It is used by
+# `dexamine.shared.general_helpers.parse_to_type` to distinguish transactions sent
+# directly to Uniswap ("uniswap_router") from transactions routed through any other
+# contract ("other_contract").
+#
+# To extend: append a new module-level constant above and add it here when Uniswap
+# deploys an additional router. Nothing else in the package needs to change.
 uniswap_address_list = [
     UNISWAP_V3_ROUTER_ADDRESS,
     UNISWAP_V3_POSITIONS_NFT_ADDRESS,

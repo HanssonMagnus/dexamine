@@ -351,26 +351,27 @@ def test_parse_to_type_with_contract_creation():
     assert general_helpers.parse_to_type(None) == "contract_creation"
 
 
-def test_parse_to_type_with_mev_contract():
-    """Test if a non-Uniswap address is classified as a smart contract."""
-    mev_address = "0x_mev_contract_address"
-    assert general_helpers.parse_to_type(mev_address) == "smart_contract"
-
-
-def test_parse_to_type_with_uni_router():
+def test_parse_to_type_with_uniswap_v2_router():
+    """A canonical Uniswap v2 router is classified as 'uniswap_router'."""
     uni_address = "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a"
-    assert general_helpers.parse_to_type(uni_address) == "dex_router"
+    assert general_helpers.parse_to_type(uni_address) == "uniswap_router"
 
 
 def test_parse_to_type_with_uni_universal_router_v4():
+    """The Uniswap universal router (v4) is classified as 'uniswap_router'."""
     uni_address = "0x66a9893cC07D91D95644AEDD05D03f95e1dBA8Af"
-    assert general_helpers.parse_to_type(uni_address) == "dex_router"
+    assert general_helpers.parse_to_type(uni_address) == "uniswap_router"
 
 
-def test_parse_to_type_with_defi_address():
-    """Test if to_address is "defi", using a generic non-MEV, non-Uniswap address."""
-    defi_address = "0x_defi_contract_address"
-    assert general_helpers.parse_to_type(defi_address) == "smart_contract"
+def test_parse_to_type_with_non_uniswap_contract():
+    """Any non-Uniswap contract is classified as 'other_contract'."""
+    other_address = "0x1111111254EEB25477B68fb85Ed929f73A960582"  # 1inch aggregator
+    assert general_helpers.parse_to_type(other_address) == "other_contract"
+
+
+def test_parse_to_type_with_invalid_address_does_not_raise():
+    """A non-hex address is logged and falls through to 'other_contract'."""
+    assert general_helpers.parse_to_type("0x_not_a_valid_address") == "other_contract"
 
 
 ########################################################################################
