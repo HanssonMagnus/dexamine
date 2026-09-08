@@ -3,8 +3,11 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-yaml
+      - id: check-toml
       - id: check-merge-conflict
       - id: check-added-large-files
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
 
   - repo: local
     hooks:
@@ -20,9 +23,14 @@ repos:
         language: system
         pass_filenames: false
 
+      - id: mypy
+        name: mypy (strict)
+        entry: python -m mypy dexamine
+        language: system
+        pass_filenames: false
+
       - id: pytest
         name: pytest
         entry: python -m pytest dexamine/
         language: system
         pass_filenames: false
-
