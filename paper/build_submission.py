@@ -21,4 +21,9 @@ with ZipFile(output / "latex-source.zip", "w", ZIP_DEFLATED) as archive:
         if not source:
             raise SystemExit(f"Missing LaTeX dependency: {name}")
         archive.write(source, name)
+with ZipFile(output / "recorded-example.zip", "w", ZIP_DEFLATED) as archive:
+    for source in sorted((paper / "examples").rglob("*")):
+        if source.suffix in {".py", ".json", ".md"}:
+            archive.write(source, source.relative_to(paper))
+    archive.write(paper.parent / "LICENSE", "LICENSE")
 print(f"Submission files written to {output}")

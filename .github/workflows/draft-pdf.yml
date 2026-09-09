@@ -24,7 +24,7 @@ jobs:
         run: python -m pip install .
 
       - name: Verify recorded example
-        run: python paper/examples/parse_recorded_transaction.py --check
+        run: make -C paper check-example PYTHON=python
 
       - name: Install LaTeX
         run: |
