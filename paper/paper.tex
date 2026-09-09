@@ -1,5 +1,5 @@
 \documentclass[11pt]{article}
-\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[a4paper]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{authblk}
@@ -21,8 +21,8 @@
 
 \title{\texttt{dexamine}: A Python package for Uniswap event data on Ethereum}
 \author[1,2]{Magnus Hansson}
-\affil[1]{Stockholm University, Stockholm, Sweden}
-\affil[2]{Swedish House of Finance, Stockholm, Sweden}
+\affil[1]{Stockholm University}
+\affil[2]{Swedish House of Finance}
 \date{}
 
 \begin{document}
@@ -32,10 +32,10 @@
 \small
 \href{mailto:hansson.carl.magnus@gmail.com}{\nolinkurl{hansson.carl.magnus@gmail.com}}\\
 ORCID: \url{https://orcid.org/0009-0004-4318-5145}\\
-\textit{Affiliations refer to the period when the work was carried out.}
 \end{center}
 
 \begin{abstract}
+\noindent
 Decentralized exchanges record trading and liquidity provision on public blockchains,
 but empirical analysis requires interpreting these records and linking them to
 execution metadata. dexamine is a Python package that parses Uniswap v2 and v3 events
@@ -44,13 +44,13 @@ liquidity changes, with token quantities, pool state, transaction order, and gas
 information. The package separates data retrieval, contract metadata, protocol
 interpretation, and output construction. The repository provides recorded Ethereum
 responses and an offline reproducible example, and version 1 has been used to
-construct data for two empirical studies of decentralized markets.
+construct data for an empirical study of price discovery in decentralized markets.
 \end{abstract}
 
 \noindent\textbf{Keywords:} Ethereum; Uniswap; decentralized finance; market
 microstructure; research software
 
-\section{Motivation and significance}
+\section{Introduction}
 Decentralized exchanges allow users to trade digital assets through programs executed
 on a blockchain. Uniswap v2 and v3 are automated market makers on Ethereum: trades
 change the balances of liquidity pools, and prices follow rules implemented by their
@@ -91,8 +91,13 @@ their execution metadata. Generic extraction tools still require these transform
 while a subgraph places them within an indexing service. A separate library allows
 researchers to reuse RPC and contract-access facilities while incorporating the
 protocol interpretation into their own pipelines. Transaction discovery, storage,
-and statistical estimation remain independent stages. Version 1 of dexamine has been used for
-data construction in two studies of decentralized markets \cite{hansson2024,hansson2025}.
+and statistical estimation remain independent stages.
+
+Version 1 of dexamine has been used for
+data construction in a study of price discovery in decentralized markets \cite{hansson2024}.
+This application requires preserving the sequence of events and their associated
+pool information. Reusing a parser provides consistent treatment of token units,
+liquidity changes, and execution metadata across analyses.
 
 The software, documentation, tests, and reproducible examples are available at
 \url{https://github.com/HanssonMagnus/dexamine}.
@@ -138,7 +143,7 @@ block metadata. Offline replay supplies recorded RPC results and seeded metadata
 \label{fig:architecture}
 \end{figure}
 
-\subsection{Software functionalities}
+\subsection{Functionality}
 The package supports Uniswap v2 and v3 swaps, mints, and burns on Ethereum mainnet.
 Mints and burns describe additions and removals of liquidity. Event records include
 token symbols and decimal precision, normalized token quantities, and event-specific
@@ -199,7 +204,7 @@ Continuous integration runs tests, formatting, linting, and strict type checking
 Python 3.10 through 3.13. Installation instructions, field definitions, limitations,
 and contribution guidance are supplied with the code.
 
-\section{Illustrative examples}
+\section{Illustrative example}
 \label{sec:example}
 Transaction 31 in Ethereum block 12,561,528, recorded on 3 June 2021, contains four
 Uniswap v3 swaps across three pools. The following code parses all supported v3 events
@@ -305,51 +310,17 @@ archived metadata calls, and independently checks each swap's amounts and pool
 state using ABI decoding and high-precision decimal arithmetic. Both checks run
 in continuous integration without a node.
 
-\section{Impact}
-Version 1 of dexamine was used to construct data for \emph{Price Discovery in Constant
-Product Markets} \cite{hansson2024} and \emph{Measuring DeFi Price Impact and A New
-Empirical Market Microstructure Model} \cite{hansson2025}. The former studies the
-contribution of trading and liquidity provision to price discovery on Uniswap. The
-latter develops an empirical market microstructure model for decentralized exchanges
-that distinguishes arbitrageurs when analyzing returns and order flow. These
-applications use the parser as a data-construction component; trader classification
-and econometric estimation are performed separately.
-
-Both applications require preserving the sequence of events and their associated
-pool information. Reusing a parser provides consistent treatment of token units,
-liquidity changes, and execution metadata across analyses. It also makes the data
-transformations inspectable independently of the statistical model. The research use
-of version 1 predates the first public release. This paper describes
-version 1.1.0, which adds the public metadata-seeding interface
-used by the offline example.
-
-The same representation supports further studies of liquidity provision, execution
-costs, and price adjustment. Researchers can select different transaction samples or
-apply alternative classifications while retaining the event construction. For example,
-a study of gas costs can aggregate at transaction level before linking costs to a
-set of events, while a study of liquidity can retain separate mint and burn observations.
-
 \section{Conclusions}
 dexamine converts Uniswap v2 and v3 receipt logs into event observations linked to
 Ethereum execution metadata. Its contribution is a reusable implementation of protocol
 interpretation and data joins for empirical research. The library supports both
 individual transactions and batched processing, with offline verification and an
-executable example. Its scope and numerical conventions are explicit: transaction
-discovery, trader attribution, and statistical analysis remain the responsibility of
-the surrounding research workflow.
+executable example.
 
 \section*{Acknowledgements}
 I thank the TrueBlocks \cite{trueblocks} and Erigon \cite{erigon} teams for assistance with node operation
 and indexing, and members of the Flashbots and Uniswap communities for discussions
 of the protocols.
-
-Claude, ChatGPT, and OpenAI Codex were used during later software maintenance
-and manuscript editing. The author reviewed the resulting changes and remains
-responsible for the software and manuscript.
-
-\section*{Funding}
-During preparation of this manuscript, the author received support from
-Handelsbanken Research Foundations through a Browaldh Scholarship.
 
 \section*{Code and data availability}
 The source code for dexamine is available at
@@ -359,10 +330,7 @@ v3.0 or later. This paper describes version
 
 The recorded Ethereum responses used in Section~\ref{sec:example} are included
 under \path{paper/examples/data}. The example scripts, expected output, historical
-metadata, and recorded inputs are distributed with the repository. The
-\href{https://github.com/HanssonMagnus/dexamine/tree/d030990fa797c4b876bed2b7d474649bcfb1358e/paper/examples}{permanent example snapshot}
-contains the files needed to reproduce all four swaps with dexamine 1.1.0.
-They are also supplied as ancillary material with this preprint.
+metadata, and recorded inputs are distributed with the repository.
 
 \bibliographystyle{unsrtnat}
 \bibliography{paper}
