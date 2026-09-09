@@ -37,18 +37,17 @@ code listing as well when evaluating the journal's limit.
 Install the package following the repository README, then run:
 
 ```bash
-python paper/examples/parse_recorded_transaction.py --check
+make -C paper check-example PYTHON=python
 ```
 
 See [examples/README.md](examples/README.md) for the recorded transaction, transport
-replay, supplied metadata and optional live-node execution. The expected output is
-tracked, and CI checks it on every paper build. No live node is needed for the default
-example. The code metadata table identifies version 1.1.0; version 1.0.0 does not
-provide `MetadataResolver.seed`. The v1.1.0 tag must point to this PR's merge commit
-before submission. Until that tag is published, use the working commit-pinned
-command in [installation instructions](../docs/installation.md). The citation and
-changelog dates must match the actual release date if publication of the tag is delayed.
-The example and manuscript are maintained in this directory.
+replay, supplied metadata and optional live-node execution. The four-swap output is
+tracked. CI checks it against the recording and independently verifies the decoded
+metadata, token quantities and pool state on every paper build. No live node is needed
+for the default example. The code metadata table identifies version 1.1.0; version 1.0.0 does not
+provide `MetadataResolver.seed`. The software tag remains unchanged. The manuscript
+links to a separate permanent commit for the revised example and recorded inputs,
+which were added after the v1.1.0 release.
 
 ## Assemble submission files
 
@@ -56,11 +55,15 @@ The example and manuscript are maintained in this directory.
 make -C paper bundle
 ```
 
-This creates `paper/submission/paper.pdf`, `highlights.txt`, `cover-letter.txt` and `latex-source.zip`.
+This creates `paper/submission/paper.pdf`, `highlights.txt`, `cover-letter.txt`,
+`latex-source.zip` and `recorded-example.zip`.
 The source archive includes the manuscript, bibliography, generated reference list,
 and Elsevier class and bibliography style. Other TeX packages come from the TeX
 distribution. Both figure PDFs and their TikZ sources are included. Generated
-submission files are ignored by Git.
+submission files are ignored by Git. The recorded-example archive contains the replay
+and verification scripts, expected output, original RPC responses, historical
+metadata, provenance and repository license. It runs with the v1.1.0 package; see
+the included example README for commands after extraction.
 
 [The paper workflow](../.github/workflows/draft-pdf.yml) checks the example, builds
 the manuscript, and uploads these files as an artifact. The two figures in `tikz/`

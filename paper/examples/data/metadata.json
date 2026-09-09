@@ -1,0 +1,38 @@
+{
+  "block_number": 12561528,
+  "block_hash": "0x748723a837042c61440a86137dd2810443d910e94e9fd0e19ec6eb9f8f6bccec",
+  "erc20": {
+    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48": {
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2": {
+      "symbol": "WETH",
+      "decimals": 18
+    },
+    "0x6B175474E89094C44Da98b954EedeAC495271d0F": {
+      "symbol": "DAI",
+      "decimals": 18
+    }
+  },
+  "v3_pools": {
+    "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640": {
+      "token0": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "factory": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+      "dex_symbol": "UniV3"
+    },
+    "0x6c6Bc977E13Df9b0de53b251522280BB72383700": {
+      "token0": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+      "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "factory": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+      "dex_symbol": "UniV3"
+    },
+    "0x60594a405d53811d3BC4766596EFD80fd545A270": {
+      "token0": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+      "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "factory": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+      "dex_symbol": "UniV3"
+    }
+  }
+}

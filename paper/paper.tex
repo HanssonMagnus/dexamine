@@ -55,7 +55,7 @@ C1 & Current code version & 1.1.0 \\
 C2 & Permanent GitHub link to code/repository used for this code version &
 \url{https://github.com/HanssonMagnus/dexamine/tree/v1.1.0} \\
 \hline
-C3 & Legal Code License & GNU General Public License v3.0 or later \\
+C3 & Legal Code License & GNU General Public License v3.0 \\
 \hline
 C4 & Code versioning system used & Git \\
 \hline
@@ -86,11 +86,11 @@ contracts \cite{adams2020,adams2021}. Their public records provide data for empi
 studies of trading and liquidity provision. However, these records describe contract
 execution and must be interpreted before they become economic observations.
 
-Studies of decentralized exchange market quality examine liquidity and trading costs
+Studies of decentralized exchange markets examine liquidity and trading costs
 as well as prices \cite{lehar2025,barbon2026}. Research on arbitrage and transaction
 ordering also shows why execution sequence and fees matter \cite{daian2020}.
 A transaction's position within a block, execution fees, and the pool state following
-a trade help describe the conditions under which it executed. One transaction can
+a trade help describe the conditions under which it executed. One Ethereum transaction can
 contain several trades or liquidity
 events, each of which must remain distinguishable. A block timestamp alone does not
 recover their execution order.
@@ -100,8 +100,9 @@ a dataset requires protocol-specific decoding, resolution of token metadata, con
 of integer quantities into token units, and joins between events and execution
 metadata. Repeating these transformations across projects creates opportunities for
 inconsistent units, signs, and ordering. dexamine implements them in a reusable Python
-library. The researcher supplies transaction positions, defined by block number and
-transaction index, and receives records for the supported events.
+library.
+The researcher supplies transaction positions, defined by block number and transaction
+index, together with a protocol selection and, optionally, a pool address, and receives records for the supported events.
 
 Related tools address extraction and indexing at different levels. Ethereum ETL exports
 blockchain records and selected token data \cite{ethereumetl}. cryo supports bulk
@@ -118,7 +119,7 @@ their execution metadata. Generic extraction tools still require these transform
 while a subgraph places them within an indexing service. A separate library allows
 researchers to reuse RPC and contract-access facilities while incorporating the
 protocol interpretation into their own pipelines. Transaction discovery, storage,
-and statistical estimation remain independent stages. Version 1 has been used for
+and statistical estimation remain independent stages. Version 1 of dexamine has been used for
 data construction in two studies of decentralized markets \cite{hansson2024,hansson2025}.
 
 \section{Software description}
@@ -181,32 +182,15 @@ logs allows users to recover integer quantities. Gas consumption and fee fields
 apply to the entire transaction and are repeated across its events. They do not
 allocate execution costs to individual trades.
 
-Destination labels compare the transaction's top-level destination against a bundled
-list of Uniswap router and periphery addresses (Figure~\ref{fig:destination}). Other destinations and contract
-creation receive separate labels. This classification does not reconstruct internal
-call paths or establish trader identity, arbitrage, or maximal extractable value.
-Those interpretations require additional evidence.
-
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=0.95\linewidth]{tikz/event_classification/event_classification.pdf}
-\caption{Construction of the \texttt{tx\_to\_type} label from the transaction's
-top-level destination. The \texttt{other\_contract} label covers every remaining
-destination; it does not establish an address's economic role or reconstruct the
-path to a pool.}
-\label{fig:destination}
-\end{figure}
+Destination labels are constructed from the transaction's top-level destination.
+Transactions with no destination are labeled \texttt{contract\_creation};
+destinations matching a bundled list of Uniswap router addresses are
+labeled \texttt{uniswap\_router}; and all remaining destinations are labeled
+\texttt{other\_contract}. This classification does not reconstruct internal call
+paths or establish trader identity, arbitrage, or maximal extractable value.
 
 \subsection{Reproducibility and verification}
 \label{subsec:verification}
-The author wrote the original implementation without generative AI assistance;
-the repository's first commit is dated 25 November 2023. In subsequent development,
-the author used Anthropic Claude and OpenAI ChatGPT to assist with writing tests,
-reviewing code, and updating the repository. The commit history documents the
-development sequence and includes explicit AI attributions for later changes.
-For this article, OpenAI Codex (GPT-6) also assisted with the metadata-seeding API
-and its tests.
-
 Reproducibility depends on the software version, source responses, and resolved
 metadata. Pool and token metadata are queried at the latest block and cached.
 Changes to token metadata can therefore affect repeated runs even when historical
@@ -228,73 +212,109 @@ Python 3.10 through 3.13. Installation instructions, field definitions, limitati
 and contribution guidance are supplied with the code.
 
 \section{Illustrative examples}
-Consider transaction 59 in Ethereum block 12,376,729, which created the Uniswap v3
-USDC/WETH pool with a 0.05\% fee and minted its first liquidity position. The following
-example retrieves its parsed event from an endpoint that retains the required history:
+Transaction 31 in Ethereum block 12,561,528, recorded on 3 June 2021, contains four
+Uniswap v3 swaps across three pools. The following code parses all supported v3 events
+in the transaction without restricting the pool address, then orders the rows by
+their positions in the receipt:
 
+\medskip
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[language=Python]
 from dexamine import DexamineSession
 
 session = DexamineSession.from_node_url(node_url)
 rows = session.parse_position(
-    block_number=12376729,
-    tx_index=59,
+    block_number=12561528,
+    tx_index=31,
     protocol="uniswap_v3",
-    exchange_pair_address=
-        "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640",
+    exchange_pair_address=None,
     output_format="flat",
 )
+rows.sort(key=lambda row: row["receipt_log_index"])
 \end{lstlisting}
 \end{minipage}
+\medskip
 
-The result contains one mint event. Table~\ref{tab:example} gives selected fields;
-token quantities are rounded for display. The mint is the sixth log in the receipt,
-so its receipt position is 5. The USDC quantity is divided by $10^6$ and the WETH
-quantity by $10^{18}$. Their positive signs indicate liquidity supplied to the pool.
-The tick bounds identify the price range of that position. Price and virtual reserves
-are absent because this is a mint record, not a swap record.
+Table~\ref{tab:example} shows the four swaps in receipt order. The token symbols
+follow each pool's token0/token1 ordering. Positive quantities enter the pool;
+negative quantities leave it. USDC amounts are scaled by $10^6$, and DAI and WETH
+amounts by $10^{18}$. The intervening logs include token transfers and other events
+outside the v3 parser's supported set. Their presence explains the gaps between
+receipt positions. The first and last swaps concern the same USDC/WETH pool, but
+remain distinct observations within one transaction.
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
 \centering
 \small
-\begin{tabular}{ll}
+\begin{tabular}{rllrr}
 \toprule
-Field & Value \\
+Receipt position & Token 0 & Token 1 & Amount 0 & Amount 1 \\
 \midrule
-Event type & mint \\
-Token pair & USDC / WETH \\
-Receipt log position & 5 \\
-USDC amount & 2995.507735 \\
-WETH amount & 0.999999999872 \\
-Lower / upper tick & 191150 / 198080 \\
-Transaction gas used & 5,201,405 \\
-Effective gas price & 64 gwei \\
-Destination label & \texttt{uniswap\_router} \\
+3  & USDC & WETH & $-14008.253925$ & $5.000000$ \\
+6  & DAI  & USDC & $-13983.724002$ & $14008.253925$ \\
+10 & DAI  & WETH & $13983.724002$ & $-4.999395$ \\
+13 & USDC & WETH & $-14003.702900$ & $4.999395$ \\
 \bottomrule
 \end{tabular}
-\caption{Selected output from the recorded Uniswap v3 transaction. Token amounts
-are rounded; gas usage refers to the whole transaction.}
+\caption{All four Uniswap v3 swaps in the recorded transaction. Amounts are in token
+units and rounded to six decimal places. Receipt positions are zero-based.}
 \label{tab:example}
 \end{table}
 
-The gas usage includes pool creation and other operations in the transaction and
-must not be interpreted as the cost of minting alone. Similarly, the destination
-label reflects the Uniswap position-manager address; it does not identify the
-transaction's economic purpose. Joining such records across transactions yields
-ordered observations of liquidity provision without assigning those interpretations
-inside the parser.
+Each swap also reports the post-event price, tick, and active liquidity.
+Table~\ref{tab:swap-state} shows the price and virtual reserves derived from that
+state. Prices are expressed as token 0 per token 1: USDC per WETH, DAI per USDC,
+and DAI per WETH for the respective pools. These are marginal prices after the
+swap, rather than ratios of the exchanged amounts. Virtual reserves characterize
+the local trading curve at the reported active liquidity; they are not the pool's
+total token balances. In particular, the large DAI/USDC virtual reserves should not
+be interpreted as assets held by that pool.
 
-The accompanying script
-\href{https://github.com/HanssonMagnus/dexamine/tree/v1.1.0/paper/examples}{\texttt{parse\_recorded\_transaction.py}}
-reproduces the complete output offline using the repository's recorded transaction,
-receipt, and block responses, with explicitly supplied USDC, WETH, and pool metadata.
-It supplies metadata through \texttt{MetadataResolver.\allowbreak seed} and replays
-the public RPC client's \texttt{call} method while exercising the same session, parser, and output
-construction. Unexpected HTTP access is rejected. The committed
-JSON output can be checked with \texttt{--check}; \texttt{--node-url} instead enables
-live retrieval. The example demonstrates the transformation of one historical
-transaction, rather than reproducing either complete research dataset.
+\begin{table}[!htbp]
+\centering
+\small
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+Receipt position & Price & Tick & Virtual reserve 0 & Virtual reserve 1 \\
+\midrule
+3  & 2802.766431 & 196936  & 137336604.311 & 49000.374 \\
+6  & 0.998748    & $-276312$ & 94086697387.618 & 94204630210.412 \\
+10 & 2800.001801 & $-79378$  & 9064867.550 & 3237.451 \\
+13 & 2802.194884 & 196938  & 137322600.609 & 49005.371 \\
+\bottomrule
+\end{tabular}
+\caption{Post-swap pool state for the events in Table~\ref{tab:example}. Prices are
+rounded to six decimal places and virtual reserves to three, in the corresponding
+token units. Active liquidity and the encoded square-root price are retained in
+the complete JSON output.}
+\label{tab:swap-state}
+\end{table}
+
+The explicit sort recovers execution order even when different supported event
+types are grouped by the parser. Pool and token addresses are retained in the
+recorded inputs; symbols provide readable labels, not unique contract identifiers.
+Gas usage of 476,588 and an effective gas price of 40 gwei apply to the whole
+transaction and repeat on every row. Summing those fields across swaps would count
+the same transaction cost four times. The \texttt{other\_contract} destination label
+describes the top-level address match and does not establish trader identity or
+the transaction's economic purpose.
+
+The accompanying
+\href{https://github.com/HanssonMagnus/dexamine/tree/d030990fa797c4b876bed2b7d474649bcfb1358e/paper/examples}{recorded example}
+reproduces the output offline with dexamine 1.1.0. It contains the full transaction,
+receipt, and block responses, the transaction hash and capture provenance, and
+metadata for all three pools and tokens. The metadata was captured separately
+through contract calls at the recorded block, rather than at the latest block.
+The script supplies it through \texttt{MetadataResolver.\allowbreak seed} and
+replays the public RPC client's \texttt{call} method while exercising the session,
+parser, and output construction. Unexpected HTTP access is rejected.
+
+The \texttt{--check} option compares all four rows with the committed JSON;
+\texttt{--node-url} enables live retrieval with normal metadata resolution.
+A separate verification script checks transaction and block identity, decodes the
+archived metadata calls, and independently checks each swap's amounts and pool
+state using ABI decoding and high-precision decimal arithmetic. Both checks run
+in continuous integration without a node.
 
 \section{Impact}
 Version 1 of dexamine was used to construct data for \emph{Price Discovery in Constant
@@ -319,8 +339,6 @@ costs, and price adjustment. Researchers can select different transaction sample
 apply alternative classifications while retaining the event construction. For example,
 a study of gas costs can aggregate at transaction level before linking costs to a
 set of events, while a study of liquidity can retain separate mint and burn observations.
-The available evidence of use is the two research applications cited above. The paper
-does not report adoption counts or commercial deployments.
 
 \section{Conclusions}
 dexamine converts Uniswap v2 and v3 receipt logs into event observations linked to
@@ -351,21 +369,15 @@ relationships that could have appeared to influence the work reported in this pa
 \section*{Data availability}
 The software is publicly available from the GitHub repository identified in the code
 metadata table. Recorded Ethereum responses used in the illustrative example are
-included in the repository under \path{dexamine/tests/test_data/node_responses}.
-The example script and expected output accompany this manuscript. The complete
-datasets of the cited research studies are not distributed with this example.
+included under \path{paper/examples/data}.
+The example scripts, expected output, and recorded inputs also accompany this
+manuscript as a supplementary archive.
 
 \section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
 The original software was written by the author without generative AI assistance.
-Later use of Claude and ChatGPT for software maintenance is described in
-Section~\ref{subsec:verification}.
-OpenAI Codex (GPT-6) assisted with manuscript organization and editing, reference
-checking, revisions to the TikZ figures, the reproducible example, and the publication
-build. The author reviewed
-manuscript drafts and supplied corrections and clarifications. Checks performed
-during revision included comparison with source code and cited sources, offline
-execution of the example, and manuscript compilation. The author remains responsible
-for the manuscript and software.
+Claude and ChatGPT were later used for software maintenance.
+OpenAI Codex (GPT-6) assisted with manuscript organization and editing.
+The author remains responsible for the manuscript and software.
 
 \bibliographystyle{elsarticle-num}
 \bibliography{paper}

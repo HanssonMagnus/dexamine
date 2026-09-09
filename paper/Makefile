@@ -13,6 +13,7 @@ tikz/%.pdf: tikz/%.tex
 
 check-example:
 	$(PYTHON) examples/parse_recorded_transaction.py --check
+	$(PYTHON) examples/verify_recording.py
 
 count:
 	texcount -inc -sum paper.tex
