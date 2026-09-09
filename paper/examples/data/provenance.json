@@ -1,0 +1,10 @@
+{
+  "chain_id": 1,
+  "block_number": 12561528,
+  "transaction_index": 31,
+  "transaction_hash": "0xdc9d24ed8c3f62667e2c124f7e8b7b9f2dea1cc668589c36440c504f37421bc2",
+  "block_hash": "0x748723a837042c61440a86137dd2810443d910e94e9fd0e19ec6eb9f8f6bccec",
+  "block_timestamp": "2021-06-03T12:21:50+00:00",
+  "retrieved_at_utc": "2026-09-09T07:55:05.228852+00:00",
+  "metadata_block_number": 12561528
+}

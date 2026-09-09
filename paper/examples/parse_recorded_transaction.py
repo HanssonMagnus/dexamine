@@ -11,31 +11,24 @@ from unittest.mock import patch
 from dexamine import DexamineSession
 from dexamine.metadata import Erc20Metadata, V3PoolMetadata
 from dexamine.rpc.json_rpc_client import JsonRpcClient
-from dexamine.shared import constants
 
-BLOCK = 12_376_729
-TX_INDEX = 59
-POOL = "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640"
-FIXTURES = (
-    Path(__file__).resolve().parents[2] / "dexamine/tests/test_data/node_responses"
-)
+BLOCK = 12_561_528
+TX_INDEX = 31
+FIXTURES = Path(__file__).resolve().parent / "data"
 
 
 def parse_example(node_url=None):
-    """Parse a real v3 mint; replay only the transport and contract metadata offline."""
+    """Parse all supported v3 events, without a pool filter, in receipt order."""
     session = DexamineSession.from_node_url(node_url or "http://unused.invalid")
     with ExitStack() as stack:
         if node_url is None:
             responses = {
-                "eth_getTransactionByBlockNumberAndIndex": json.loads(
-                    (FIXTURES / "tx_data.json").read_text()
-                ),
-                "eth_getTransactionReceipt": json.loads(
-                    (FIXTURES / "receipt_data.json").read_text()
-                ),
-                "eth_getBlockByNumber": json.loads(
-                    (FIXTURES / "block_data.json").read_text()
-                ),
+                method: json.loads((FIXTURES / filename).read_text())
+                for method, filename in (
+                    ("eth_getTransactionByBlockNumberAndIndex", "transaction.json"),
+                    ("eth_getTransactionReceipt", "receipt.json"),
+                    ("eth_getBlockByNumber", "block.json"),
+                )
             }
             tx_hash = responses["eth_getTransactionReceipt"]["result"][
                 "transactionHash"
@@ -59,26 +52,27 @@ def parse_example(node_url=None):
                     side_effect=RuntimeError("Offline example attempted HTTP"),
                 )
             )
+            metadata = json.loads((FIXTURES / "metadata.json").read_text())
             session.metadata.seed(
                 erc20={
-                    constants.USDC_TOKEN_ADDRESS: Erc20Metadata("USDC", 6),
-                    constants.WETH_TOKEN_ADDRESS: Erc20Metadata("WETH", 18),
+                    address: Erc20Metadata(**values)
+                    for address, values in metadata["erc20"].items()
                 },
                 v3_pools={
-                    POOL: V3PoolMetadata(
-                        constants.USDC_TOKEN_ADDRESS,
-                        constants.WETH_TOKEN_ADDRESS,
-                        "UniV3",
+                    address: V3PoolMetadata(
+                        values["token0"], values["token1"], values["dex_symbol"]
                     )
+                    for address, values in metadata["v3_pools"].items()
                 },
             )
-        return session.parse_position(
+        rows = session.parse_position(
             block_number=BLOCK,
             tx_index=TX_INDEX,
             protocol="uniswap_v3",
-            exchange_pair_address=POOL,
+            exchange_pair_address=None,
             output_format="flat",
         )
+    return sorted(rows, key=lambda row: row["receipt_log_index"])
 
 
 def main():
@@ -96,7 +90,7 @@ def main():
         expected = Path(__file__).with_name("expected_output.json").read_text()
         if json.loads(expected) != rows:
             raise SystemExit("Example output differs from expected_output.json")
-        print("Recorded transaction matches expected_output.json")
+        print("Four recorded swaps match expected_output.json")
     else:
         print(rendered, end="")
 
