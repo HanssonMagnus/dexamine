@@ -55,7 +55,7 @@ C1 & Current code version & 1.1.0 \\
 C2 & Permanent GitHub link to code/repository used for this code version &
 \url{https://github.com/HanssonMagnus/dexamine/tree/v1.1.0} \\
 \hline
-C3 & Legal Code License & GNU General Public License v3.0 or later \\
+C3 & Legal Code License & GNU General Public License v3.0 \\
 \hline
 C4 & Code versioning system used & Git \\
 \hline
@@ -86,11 +86,11 @@ contracts \cite{adams2020,adams2021}. Their public records provide data for empi
 studies of trading and liquidity provision. However, these records describe contract
 execution and must be interpreted before they become economic observations.
 
-Studies of decentralized exchange market quality examine liquidity and trading costs
+Studies of decentralized exchange markets examine liquidity and trading costs
 as well as prices \cite{lehar2025,barbon2026}. Research on arbitrage and transaction
 ordering also shows why execution sequence and fees matter \cite{daian2020}.
 A transaction's position within a block, execution fees, and the pool state following
-a trade help describe the conditions under which it executed. One transaction can
+a trade help describe the conditions under which it executed. One Ethereum transaction can
 contain several trades or liquidity
 events, each of which must remain distinguishable. A block timestamp alone does not
 recover their execution order.
@@ -100,8 +100,9 @@ a dataset requires protocol-specific decoding, resolution of token metadata, con
 of integer quantities into token units, and joins between events and execution
 metadata. Repeating these transformations across projects creates opportunities for
 inconsistent units, signs, and ordering. dexamine implements them in a reusable Python
-library. The researcher supplies transaction positions, defined by block number and
-transaction index, and receives records for the supported events.
+library.
+The researcher supplies transaction positions, defined by block number and transaction
+index, together with a protocol selection and, optionally, a pool address, and receives records for the supported events.
 
 Related tools address extraction and indexing at different levels. Ethereum ETL exports
 blockchain records and selected token data \cite{ethereumetl}. cryo supports bulk
@@ -118,7 +119,7 @@ their execution metadata. Generic extraction tools still require these transform
 while a subgraph places them within an indexing service. A separate library allows
 researchers to reuse RPC and contract-access facilities while incorporating the
 protocol interpretation into their own pipelines. Transaction discovery, storage,
-and statistical estimation remain independent stages. Version 1 has been used for
+and statistical estimation remain independent stages. Version 1 of dexamine has been used for
 data construction in two studies of decentralized markets \cite{hansson2024,hansson2025}.
 
 \section{Software description}
@@ -181,32 +182,15 @@ logs allows users to recover integer quantities. Gas consumption and fee fields
 apply to the entire transaction and are repeated across its events. They do not
 allocate execution costs to individual trades.
 
-Destination labels compare the transaction's top-level destination against a bundled
-list of Uniswap router and periphery addresses (Figure~\ref{fig:destination}). Other destinations and contract
-creation receive separate labels. This classification does not reconstruct internal
-call paths or establish trader identity, arbitrage, or maximal extractable value.
-Those interpretations require additional evidence.
-
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=0.95\linewidth]{tikz/event_classification/event_classification.pdf}
-\caption{Construction of the \texttt{tx\_to\_type} label from the transaction's
-top-level destination. The \texttt{other\_contract} label covers every remaining
-destination; it does not establish an address's economic role or reconstruct the
-path to a pool.}
-\label{fig:destination}
-\end{figure}
+Destination labels are constructed from the transaction's top-level destination.
+Transactions with no destination are labeled \texttt{contract\_creation};
+destinations matching a bundled list of Uniswap router addresses are
+labeled \texttt{uniswap\_router}; and all remaining destinations are labeled
+\texttt{other\_contract}. This classification does not reconstruct internal call
+paths or establish trader identity, arbitrage, or maximal extractable value.
 
 \subsection{Reproducibility and verification}
 \label{subsec:verification}
-The author wrote the original implementation without generative AI assistance;
-the repository's first commit is dated 25 November 2023. In subsequent development,
-the author used Anthropic Claude and OpenAI ChatGPT to assist with writing tests,
-reviewing code, and updating the repository. The commit history documents the
-development sequence and includes explicit AI attributions for later changes.
-For this article, OpenAI Codex (GPT-6) also assisted with the metadata-seeding API
-and its tests.
-
 Reproducibility depends on the software version, source responses, and resolved
 metadata. Pool and token metadata are queried at the latest block and cached.
 Changes to token metadata can therefore affect repeated runs even when historical
@@ -229,8 +213,7 @@ and contribution guidance are supplied with the code.
 
 \section{Illustrative examples}
 Transaction 31 in Ethereum block 12,561,528, recorded on 3 June 2021, contains four
-Uniswap v3 swaps across three pools. It was selected from observations used in the
-author's price-impact research. The following code parses all supported v3 events
+Uniswap v3 swaps across three pools. The following code parses all supported v3 events
 in the transaction without restricting the pool address, then orders the rows by
 their positions in the receipt:
 
@@ -331,8 +314,7 @@ The \texttt{--check} option compares all four rows with the committed JSON;
 A separate verification script checks transaction and block identity, decodes the
 archived metadata calls, and independently checks each swap's amounts and pool
 state using ABI decoding and high-precision decimal arithmetic. Both checks run
-in continuous integration without a node. The example reproduces one historical
-transaction, rather than either complete research dataset.
+in continuous integration without a node.
 
 \section{Impact}
 Version 1 of dexamine was used to construct data for \emph{Price Discovery in Constant
@@ -357,8 +339,6 @@ costs, and price adjustment. Researchers can select different transaction sample
 apply alternative classifications while retaining the event construction. For example,
 a study of gas costs can aggregate at transaction level before linking costs to a
 set of events, while a study of liquidity can retain separate mint and burn observations.
-The available evidence of use is the two research applications cited above. The paper
-does not report adoption counts or commercial deployments.
 
 \section{Conclusions}
 dexamine converts Uniswap v2 and v3 receipt logs into event observations linked to
@@ -389,22 +369,15 @@ relationships that could have appeared to influence the work reported in this pa
 \section*{Data availability}
 The software is publicly available from the GitHub repository identified in the code
 metadata table. Recorded Ethereum responses used in the illustrative example are
-included under \path{paper/examples/data} in the recorded example linked above.
+included under \path{paper/examples/data}.
 The example scripts, expected output, and recorded inputs also accompany this
-manuscript as a supplementary archive. The complete
-datasets of the cited research studies are not distributed with this example.
+manuscript as a supplementary archive.
 
 \section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
 The original software was written by the author without generative AI assistance.
-Later use of Claude and ChatGPT for software maintenance is described in
-Section~\ref{subsec:verification}.
-OpenAI Codex (GPT-6) assisted with manuscript organization and editing, reference
-checking, revisions to the TikZ figures, the reproducible example, and the publication
-build. The author reviewed
-manuscript drafts and supplied corrections and clarifications. Checks performed
-during revision included comparison with source code and cited sources, offline
-execution of the example, and manuscript compilation. The author remains responsible
-for the manuscript and software.
+Claude and ChatGPT were later used for software maintenance.
+OpenAI Codex (GPT-6) assisted with manuscript organization and editing.
+The author remains responsible for the manuscript and software.
 
 \bibliographystyle{elsarticle-num}
 \bibliography{paper}
