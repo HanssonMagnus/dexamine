@@ -144,7 +144,7 @@ Two behaviours are worth knowing before you rely on the numbers:
   - [`resources/`](./dexamine/resources/) — ABIs.
   - [`tests/`](./dexamine/tests/) — offline unit tests and opt-in integration tests.
 - [`docs/`](./docs/docs.md) — documentation.
-- [`paper/`](./paper/) — the accompanying SoftwareX manuscript.
+- [`paper/`](./paper/) — the accompanying software preprint.
 
 ## Development
 

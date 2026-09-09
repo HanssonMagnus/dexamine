@@ -89,10 +89,10 @@ The endpoint must retain the requested transaction, receipt and block. Live mode
 uses dexamine's normal metadata resolution at the latest block, so metadata changes
 could affect its output; offline mode uses the recorded historical metadata.
 
-## Submission archive
+## Preprint ancillary archive
 
 `make -C paper bundle` includes this directory in `recorded-example.zip` alongside
-the repository license. After extracting it, install dexamine 1.1.0 with
+the repository license. The arXiv source archive also contains this ZIP under `anc/`. After extracting it, install dexamine 1.1.0 with
 `python -m pip install git+https://github.com/HanssonMagnus/dexamine.git@v1.1.0`, then run
 `python examples/parse_recorded_transaction.py --check` and
 `python examples/verify_recording.py` from the extracted directory.

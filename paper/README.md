@@ -1,71 +1,98 @@
-# SoftwareX manuscript
+# arXiv software preprint
 
-`paper.tex` is the editable manuscript source for an **Original Software Publication**
-in SoftwareX. `paper.pdf` is the compiled manuscript, and `paper.bib` holds its references.
-The source follows Elsevier's [official LaTeX template](https://legacyfileshare.elsevier.com/promis_misc/softwarex-osp-template.tex)
-and [Word template, version 6, March 2026](https://legacyfileshare.elsevier.com/promis_misc/softwarex-osp-template.docx).
-The template specifies five main sections, a code metadata table, about 100 abstract
-words, at most six keywords, a 4,000-word limit and at most six figures. Its main-text
-page target is six pages, excluding metadata, tables, figures and references.
+`paper.tex` is the editable manuscript source, `paper.pdf` is the compiled preprint,
+and `paper.bib` holds its references. The manuscript uses the standard LaTeX
+`article` class with 11-point text, A4 paper, one-inch margins, and numbered
+references. The title-page affiliations identify where the work was carried out.
 
-Both official templates, checked on 8 September 2026, use metadata rows **C1–C8**
-and do not include a reproducible-capsule row. This manuscript
-preserves that numbering. Its offline example is documented below; it is not a
-separately hosted reproducible capsule.
+## Build and preview
 
-The root `Licence.txt` duplicates `LICENSE` because the SoftwareX template explicitly
-requires that filename. `LICENSE` is authoritative; keep `Licence.txt` byte-identical
-when updating it (`cp LICENSE Licence.txt`).
-
-## Build
-
-Install a TeX distribution with `elsarticle`, `latexmk`, `xurl`, `microtype`, `listings`,
-`tabularx`, `booktabs`, `standalone` and TikZ. On Ubuntu:
+Install a TeX distribution with `latexmk`, `lmodern`, `geometry`, `authblk`, `natbib`, `xurl`,
+`microtype`, `listings`, `booktabs`, `standalone` and TikZ. On Ubuntu:
 
 ```bash
-sudo apt-get install latexmk texlive-publishers texlive-latex-extra texlive-fonts-recommended texlive-extra-utils
+sudo apt-get install latexmk lmodern texlive-latex-extra texlive-fonts-recommended texlive-extra-utils
 make -C paper
 make -C paper count
 ```
 
-The PDF uses the template's preprint layout and numbered references. The word count
-excludes the code metadata table and bibliography; inspect the abstract, captions and
-code listing as well when evaluating the journal's limit.
+Open `paper/paper.pdf` to inspect the result. For automatic recompilation on save:
+
+```bash
+cd paper
+latexmk -pdf -pvc -interaction=nonstopmode paper.tex
+```
+
+Press Ctrl+C to stop watching. The build always invokes `latexmk`, which checks
+whether the source or generated bibliography needs rebuilding. This also works in
+a fresh checkout containing the tracked PDF but no generated `.bbl` file.
+When switching from the old Elsevier layout, run `cd paper && latexmk -c paper.tex`
+once before building if a leftover `.aux` file reports an undefined `\emailauthor`.
 
 ## Reproduce the example
 
-Install the package following the repository README, then run:
+Install dexamine 1.1.0 following the [installation instructions](../docs/installation.md),
+then run from the repository root:
 
 ```bash
 make -C paper check-example PYTHON=python
 ```
 
 See [examples/README.md](examples/README.md) for the recorded transaction, transport
-replay, supplied metadata and optional live-node execution. The four-swap output is
-tracked. CI checks it against the recording and independently verifies the decoded
-metadata, token quantities and pool state on every paper build. No live node is needed
-for the default example. The code metadata table identifies version 1.1.0; version 1.0.0 does not
-provide `MetadataResolver.seed`. The software tag remains unchanged. The manuscript
-links to a separate permanent commit for the revised example and recorded inputs,
-which were added after the v1.1.0 release.
+replay, historical metadata and optional live-node execution. The four-swap output
+is tracked. CI checks it against the recording and independently verifies the
+metadata, token quantities and pool state without a node.
 
-## Assemble submission files
+The paper describes version 1.1.0, which provides `MetadataResolver.seed`. The
+software tag remains unchanged. The manuscript links to a separate permanent commit
+for the revised example and recorded inputs, added after the v1.1.0 release.
+
+## Prepare the arXiv upload
 
 ```bash
 make -C paper bundle
 ```
 
-This creates `paper/submission/paper.pdf`, `highlights.txt`, `cover-letter.txt`,
-`latex-source.zip` and `recorded-example.zip`.
-The source archive includes the manuscript, bibliography, generated reference list,
-and Elsevier class and bibliography style. Other TeX packages come from the TeX
-distribution. Both figure PDFs and their TikZ sources are included. Generated
-submission files are ignored by Git. The recorded-example archive contains the replay
-and verification scripts, expected output, original RPC responses, historical
-metadata, provenance and repository license. It runs with the v1.1.0 package; see
-the included example README for commands after extraction.
+The files to use in `paper/submission/` are:
 
-[The paper workflow](../.github/workflows/draft-pdf.yml) checks the example, builds
-the manuscript, and uploads these files as an artifact. The two figures in `tikz/`
-show the session architecture and destination-label decision rules. `make` rebuilds
-their PDFs when their sources change; the adjacent PNGs are preview exports.
+- `paper.pdf`: the preprint for local inspection.
+- `arxiv-source.zip`: the source archive to upload to arXiv.
+- `recorded-example.zip`: a separate copy of the reproducible example archive.
+
+The arXiv archive contains `paper.tex`, `paper.bib`, the generated `paper.bbl`, and
+only the architecture figure PDF used by the manuscript. It also includes
+`anc/recorded-example.zip`, containing the scripts, expected output, original RPC
+responses, historical metadata, provenance and repository license. Standard LaTeX
+packages and bibliography styles come from the TeX distribution. The compiled
+manuscript PDF, unused figures and publisher submission files are excluded from the
+source archive.
+
+These choices follow arXiv's [TeX submission guidance](https://info.arxiv.org/help/submit_tex.html)
+and [ancillary-file instructions](https://info.arxiv.org/help/ancillary_files.html).
+Select `paper.tex` as the main file and PDFLaTeX as the processor when submitting.
+Inspect the PDF generated by arXiv before approving the submission. This repository
+prepares the files; it does not submit or announce the paper.
+
+To check the archive independently, extract it into an empty directory and run
+`pdflatex -interaction=nonstopmode -halt-on-error paper.tex` twice there. The included
+`.bbl` provides the references without needing to run BibTeX. To rebuild references
+after editing the source, use `latexmk -pdf paper.tex` instead. Extract the ancillary
+example archive and follow its README to reproduce the four swaps.
+
+[The paper workflow](../.github/workflows/draft-pdf.yml) runs the offline checks,
+builds the preprint and source archive, then compiles and runs the extracted files.
+It uploads the three generated files as the `arxiv-preprint` artifact. Generated
+submission files are ignored by Git. If an older local build left SoftwareX files
+in `paper/submission/`, use only the three files listed above.
+
+## Historical files
+
+The architecture figure's editable TikZ source is in `tikz/flow_chart/`; `make`
+rebuilds its PDF when the source changes. The destination-label diagram in
+`tikz/event_classification/` is retained as an unused asset and is not included in
+the preprint upload. The former SoftwareX manuscript and submission materials
+remain available in Git history.
+
+The root `Licence.txt` is retained for compatibility with the earlier SoftwareX
+preparation and duplicates `LICENSE`. `LICENSE` is authoritative; keep the two
+files identical when updating the license.
