@@ -1,12 +1,12 @@
 .PHONY: all check-example count bundle
 
 PYTHON ?= python3
-FIGURES = tikz/flow_chart/flow_chart.pdf tikz/event_classification/event_classification.pdf
+FIGURES = tikz/flow_chart/flow_chart.pdf
 
-all: paper.pdf
-
-paper.pdf: paper.tex paper.bib $(FIGURES)
+all: $(FIGURES)
 	latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+
+paper.pdf: all
 
 tikz/%.pdf: tikz/%.tex
 	latexmk -cd -pdf -interaction=nonstopmode -halt-on-error $<

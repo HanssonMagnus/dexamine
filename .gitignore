@@ -176,6 +176,6 @@ cython_debug/
 # Legacy manuscript XML output
 paper/jats/
 
-# SoftwareX build and submission outputs
+# Manuscript build and submission outputs
 *.spl
 paper/submission/

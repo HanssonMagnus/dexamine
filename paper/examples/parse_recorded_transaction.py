@@ -1,4 +1,4 @@
-"""Reproduce the SoftwareX example, offline by default, or with --node-url URL."""
+"""Reproduce the paper example, offline by default, or with --node-url URL."""
 
 from __future__ import annotations
 

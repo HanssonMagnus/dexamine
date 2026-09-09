@@ -1,30 +1,39 @@
-% Adapted from the official SoftwareX Original Software Publication template,
-% Elsevier, March 2026. Source: https://legacyfileshare.elsevier.com/promis_misc/softwarex-osp-template.tex
-% The template is distributed under LPPL 1.2 or later.
-\documentclass[preprint,12pt,a4paper]{elsarticle}
-\usepackage{amssymb}
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{authblk}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{microtype}
-\usepackage{tabularx}
 \usepackage{listings}
+\usepackage[numbers,sort&compress]{natbib}
 \usepackage{xurl}
-\usepackage[hidelinks,pdfusetitle=false]{hyperref}
+\usepackage[hidelinks]{hyperref}
 \hypersetup{pdftitle={dexamine: A Python package for Uniswap event data on Ethereum},
   pdfauthor={Magnus Hansson}}
 \setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
 \lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible,
   keepspaces=true,showstringspaces=false,frame=single}
-\journal{SoftwareX}
+\renewcommand{\Affilfont}{\small}
+
+\title{\texttt{dexamine}: A Python package for Uniswap event data on Ethereum}
+\author[1,2]{Magnus Hansson}
+\affil[1]{Stockholm University, Stockholm, Sweden}
+\affil[2]{Swedish House of Finance, Stockholm, Sweden}
+\date{}
 
 \begin{document}
-\begin{frontmatter}
-\title{dexamine: A Python package for Uniswap event data on Ethereum}
-\author[su,shf]{Magnus Hansson\corref{cor1}}
-\ead{hansson.carl.magnus@gmail.com}
-\ead[url]{https://orcid.org/0009-0004-4318-5145}
-\cortext[cor1]{Corresponding author.}
-\address[su]{Stockholm University, Stockholm, Sweden}
-\address[shf]{Swedish House of Finance, Stockholm, Sweden}
+\maketitle
+\vspace{-2em}
+\begin{center}
+\small
+\href{mailto:hansson.carl.magnus@gmail.com}{\nolinkurl{hansson.carl.magnus@gmail.com}}\\
+ORCID: \url{https://orcid.org/0009-0004-4318-5145}\\
+\textit{Affiliations refer to the period when the work was carried out.}
+\end{center}
+
 \begin{abstract}
 Decentralized exchanges record trading and liquidity provision on public blockchains,
 but empirical analysis requires interpreting these records and linking them to
@@ -32,51 +41,13 @@ execution metadata. dexamine is a Python package that parses Uniswap v2 and v3 e
 on Ethereum. It converts transaction receipt logs into observations of trades and
 liquidity changes, with token quantities, pool state, transaction order, and gas
 information. The package separates data retrieval, contract metadata, protocol
-interpretation, and output construction. A recorded transaction illustrates reproducible
-parsing without a live node. Version 1 has supported data construction for two studies
-of price discovery and price impact in decentralized markets.
+interpretation, and output construction. The repository provides recorded Ethereum
+responses and an offline reproducible example, and version 1 has been used to
+construct data for two empirical studies of decentralized markets.
 \end{abstract}
-\begin{keyword}
-Ethereum \sep Uniswap \sep Decentralized finance \sep Market microstructure \sep Research software
-\end{keyword}
-\end{frontmatter}
-\clearpage
 
-%TC:ignore
-\section*{Required Metadata}
-\begin{table}[!ht]
-\small
-\begin{tabularx}{\textwidth}{|l|p{4.5cm}|X|}
-\hline
-\textbf{Nr.} & \textbf{Code metadata description} & \textbf{Metadata} \\
-\hline
-C1 & Current code version & 1.1.0 \\
-\hline
-C2 & Permanent GitHub link to code/repository used for this code version &
-\url{https://github.com/HanssonMagnus/dexamine/tree/v1.1.0} \\
-\hline
-C3 & Legal Code License & GNU General Public License v3.0 or later \\
-\hline
-C4 & Code versioning system used & Git \\
-\hline
-C5 & Software code languages, tools, and services used & Python; Ethereum JSON-RPC \\
-\hline
-C6 & Compilation requirements, operating environments \& dependencies &
-Verified in continuous integration on Linux with Python 3.10, 3.11, 3.12, and 3.13.
-Requires Python 3.10 or newer, web3 6.15.0 or newer, and requests 2.31.0 or newer.
-An Ethereum endpoint retaining the requested blocks and receipts is needed for live parsing.
-No compilation of dexamine is required. \\
-\hline
-C7 & If available Link to developer documentation/manual &
-\url{https://github.com/HanssonMagnus/dexamine/blob/v1.1.0/docs/docs.md} \\
-\hline
-C8 & Support email for questions & \nolinkurl{hansson.carl.magnus@gmail.com} \\
-\hline
-\end{tabularx}
-\caption{Code metadata.}
-\end{table}
-\clearpage
-%TC:endignore
+\noindent\textbf{Keywords:} Ethereum; Uniswap; decentralized finance; market
+microstructure; research software
 
 \section{Motivation and significance}
 Decentralized exchanges allow users to trade digital assets through programs executed
@@ -122,7 +93,23 @@ protocol interpretation into their own pipelines. Transaction discovery, storage
 and statistical estimation remain independent stages. Version 1 of dexamine has been used for
 data construction in two studies of decentralized markets \cite{hansson2024,hansson2025}.
 
-\section{Software description}
+The software, documentation, tests, and reproducible examples are available at
+\url{https://github.com/HanssonMagnus/dexamine}.
+
+\section{Software design and implementation}
+\subsection{Installation and usage}
+dexamine can be installed directly from the source repository:
+
+\begin{lstlisting}[language=bash]
+python -m pip install git+https://github.com/HanssonMagnus/dexamine.git@v1.1.0
+\end{lstlisting}
+
+The package requires Python 3.10 or newer, web3.py 6.15.0 or newer, and Requests
+2.31.0 or newer. Live parsing requires access to an Ethereum JSON-RPC endpoint
+retaining the requested historical blocks and transaction receipts and supporting
+contract metadata calls. The recorded example in Section~\ref{sec:example} runs
+offline without a node.
+
 \subsection{Software architecture}
 Figure~\ref{fig:architecture} shows the separation of JSON-RPC retrieval, contract
 metadata resolution, protocol parsers, and output construction. A reusable session loads contract interfaces
@@ -140,9 +127,9 @@ one session per worker. Processing rates depend on endpoint latency and capacity
 batch size, and metadata cache misses; no throughput advantage over other extraction
 tools is claimed here.
 
-\begin{figure}[!htbp]
+\begin{figure}[!ht]
 \centering
-\includegraphics[width=\linewidth]{tikz/flow_chart/flow_chart.pdf}
+\includegraphics[width=0.85\linewidth]{tikz/flow_chart/flow_chart.pdf}
 \caption{Data flow within a session. The RPC client retrieves execution records;
 the metadata resolver supplies pool and token information. Protocol parsers decode
 receipt logs, and the output layer joins the resulting events to transaction and
@@ -212,6 +199,7 @@ Python 3.10 through 3.13. Installation instructions, field definitions, limitati
 and contribution guidance are supplied with the code.
 
 \section{Illustrative examples}
+\label{sec:example}
 Transaction 31 in Ethereum block 12,561,528, recorded on 3 June 2021, contains four
 Uniswap v3 swaps across three pools. The following code parses all supported v3 events
 in the transaction without restricting the pool address, then orders the rows by
@@ -309,8 +297,8 @@ The script supplies it through \texttt{MetadataResolver.\allowbreak seed} and
 replays the public RPC client's \texttt{call} method while exercising the session,
 parser, and output construction. Unexpected HTTP access is rejected.
 
-The \texttt{--check} option compares all four rows with the committed JSON;
-\texttt{--node-url} enables live retrieval with normal metadata resolution.
+The \verb|--check| option compares all four rows with the committed JSON;
+\verb|--node-url| enables live retrieval with normal metadata resolution.
 A separate verification script checks transaction and block identity, decodes the
 archived metadata calls, and independently checks each swap's amounts and pool
 state using ABI decoding and high-precision decimal arithmetic. Both checks run
@@ -330,8 +318,8 @@ Both applications require preserving the sequence of events and their associated
 pool information. Reusing a parser provides consistent treatment of token units,
 liquidity changes, and execution metadata across analyses. It also makes the data
 transformations inspectable independently of the statistical model. The research use
-of version 1 predates the first public release. The code metadata identifies the
-1.1.0 release described here, which adds the public metadata-seeding interface
+of version 1 predates the first public release. This paper describes
+version 1.1.0, which adds the public metadata-seeding interface
 used by the offline example.
 
 The same representation supports further studies of liquidity provision, execution
@@ -354,31 +342,27 @@ I thank the TrueBlocks \cite{trueblocks} and Erigon \cite{erigon} teams for assi
 and indexing, and members of the Flashbots and Uniswap communities for discussions
 of the protocols.
 
+Claude, ChatGPT, and OpenAI Codex were used during later software maintenance
+and manuscript editing. The author reviewed the resulting changes and remains
+responsible for the software and manuscript.
+
 \section*{Funding}
 During preparation of this manuscript, the author received support from
 Handelsbanken Research Foundations through a Browaldh Scholarship.
 
-\section*{CRediT authorship contribution statement}
-Magnus Hansson: Conceptualization, Methodology, Software, Validation, Writing (original
-draft), Writing (review and editing).
+\section*{Code and data availability}
+The source code for dexamine is available at
+\url{https://github.com/HanssonMagnus/dexamine} under the GNU General Public License
+v3.0 or later. This paper describes version
+\href{https://github.com/HanssonMagnus/dexamine/tree/v1.1.0}{\texttt{v1.1.0}}.
 
-\section*{Declaration of competing interest}
-The author declares that he has no known competing financial interests or personal
-relationships that could have appeared to influence the work reported in this paper.
+The recorded Ethereum responses used in Section~\ref{sec:example} are included
+under \path{paper/examples/data}. The example scripts, expected output, historical
+metadata, and recorded inputs are distributed with the repository. The
+\href{https://github.com/HanssonMagnus/dexamine/tree/d030990fa797c4b876bed2b7d474649bcfb1358e/paper/examples}{permanent example snapshot}
+contains the files needed to reproduce all four swaps with dexamine 1.1.0.
+They are also supplied as ancillary material with this preprint.
 
-\section*{Data availability}
-The software is publicly available from the GitHub repository identified in the code
-metadata table. Recorded Ethereum responses used in the illustrative example are
-included under \path{paper/examples/data}.
-The example scripts, expected output, and recorded inputs also accompany this
-manuscript as a supplementary archive.
-
-\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
-The original software was written by the author without generative AI assistance.
-Claude and ChatGPT were later used for software maintenance.
-OpenAI Codex (GPT-6) assisted with manuscript organization and editing.
-The author reviewed and edited the content and takes full responsibility for the manuscript and software.
-
-\bibliographystyle{elsarticle-num}
+\bibliographystyle{unsrtnat}
 \bibliography{paper}
 \end{document}
