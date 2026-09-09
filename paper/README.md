@@ -7,11 +7,11 @@ references. The title-page affiliations identify where the work was carried out.
 
 ## Build and preview
 
-Install a TeX distribution with `latexmk`, `geometry`, `authblk`, `natbib`, `xurl`,
+Install a TeX distribution with `latexmk`, `lmodern`, `geometry`, `authblk`, `natbib`, `xurl`,
 `microtype`, `listings`, `booktabs`, `standalone` and TikZ. On Ubuntu:
 
 ```bash
-sudo apt-get install latexmk texlive-latex-extra texlive-fonts-recommended texlive-extra-utils
+sudo apt-get install latexmk lmodern texlive-latex-extra texlive-fonts-recommended texlive-extra-utils
 make -C paper
 make -C paper count
 ```
