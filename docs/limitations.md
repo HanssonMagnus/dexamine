@@ -17,6 +17,12 @@ relying on the output.
 
 ## Out of scope
 
+- **Uniswap v4.** Not supported, and not planned. v2 and v3 give every pool its own
+  contract, so an event's pool is its emitting address. v4 routes all pools through a
+  single `PoolManager`, identifying them by a `PoolId` in the event data, and adds hooks
+  and flash accounting. That is a different parser and a different metadata model, not
+  an extension of this one. See [Uniswap v4 transactions](#uniswap-v4-transactions)
+  below for what `dexamine` does when it meets one.
 - **Other decentralized exchanges and other chains.** Adding them would mean a second
   set of event signatures, decoding rules and pool-state conventions per protocol. A
   narrow, well-tested parser is more useful than a broad, shallow one.
@@ -51,6 +57,26 @@ fee-on-transfer designs — can make both legs non-zero, in which case the net a
 reflects the token's own mechanics as well as the trade. Understand the ERC-20 you are
 analysing. See
 [`parsers/uniswap_v2.md`](./parsers/uniswap_v2.md#notes-on-uniswap-v2-swaps-net-amounts).
+
+### Uniswap v4 transactions
+
+A transaction that swaps through Uniswap v4 produces **no rows**, because the v2 and v3
+parsers match on those protocols' event signatures and v4's `PoolManager` emits its own.
+The transaction is not rejected, and no error is raised; the result simply contains no
+events.
+
+This interacts with the routing classification in a way worth understanding. The
+universal router that serves v4
+(`0x66a9893cC07D91D95644AEDD05D03f95e1dBA8Af`) is a canonical Uniswap deployment, so it
+is in `constants.uniswap_address_list` and `parse_to_type` classifies it as
+`uniswap_router` — correctly, since `tx_to_type` describes the transaction's destination
+address, not the pools it touched. But because a v4 transaction produces no events, no
+row is emitted to carry that label. What you observe is simply an empty result.
+
+The practical consequence: **an empty result is not evidence that a transaction did no
+Uniswap trading.** If you are counting Uniswap activity over recent blocks, transactions
+that route to v4 will be silently absent. Check the destination address yourself if that
+distinction matters to your analysis.
 
 ### Uniswap v3 virtual reserves at zero liquidity
 

@@ -4,6 +4,12 @@ Thank you for your interest in contributing. Contributions of all kinds are welc
 bug reports, documentation improvements, new tests, parser fixes, and research
 applications that stretch the package in new directions.
 
+**Before you invest time**: `dexamine` is finished software with a fixed scope, and the
+author no longer works in this area. Bug reports and fixes within the documented scope
+are welcome and will be looked at, though possibly slowly. Proposals that widen the
+scope are likely to be declined — see below. Forking is a perfectly good outcome, and
+the license and test suite both support it.
+
 ## Getting help and reporting problems
 
 - **Questions and support**: open a
@@ -28,6 +34,9 @@ that would broaden it -- other decentralized exchanges, other chains, mempool or
 calldata parsing, or bundled analysis and plotting -- are likely to be declined, not
 because they are uninteresting, but because a narrow, well-tested parser is more useful
 than a broad, shallow one. Open an issue to discuss before writing such code.
+
+This includes **Uniswap v4**: its singleton `PoolManager` architecture needs a different
+parser and metadata model, so it belongs in a separate package rather than in this one.
 
 Adding a newly deployed *Uniswap* router address to
 `dexamine/shared/constants.py:uniswap_address_list` is in scope and welcome. Adding
