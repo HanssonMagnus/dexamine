@@ -27,3 +27,17 @@ keywords:
   - blockchain
   - market microstructure
   - python
+preferred-citation:
+  type: article
+  title: "dexamine: A Python package for Uniswap event data on Ethereum"
+  authors:
+    - family-names: Hansson
+      given-names: Magnus
+      orcid: "https://orcid.org/0009-0004-4318-5145"
+      affiliation: "Stockholm University and Swedish House of Finance"
+  year: 2026
+  month: 9
+  journal: arXiv
+  doi: 10.48550/arXiv.2609.10407
+  url: "https://arxiv.org/abs/2609.10407"
+  notes: "arXiv:2609.10407 [q-fin.TR]"
