@@ -11,6 +11,15 @@ Documentation and repository metadata only; the package is unchanged.
 
 ### Added
 
+- A project status statement in the README, `CONTRIBUTING.md` and
+  `docs/limitations.md`: the package is complete rather than abandoned, its scope is
+  fixed, and Uniswap v4 is not supported and not planned. The documentation previously
+  did not mention v4 at all, so a reader could not tell whether it was supported,
+  planned or deliberately excluded.
+- `docs/limitations.md` documents what happens when `dexamine` meets a Uniswap v4
+  transaction: it returns no rows and raises no error, and although the universal router
+  serving v4 classifies as `uniswap_router`, no row is emitted to carry that label. An
+  empty result is therefore not evidence that a transaction did no Uniswap trading.
 - The accompanying paper is published as a preprint,
   [arXiv:2609.10407](https://arxiv.org/abs/2609.10407)
   (doi:10.48550/arXiv.2609.10407). `CITATION.cff` carries a `preferred-citation` entry
