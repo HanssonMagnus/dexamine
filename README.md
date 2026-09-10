@@ -16,6 +16,7 @@ was routed to the pool.
 [![tests](https://github.com/HanssonMagnus/dexamine/actions/workflows/ci.yml/badge.svg)](https://github.com/HanssonMagnus/dexamine/actions/workflows/ci.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
+[![arXiv](https://img.shields.io/badge/arXiv-2609.10407-b31b1b.svg)](https://arxiv.org/abs/2609.10407)
 
 ## What it supports
 
@@ -144,7 +145,8 @@ Two behaviours are worth knowing before you rely on the numbers:
   - [`resources/`](./dexamine/resources/) — ABIs.
   - [`tests/`](./dexamine/tests/) — offline unit tests and opt-in integration tests.
 - [`docs/`](./docs/docs.md) — documentation.
-- [`paper/`](./paper/) — the accompanying software preprint.
+- [`paper/`](./paper/) — LaTeX source for the accompanying preprint,
+  [arXiv:2609.10407](https://arxiv.org/abs/2609.10407).
 
 ## Development
 
@@ -170,9 +172,28 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution guidelines and
 
 ## Citing `dexamine`
 
-If you use this package, or data parsed with it, please cite it. Citation metadata is in
-[`CITATION.cff`](./CITATION.cff); GitHub renders it as a "Cite this repository" button.
-The accompanying paper is in [`paper/paper.tex`](./paper/paper.tex).
+If you use this package, or data parsed with it, please cite the accompanying paper:
+
+> Hansson, M. (2026). *`dexamine`: A Python package for Uniswap event data on Ethereum.*
+> arXiv:2609.10407 [q-fin.TR].
+> [doi:10.48550/arXiv.2609.10407](https://doi.org/10.48550/arXiv.2609.10407)
+
+```bibtex
+@misc{hansson2026dexaminepythonpackageuniswap,
+      title={dexamine: A Python package for Uniswap event data on Ethereum},
+      author={Magnus Hansson},
+      year={2026},
+      eprint={2609.10407},
+      archivePrefix={arXiv},
+      primaryClass={q-fin.TR},
+      doi={10.48550/arXiv.2609.10407},
+      url={https://arxiv.org/abs/2609.10407},
+}
+```
+
+The same metadata is in [`CITATION.cff`](./CITATION.cff), which GitHub renders as a
+"Cite this repository" button. The LaTeX source of the preprint is in
+[`paper/`](./paper/).
 
 ## FAQ
 

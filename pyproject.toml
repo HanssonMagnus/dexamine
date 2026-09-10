@@ -43,6 +43,7 @@ Homepage = "https://github.com/HanssonMagnus/dexamine"
 Repository = "https://github.com/HanssonMagnus/dexamine"
 Documentation = "https://github.com/HanssonMagnus/dexamine/blob/main/docs/docs.md"
 Issues = "https://github.com/HanssonMagnus/dexamine/issues"
+Paper = "https://arxiv.org/abs/2609.10407"
 Changelog = "https://github.com/HanssonMagnus/dexamine/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]

@@ -5,6 +5,31 @@ All notable changes to `dexamine` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Documentation and repository metadata only; the package is unchanged.
+
+### Added
+
+- The accompanying paper is published as a preprint,
+  [arXiv:2609.10407](https://arxiv.org/abs/2609.10407)
+  (doi:10.48550/arXiv.2609.10407). `CITATION.cff` carries a `preferred-citation` entry
+  for it, so GitHub's "Cite this repository" button now returns the paper, and the
+  README shows the BibTeX.
+
+### Changed
+
+- Continuous integration no longer compiles the manuscript. Now that the preprint is
+  published, building it is a local step. The recorded-example checks moved into the
+  test workflow, where they run on Python 3.10 through 3.13; the manuscript states that
+  they run in continuous integration without a node.
+
+### Removed
+
+- `Licence.txt`, a byte-identical duplicate of `LICENSE` kept only to satisfy an
+  Elsevier filename requirement while SoftwareX was the intended venue. `LICENSE` is
+  authoritative.
+
 ## [1.1.0] - 2026-09-08
 
 ### Added
@@ -94,6 +119,7 @@ Initial release with support for Uniswap v2 and Uniswap v3 on Ethereum mainnet.
 - `output_format="flat"`, emitting one CSV-ready row per parsed event.
 - A batching JSON-RPC client and a cached metadata resolver.
 
+[Unreleased]: https://github.com/HanssonMagnus/dexamine/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/HanssonMagnus/dexamine/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/HanssonMagnus/dexamine/releases/tag/v1.0.0
 [0.1.0]: https://github.com/HanssonMagnus/dexamine/releases/tag/v0.1.0

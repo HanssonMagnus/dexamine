@@ -40,3 +40,8 @@ jobs:
 
       - name: Pytest
         run: python -m pytest dexamine/ -v
+
+      # The preprint (arXiv:2609.10407) states that both example checks run in
+      # continuous integration without a node. Keep this step.
+      - name: Verify recorded example
+        run: make -C paper check-example PYTHON=python
