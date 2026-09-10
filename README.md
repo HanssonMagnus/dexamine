@@ -34,13 +34,10 @@ See [Scope and limitations](#scope-and-limitations) for what it deliberately doe
 
 `dexamine` is **complete, not abandoned**. It does what it documents, the test suite
 passes on Python 3.10 through 3.13, and the scope is fixed: Uniswap v2 and v3 on
-Ethereum mainnet. **Uniswap v4 is not supported and is not planned** — its singleton
-`PoolManager` design emits different events and needs a different parser, which is a new
-package rather than an addition to this one.
+Ethereum mainnet. **Uniswap v4 is not supported and is not planned**.
 
 Bug reports are welcome and the recorded-response test suite makes them straightforward
-to act on, but the author no longer works in this area, so replies may be slow. Anyone
-who wants to extend the package is welcome to fork it; the license permits it and the
+to act on. Anyone who wants to extend the package is welcome to fork it; the license permits it and the
 tests make it safe.
 
 ## Installation
